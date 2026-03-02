@@ -288,26 +288,63 @@ textarea{
   margin:14px 0;
 }
 
-.small{
-  font-size:13px;
+/* Canvas responsive */
+canvas{
+  max-width:100%;
+  height:auto;
+}
+
+
+/* =========================
+   Käufer: dynamische Bereiche
+   ========================= */
+
+/* Verkäuferbeobachtung: responsives Grid */
+.seller-grid{
+  display:grid;
+  gap:14px;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.seller-item{
+  min-width:0;
+}
+
+/* Käufe: Blöcke/Zeilen mit mehr Platz */
+.purchase-list{
+  display:grid;
+  gap:14px;
+  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.purchase-row{
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#f8fafc;
+  padding:12px;
+}
+
+.purchase-row-head{
+  font-weight:800;
   color:var(--muted);
+  margin-bottom:8px;
 }
 
-.footer{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:18px;
+.purchase-fields{
+  display:grid;
+  gap:12px;
+  grid-template-columns: 1.2fr 0.8fr 1fr;
 }
 
-/* Grid helpers */
-.span2{
-  grid-column:1 / -1;
+@media (max-width:750px){
+  .purchase-fields{
+    grid-template-columns:1fr;
+  }
 }
 
-/* Dynamische Anbieter-Buttons (wie Textboxen, mit grauem +) */
+/* Add-Buttons: gleiche Designsprache wie Inputs */
 .add-seller-btn{
   width:100%;
-  margin-top:10px;
   padding:10px;
   border:1px solid #cbd5e1;
   border-radius:10px;
