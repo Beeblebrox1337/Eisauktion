@@ -288,30 +288,20 @@ textarea{
   margin:14px 0;
 }
 
-/* Canvas responsive */
-canvas{
-  max-width:100%;
-  height:auto;
+.small{
+  font-size:13px;
+  color:var(--muted);
 }
 
+.footer{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:18px;
+}
 
 /* Grid helpers */
 .span2{
   grid-column:1 / -1;
-}
-
-
-/* Verkäuferbeobachtung: flexibles Grid (skaliert sauber bei vielen Anbietern) */
-.seller-grid{
-  display:grid;
-  gap:14px;
-  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-  align-items:start;
-}
-
-.seller-item{
-  display:flex;
-  flex-direction:column;
 }
 
 /* Dynamische Anbieter-Buttons (wie Textboxen, mit grauem +) */
