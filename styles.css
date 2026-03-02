@@ -380,3 +380,59 @@ canvas{
 .strategy-block textarea{
   min-height:120px;
 }
+
+/* === Navigation Dropdown (Rollenkarten) === */
+nav .navdrop{ position:relative; }
+
+nav .navdrop summary{
+  list-style:none;
+  cursor:pointer;
+  user-select:none;
+  text-decoration:none;
+  color:var(--brand);
+  font-weight:600;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+nav .navdrop summary::-webkit-details-marker{ display:none; }
+nav .navdrop summary:hover{ background:#eef6ff; }
+nav .navdrop[open] summary{ background:#eef6ff; }
+nav .navdrop summary.active{ background:var(--brand); color:#fff; }
+
+nav .navdrop .navdrop-menu{
+  position:absolute;
+  top:calc(100% + 8px);
+  left:0;
+  background:#ffffff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:6px;
+  min-width:220px;
+  z-index:50;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+nav .navdrop .navdrop-menu a{
+  border-radius:10px;
+  padding:10px 12px;
+  color:var(--text);
+  border:1px solid transparent;
+}
+nav .navdrop .navdrop-menu a:hover{ background:#f1f5f9; }
+
+/* Mobile: Dropdown-Menü nicht abschneiden */
+@media (max-width:700px){
+  nav .navdrop .navdrop-menu{
+    position:fixed;
+    left:18px;
+    right:18px;
+    top:64px;
+    min-width:auto;
+  }
+}
+
