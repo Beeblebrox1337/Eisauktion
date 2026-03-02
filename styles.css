@@ -381,13 +381,17 @@ canvas{
   min-height:120px;
 }
 
-/* === Navigation Dropdown (Rollenkarten) === */
-nav .navdrop{ position:relative; }
+/* ============================= */
+/* Hover-Dropdown: Rollenkarten  */
+/* ============================= */
 
-nav .navdrop summary{
-  list-style:none;
-  cursor:pointer;
-  user-select:none;
+nav .navdrop{
+  position:relative;
+  display:inline-block;
+}
+
+/* Toggle sieht aus wie normale Nav-Buttons */
+nav .navdrop-toggle{
   text-decoration:none;
   color:var(--brand);
   font-weight:600;
@@ -395,15 +399,22 @@ nav .navdrop summary{
   border-radius:999px;
   border:1px solid transparent;
   white-space:nowrap;
+  display:inline-block;
 }
-nav .navdrop summary::-webkit-details-marker{ display:none; }
-nav .navdrop summary:hover{ background:#eef6ff; }
-nav .navdrop[open] summary{ background:#eef6ff; }
-nav .navdrop summary.active{ background:var(--brand); color:#fff; }
 
-nav .navdrop .navdrop-menu{
+nav .navdrop-toggle:hover{
+  background:#eef6ff;
+}
+
+nav .navdrop-toggle.active{
+  background:var(--brand);
+  color:#fff;
+}
+
+/* Dropdown-Menü */
+nav .navdrop-menu{
   position:absolute;
-  top:calc(100% + 8px);
+  top:calc(100% + 6px);
   left:0;
   background:#ffffff;
   border:1px solid var(--border);
@@ -411,28 +422,61 @@ nav .navdrop .navdrop-menu{
   box-shadow:var(--shadow);
   padding:6px;
   min-width:220px;
-  z-index:50;
+
   display:flex;
   flex-direction:column;
   gap:4px;
+
+  opacity:0;
+  transform:translateY(-6px);
+  pointer-events:none;
+  transition:all 0.18s ease;
+  z-index:50;
 }
 
-nav .navdrop .navdrop-menu a{
+/* Menüeinträge */
+nav .navdrop-menu a{
   border-radius:10px;
   padding:10px 12px;
   color:var(--text);
-  border:1px solid transparent;
 }
-nav .navdrop .navdrop-menu a:hover{ background:#f1f5f9; }
 
-/* Mobile: Dropdown-Menü nicht abschneiden */
+nav .navdrop-menu a:hover{
+  background:#f1f5f9;
+}
+
+/* Öffnen bei Hover */
+nav .navdrop:hover .navdrop-menu{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+/* Hover-Puffer (damit Menü nicht „abbricht“) */
+nav .navdrop::after{
+  content:"";
+  position:absolute;
+  height:12px;
+  left:0;
+  right:0;
+  bottom:-12px;
+}
+
+/* Mobile Verhalten */
 @media (max-width:700px){
-  nav .navdrop .navdrop-menu{
-    position:fixed;
-    left:18px;
-    right:18px;
-    top:64px;
-    min-width:auto;
+  nav .navdrop{
+    width:100%;
+  }
+
+  nav .navdrop-menu{
+    position:static;
+    opacity:1;
+    transform:none;
+    pointer-events:auto;
+    box-shadow:none;
+    border:none;
+    padding-left:12px;
   }
 }
+
 
