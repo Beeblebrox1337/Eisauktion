@@ -17,7 +17,8 @@
   box-sizing:border-box;
 }
 
-/* WICHTIG: iOS Scroll Fix */
+/* ========== Grundlayout ========== */
+
 html, body{
   margin:0;
   padding:0;
@@ -34,16 +35,15 @@ body{
   -webkit-overflow-scrolling:touch;
 }
 
-/* Layout Container */
 .container{
   max-width:1100px;
   margin:0 auto;
   padding:24px 18px 60px;
 }
 
-/* Header */
+/* ========== Header / Navigation ========== */
+
 header.sitebar{
-  position:relative; /* kein sticky -> verhindert iOS Scrollbug */
   background:#ffffff;
   border-bottom:1px solid var(--border);
 }
@@ -79,17 +79,6 @@ nav{
   flex-wrap:wrap;
 }
 
-@media (max-width:700px){
-  nav{
-    overflow-x:auto;
-    flex-wrap:nowrap;
-    width:100%;
-  }
-  nav a{
-    flex:0 0 auto;
-  }
-}
-
 nav a{
   text-decoration:none;
   color:var(--brand);
@@ -109,7 +98,110 @@ nav a.active{
   color:white;
 }
 
-/* Typography */
+/* ========== Hover Dropdown (Rollenkarten) ========== */
+
+nav .navdrop{
+  position:relative;
+  display:inline-block;
+}
+
+nav .navdrop-toggle{
+  text-decoration:none;
+  color:var(--brand);
+  font-weight:600;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid transparent;
+  white-space:nowrap;
+  display:inline-block;
+}
+
+nav .navdrop-toggle:hover{
+  background:#eef6ff;
+}
+
+nav .navdrop-toggle.active{
+  background:var(--brand);
+  color:#fff;
+}
+
+nav .navdrop-menu{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  background:#ffffff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:6px;
+  min-width:220px;
+
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+
+  opacity:0;
+  transform:translateY(-6px);
+  pointer-events:none;
+  transition:all 0.18s ease;
+  z-index:50;
+}
+
+nav .navdrop-menu a{
+  border-radius:10px;
+  padding:10px 12px;
+  color:var(--text);
+}
+
+nav .navdrop-menu a:hover{
+  background:#f1f5f9;
+}
+
+nav .navdrop:hover .navdrop-menu{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+nav .navdrop::after{
+  content:"";
+  position:absolute;
+  height:12px;
+  left:0;
+  right:0;
+  bottom:-12px;
+}
+
+/* Mobile Navigation */
+
+@media (max-width:700px){
+  nav{
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    width:100%;
+  }
+
+  nav a{
+    flex:0 0 auto;
+  }
+
+  nav .navdrop{
+    width:100%;
+  }
+
+  nav .navdrop-menu{
+    position:static;
+    opacity:1;
+    transform:none;
+    pointer-events:auto;
+    box-shadow:none;
+    border:none;
+    padding-left:12px;
+  }
+}
+
+/* ========== Typografie ========== */
+
 h1{font-size:28px;margin:18px 0 8px;}
 h2{font-size:18px;margin:0 0 10px;}
 h3{font-size:16px;margin:0 0 8px;}
@@ -119,7 +211,8 @@ h3{font-size:16px;margin:0 0 8px;}
   h1{font-size:24px;}
 }
 
-/* Cards */
+/* ========== Karten ========== */
+
 .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -129,7 +222,8 @@ h3{font-size:16px;margin:0 0 8px;}
   margin-bottom:18px;
 }
 
-/* Grid System */
+/* ========== Grid ========== */
+
 .grid{
   display:grid;
   gap:14px;
@@ -156,7 +250,8 @@ h3{font-size:16px;margin:0 0 8px;}
   }
 }
 
-/* Forms */
+/* ========== Formulare ========== */
+
 label{
   font-weight:700;
   display:block;
@@ -168,7 +263,7 @@ input, textarea, select{
   padding:10px;
   border:1px solid #cbd5e1;
   border-radius:10px;
-  font-size:16px; /* verhindert iOS Zoom */
+  font-size:16px;
 }
 
 textarea{
@@ -176,7 +271,8 @@ textarea{
   resize:vertical;
 }
 
-/* Buttons */
+/* ========== Buttons ========== */
+
 .row{
   display:flex;
   gap:10px;
@@ -209,7 +305,8 @@ textarea{
   }
 }
 
-/* Badges */
+/* ========== Badges ========== */
+
 .badge{
   display:inline-block;
   padding:4px 10px;
@@ -234,24 +331,8 @@ textarea{
   background:rgba(185,28,28,0.1);
 }
 
-/* Notes & Results */
-.note{
-  background:#fff7ed;
-  border:1px solid rgba(180,83,9,0.3);
-  border-radius:12px;
-  padding:12px;
-  color:#7c2d12;
-}
+/* ========== Tabellen ========== */
 
-.result{
-  background:#eef6ff;
-  border:1px solid #dbeafe;
-  border-radius:12px;
-  padding:12px;
-  font-weight:700;
-}
-
-/* Tables */
 .table{
   width:100%;
   border-collapse:collapse;
@@ -281,71 +362,86 @@ textarea{
   }
 }
 
-/* Horizontal Rule */
+/* ========== Utilities ========== */
+
 .hr{
   height:1px;
   background:var(--border);
   margin:14px 0;
 }
 
-/* Canvas responsive */
-canvas{
-  max-width:100%;
-  height:auto;
+.small{
+  font-size:13px;
+  color:var(--muted);
 }
 
-/* =========================
-   Dynamische Bereiche (Käufer + Unternehmen)
-   ========================= */
+.footer{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:18px;
+}
 
-/* Verkäuferbeobachtung: flexibles Grid für viele Anbieter */
+.span2{
+  grid-column:1 / -1;
+}
+
+/* ===================================== */
+/* v3-Designteile, die aktuell fehlten   */
+/* (Note/Result + Rollen-Layouts)        */
+/* ===================================== */
+
+/* Notes & Results */
+.note{
+  background:#fff7ed;
+  border:1px solid rgba(180,83,9,0.3);
+  border-radius:12px;
+  padding:12px;
+  color:#7c2d12;
+}
+
+.result{
+  background:#eef6ff;
+  border:1px solid #dbeafe;
+  border-radius:12px;
+  padding:12px;
+  font-weight:700;
+}
+
+/* ===================================== */
+/* Verkäuferbeobachtung/Verkäuferverwaltung */
+/* ===================================== */
+
 .seller-grid{
   display:grid;
   gap:14px;
-  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns:repeat(3, 1fr);
+  margin-bottom:10px;
+}
+
+@media (max-width:1024px){
+  .seller-grid{ grid-template-columns:repeat(2, 1fr); }
+}
+@media (max-width:750px){
+  .seller-grid{ grid-template-columns:1fr; }
 }
 
 .seller-item{
-  min-width:0;
-}
-
-/* Käufe (Käufer): Karten + 3 gleich breite Felder */
-.purchase-list{
-  display:grid;
-  gap:14px;
-  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.purchase-row{
+  background:#f8fafc;
   border:1px solid var(--border);
   border-radius:12px;
-  background:#f8fafc;
   padding:12px;
 }
 
-.purchase-row-head{
-  font-weight:800;
-  color:var(--muted);
-  margin-bottom:8px;
+.seller-item label{
+  margin-top:0;
 }
 
-.purchase-fields{
-  display:grid;
-  gap:12px;
-  grid-template-columns:repeat(3, 1fr);
+/* Zentraler Button unter dem Grid */
+.add-seller-btn.central{
+  margin:10px 0 14px;
 }
 
-.purchase-fields label{
-  white-space:nowrap; /* sorgt dafür, dass "Preis/Einheit (€)" in einer Zeile bleibt */
-}
-
-@media (max-width:750px){
-  .purchase-fields{
-    grid-template-columns:1fr;
-  }
-}
-
-/* Add-Buttons: gleiche Designsprache wie Inputs */
+/* add-seller-btn */
 .add-seller-btn{
   width:100%;
   padding:10px;
@@ -372,11 +468,57 @@ canvas{
   line-height:1;
 }
 
-.add-seller-btn.central{
+/* ===================================== */
+/* Käufer: Käufe dokumentieren            */
+/* ===================================== */
+
+.purchase-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.purchase-row{
+  background:#f8fafc;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+}
+
+.purchase-row-head{
+  font-weight:800;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+/* 3 gleich breite Felder */
+.purchase-fields{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  align-items:end;
+}
+
+@media (max-width:750px){
+  .purchase-fields{
+    grid-template-columns:1fr;
+  }
+}
+
+/* Label "Preis/Einheit (€)" in einer Zeile */
+.purchase-fields label{
+  white-space:nowrap;
+}
+
+/* ===================================== */
+/* Käufer: Strategie-Block                */
+/* ===================================== */
+
+.strategy-block{
   margin-top:10px;
 }
 
-/* Strategie-Block (Käufer): volle Breite */
 .strategy-block textarea{
-  min-height:120px;
+  width:100%;
+  min-height:110px;
 }
