@@ -10,10 +10,6 @@
 
 <header class="sitebar">
   <div class="navwrap">
-    <div class="brand"><span class="dot"></span> Eisauktion</div>
-
-    <header class="sitebar">
-  <div class="navwrap">
     <div class="brand">
       <span class="dot"></span>
       Eisauktion
@@ -24,10 +20,8 @@
       <a href="spielerklaerung.html">Spielerklärung</a>
       <a class="active" href="fragebogen.html">Fragebogen</a>
 
-      <!-- Rollenkarten Dropdown -->
       <div class="navdrop">
         <a class="navdrop-toggle" href="#">Rollenkarten ▾</a>
-
         <div class="navdrop-menu">
           <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
           <a href="rolle-kaeufer.html">Rolle: Käufer</a>
@@ -49,11 +43,11 @@
     <div class="grid two">
       <div>
         <label>Unternehmensname</label>
-        <input id="u_name" type="text" placeholder="z. B. Eis & Co."/>
+        <input id="u_name" type="text" placeholder="z. B. Eis & Co., FrostFactory, GelatoGurus"/>
       </div>
       <div>
         <label>Mitglieder</label>
-        <input id="u_members" type="text" placeholder="Namen der Gruppenmitglieder"/>
+        <input id="u_members" type="text" placeholder="z. B. Lina, Mert, Jonas (oder: 3 Personen)"/>
       </div>
     </div>
   </section>
@@ -80,20 +74,20 @@
       <div class="grid three">
         <div>
           <label class="small">5 Einheiten</label>
-          <input id="eins_5" type="text" placeholder="…"/>
+          <input id="eins_5" type="text" placeholder="z. B. „sehr sicher“ / „immer machbar“"/>
         </div>
         <div>
           <label class="small">10 Einheiten</label>
-          <input id="eins_10" type="text" placeholder="…"/>
+          <input id="eins_10" type="text" placeholder="z. B. „meist möglich“ / „nur wenn Preis gut“"/>
         </div>
         <div>
           <label class="small">15 Einheiten</label>
-          <input id="eins_15" type="text" placeholder="…"/>
+          <input id="eins_15" type="text" placeholder="z. B. „riskant“ / „nur bei hoher Nachfrage“"/>
         </div>
       </div>
 
       <label>Welche Menge erscheint als sinnvoller Startwert – und warum?</label>
-      <textarea id="startwert_warum"></textarea>
+      <textarea id="startwert_warum" placeholder="z. B. „Wir starten mit 10 Einheiten, weil wir damit skalieren können, ohne zu viel Risiko durch Überproduktion zu haben.“"></textarea>
     </section>
   </div>
 
@@ -104,13 +98,13 @@
     </p>
 
     <label>Wollen wir eher viel produzieren oder vorsichtig bleiben?</label>
-    <textarea id="grundidee_1"></textarea>
+    <textarea id="grundidee_1" placeholder="z. B. „Eher vorsichtig starten (8–10), dann je nach Preis anpassen.“"></textarea>
 
     <label>Wo sehen wir unser Risiko?</label>
-    <textarea id="grundidee_2"></textarea>
+    <textarea id="grundidee_2" placeholder="z. B. „Überproduktion: nicht verkauftes Eis verfällt → Kosten bleiben, Umsatz fehlt.“"></textarea>
 
     <label>Was könnte unser Unternehmen erfolgreicher machen als andere?</label>
-    <textarea id="grundidee_3"></textarea>
+    <textarea id="grundidee_3" placeholder="z. B. „Konsequent an Grenzkosten orientieren, schnell auf Marktpreise reagieren, keine Panikproduktion.“"></textarea>
   </section>
 
   <section class="card">
@@ -118,7 +112,7 @@
 
     <h3>a) Fixkosten (pro Runde)</h3>
     <label>Summe Fixkosten pro Runde (€)</label>
-    <input id="fix" type="number" step="0.01" placeholder="z. B. 5"/>
+    <input id="fix" type="number" step="0.01" placeholder="z. B. 5.00"/>
 
     <div class="hr"></div>
 
@@ -126,15 +120,15 @@
     <div class="grid three">
       <div>
         <label>Zutaten (€)</label>
-        <input id="v_zutaten" type="number" step="0.01"/>
+        <input id="v_zutaten" type="number" step="0.01" placeholder="z. B. 0.40"/>
       </div>
       <div>
         <label>Herstellung (€)</label>
-        <input id="v_herstellung" type="number" step="0.01"/>
+        <input id="v_herstellung" type="number" step="0.01" placeholder="z. B. 0.35"/>
       </div>
       <div>
         <label>Material (€)</label>
-        <input id="v_material" type="number" step="0.01"/>
+        <input id="v_material" type="number" step="0.01" placeholder="z. B. 0.25"/>
       </div>
     </div>
 
@@ -144,7 +138,7 @@
     </div>
 
     <label>Variable Kosten pro Einheit (Summe) (€)</label>
-    <input id="var_sum" type="number" step="0.01" readonly/>
+    <input id="var_sum" type="number" step="0.01" readonly placeholder="wird berechnet"/>
 
     <div class="hr"></div>
 
@@ -180,16 +174,16 @@
     <div class="grid two">
       <div>
         <label>Wenn der Marktpreis über … € liegt → wir produzieren.</label>
-        <input id="rule_over" type="number" step="0.01"/>
+        <input id="rule_over" type="number" step="0.01" placeholder="z. B. 1.20 (mind. über Grenzkosten)"/>
       </div>
       <div>
         <label>Wenn der Marktpreis unter … € liegt → wir reduzieren / stoppen.</label>
-        <input id="rule_under" type="number" step="0.01"/>
+        <input id="rule_under" type="number" step="0.01" placeholder="z. B. 1.00 (unterhalb Gewinnschwelle)"/>
       </div>
     </div>
 
     <label>Warum?</label>
-    <textarea id="rule_why"></textarea>
+    <textarea id="rule_why" placeholder="z. B. „Über Grenzkosten lohnt sich Produktion, darunter machen wir Verlust. Bei sehr niedrigem Preis produzieren wir nur minimal oder gar nicht.“"></textarea>
   </section>
 
   <section class="card">
@@ -197,26 +191,25 @@
     <p class="small">Nicht verkauftes Eis verfällt. Überproduktion kann also Verlust bedeuten.</p>
 
     <label>Welche Folgen hätte Überproduktion für unser Unternehmen?</label>
-    <textarea id="risk_1"></textarea>
+    <textarea id="risk_1" placeholder="z. B. „Wir zahlen die variablen Kosten für alle produzierten Einheiten, aber bekommen keinen Umsatz → Kapital sinkt schnell.“"></textarea>
 
     <label>Welche Strategie hilft, das Risiko zu begrenzen?</label>
-    <textarea id="risk_2"></textarea>
+    <textarea id="risk_2" placeholder="z. B. „In kleinen Schritten anpassen (z. B. +2/-2), zuerst Marktpreis beobachten, lieber knapp produzieren als zu viel.“"></textarea>
   </section>
 
   <section class="card">
     <h2>7. Strategie für die zweite Runde (Vorausdenken)</h2>
 
     <label>Wann würden wir unsere Produktion erhöhen?</label>
-    <textarea id="s2_1"></textarea>
+    <textarea id="s2_1" placeholder="z. B. „Wenn Preis deutlich über Grenzkosten liegt und viel verkauft wurde (Nachfrage hoch).“"></textarea>
 
     <label>Wann würden wir sie senken?</label>
-    <textarea id="s2_2"></textarea>
+    <textarea id="s2_2" placeholder="z. B. „Wenn Preis fällt oder wir viel unverkauft hatten → Risiko senken.“"></textarea>
 
     <label>Woran erkennen wir, wie sich Angebot und Nachfrage entwickeln?</label>
-    <textarea id="s2_3"></textarea>
+    <textarea id="s2_3" placeholder="z. B. „An Preisbewegungen, Ausverkauf/Überschuss, Verhalten der Käufer, Konkurrenzproduktion.“"></textarea>
   </section>
 
-  <!-- NEU: Absenden/Speichern -->
   <section class="card">
     <h2>Unternehmen gründen: Daten speichern</h2>
     <p>
@@ -274,7 +267,6 @@ function calcTotal(){
   document.getElementById('mc_out').innerHTML =
     `Grenzkosten pro Einheit ≈ <strong>${eur(mc)}</strong>`;
 
-  // einfache Liquiditätsprüfung
   const cap = num(document.getElementById('startkapital').value);
   const note = document.getElementById('liq_note');
   if(cap > 0){
@@ -290,51 +282,41 @@ function calcTotal(){
   }
 }
 
-// --- Speichern / Laden (für Rollen-Seite & Auswertung) ---
 function collectQuestionnaire(){
   return {
-    // Basisdaten
     u_name: document.getElementById("u_name")?.value || "",
     u_members: document.getElementById("u_members")?.value || "",
     startkapital: document.getElementById("startkapital")?.value || "",
     max_prod: document.getElementById("max_prod")?.value || "",
 
-    // Grundidee
     grundidee_1: document.getElementById("grundidee_1")?.value || "",
     grundidee_2: document.getElementById("grundidee_2")?.value || "",
     grundidee_3: document.getElementById("grundidee_3")?.value || "",
 
-    // Kapazitäten/Startwert
     eins_5: document.getElementById("eins_5")?.value || "",
     eins_10: document.getElementById("eins_10")?.value || "",
     eins_15: document.getElementById("eins_15")?.value || "",
     startwert_warum: document.getElementById("startwert_warum")?.value || "",
 
-    // Kosten
     fix: document.getElementById("fix")?.value || "",
     v_zutaten: document.getElementById("v_zutaten")?.value || "",
     v_herstellung: document.getElementById("v_herstellung")?.value || "",
     v_material: document.getElementById("v_material")?.value || "",
     var_sum: document.getElementById("var_sum")?.value || "",
 
-    // Beispielrechnung (frei wählbar)
     menge: document.getElementById("menge")?.value || "",
 
-    // Entscheidungsregel
     rule_over: document.getElementById("rule_over")?.value || "",
     rule_under: document.getElementById("rule_under")?.value || "",
     rule_why: document.getElementById("rule_why")?.value || "",
 
-    // Risiko
     risk_1: document.getElementById("risk_1")?.value || "",
     risk_2: document.getElementById("risk_2")?.value || "",
 
-    // Vorausdenken Runde 2
     s2_1: document.getElementById("s2_1")?.value || "",
     s2_2: document.getElementById("s2_2")?.value || "",
     s2_3: document.getElementById("s2_3")?.value || "",
 
-    // Metadaten
     saved_at: new Date().toISOString()
   };
 }
@@ -349,7 +331,6 @@ function setBadge(type, text){
 function saveQuestionnaire(){
   const data = collectQuestionnaire();
 
-  // Minimal-Check (Name + Kosten + Regel)
   const hasBasics = (data.u_name.trim().length > 0) &&
                     (String(data.fix).trim().length > 0) &&
                     (String(data.var_sum).trim().length > 0) &&
@@ -423,7 +404,6 @@ function loadQuestionnaire(){
   map("s2_2", data.s2_2);
   map("s2_3", data.s2_3);
 
-  // nachladen: Summen/Beispiele neu berechnen (damit Ausgaben passen)
   try { calcVar(); } catch(e) {}
   try { calcTotal(); } catch(e) {}
 
@@ -438,7 +418,6 @@ function clearQuestionnaire(){
   setBadge("warn", "gelöscht");
 }
 
-// Beim Öffnen: falls vorhanden automatisch laden
 document.addEventListener("DOMContentLoaded", () => {
   if(localStorage.getItem("eisauktion_questionnaire")){
     loadQuestionnaire();
@@ -448,5 +427,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
-
