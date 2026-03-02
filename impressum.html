@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Impressum & Datenschutz – Eisauktion</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header class="sitebar">
+  <div class="navwrap">
+    <div class="brand"><span class="dot"></span> Eisauktion</div>
+    <nav>
+      <a href="index.html">Übersicht</a>
+      <a href="spielerklaerung.html">Spielerklärung</a>
+      <a href="fragebogen.html">Fragebogen</a>
+
+      <!-- Rollenkarten: Dropdown -->
+      <details class="navdrop">
+        <summary>Rollenkarten ▾</summary>
+        <div class="navdrop-menu">
+          <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
+          <a href="rolle-kaeufer.html">Rolle: Käufer</a>
+        </div>
+      </details>
+
+      <a href="auswertung.html">Auswertung</a>
+      <a class="active" href="impressum.html">Impressum</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Impressum & Datenschutz</h1>
+  <p class="lead">Angaben gemäß § 5 TMG sowie Informationen nach DSGVO (Art. 12 ff.).</p>
+
+  <section class="card">
+    <h2>Verantwortlicher</h2>
+    <p>
+      <strong>Sebastian Grünberg</strong><br/>
+      Fachlehrer Informatik und Politik und Wirtschaft<br/>
+      Main-Taunus-Schule<br/>
+      Rudolf-Mohr Straße 4 · 65719 Hofheim am Taunus
+    </p>
+    <p class="small">
+      Hinweis: Diese Website ist ein Unterrichtstool zur Simulation einer Eisauktion.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Haftungshinweise</h2>
+    <ul>
+      <li><strong>Inhalte:</strong> Die Inhalte wurden mit Sorgfalt erstellt. Für Aktualität, Richtigkeit und Vollständigkeit wird keine Gewähr übernommen.</li>
+      <li><strong>Externe Dienste/Links:</strong> Soweit diese Seiten auf externe Angebote verweisen, liegt die Verantwortung für deren Inhalte beim jeweiligen Anbieter.</li>
+      <li><strong>Urheberrecht:</strong> Inhalte und Materialien dieser Website sind – soweit nicht anders gekennzeichnet – urheberrechtlich geschützt.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Datenschutz (DSGVO)</h2>
+
+    <h3>Welche Daten werden verarbeitet?</h3>
+    <ul>
+      <li><strong>Rundendaten & Eingaben:</strong> Eure Eingaben (z. B. Preise, Mengen, Notizen) werden zur Bedienung des Tools im Browser gespeichert (Local Storage). Das dient ausschließlich der Simulation und der späteren Auswertung im Unterricht.</li>
+      <li><strong>Formulareingaben:</strong> Wenn ihr ein Formular zur Auswertung/Übermittlung nutzt, werden die dort eingegebenen Daten an den verwendeten Formular-Dienst (Formspree) übertragen und verarbeitet, damit die Übermittlung möglich ist.</li>
+    </ul>
+
+    <h3>Zweck & Rechtsgrundlage</h3>
+    <ul>
+      <li><strong>Zweck:</strong> Durchführung der Unterrichtssimulation, Zwischenspeicherung der Eingaben, Erstellung der Auswertung.</li>
+      <li><strong>Rechtsgrundlage:</strong> Je nach Kontext erfolgt die Verarbeitung auf Grundlage von Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) und/oder zur Durchführung des Unterrichtsvorhabens (Art. 6 Abs. 1 lit. e DSGVO i. V. m. schulrechtlichen Vorgaben). Im Zweifel gilt: Nur so viele Daten wie nötig.</li>
+    </ul>
+
+    <h3>Speicherdauer</h3>
+    <ul>
+      <li><strong>Im Browser:</strong> Local-Storage-Daten bleiben gespeichert, bis sie von euch gelöscht werden (z. B. über „Gespeicherte Runden löschen“) oder ihr den Browser-Speicher entfernt.</li>
+      <li><strong>Übermittelte Formulardaten:</strong> Speicherdauer richtet sich nach dem verwendeten Dienst und den organisatorischen Erfordernissen der Auswertung.</li>
+    </ul>
+
+    <h3>Empfänger / Drittanbieter</h3>
+    <ul>
+      <li><strong>Hosting:</strong> Die Website wird über GitHub Pages bereitgestellt (technischer Betrieb/Hosting).</li>
+      <li><strong>Formularversand:</strong> Formspree wird genutzt, um Formularinhalte zu übermitteln.</li>
+    </ul>
+
+    <h3>Betroffenenrechte</h3>
+    <p>
+      Ihr habt – je nach Voraussetzungen – das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch gegen die Verarbeitung.
+      Außerdem besteht ein Beschwerderecht bei einer Datenschutzaufsichtsbehörde.
+    </p>
+
+    <h3>Keine Profilbildung / Tracking</h3>
+    <p class="small">
+      Dieses Tool ist als Unterrichtsanwendung konzipiert. Es werden keine Tracking-Cookies gesetzt und keine Werbung ausgeliefert.
+      Technisch notwendige Daten (z. B. Server-Logs beim Hosting) können beim jeweiligen Hosting-Anbieter anfallen.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Lokale Daten löschen</h2>
+    <p>Wenn ihr eure lokal gespeicherten Rundendaten entfernen wollt:</p>
+    <ul>
+      <li>Nutzt auf den Rollenseiten den Button <strong>„Gespeicherte Runden löschen“</strong>, oder</li>
+      <li>löscht den Website-Speicher im Browser (Website-Daten / Cache & Site Data).</li>
+    </ul>
+  </section>
+
+  <p class="footer">Stand: <span id="d"></span></p>
+</main>
+
+<script>
+  document.getElementById('d').textContent = new Date().toLocaleDateString('de-DE');
+</script>
+
+</body>
+</html>
