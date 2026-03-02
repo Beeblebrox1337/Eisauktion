@@ -11,14 +11,26 @@
 
 <header class="sitebar">
   <div class="navwrap">
-    <div class="brand"><img class="brand-icon" src="assets/eis/eis7.png" alt="" aria-hidden="true"> Eisauktion</div>
+    <div class="brand"><span class="dot"></span> Eisauktion</div>
+
     <nav>
       <a href="index.html">Übersicht</a>
       <a href="spielerklaerung.html">Spielerklärung</a>
       <a href="fragebogen.html">Fragebogen</a>
-      <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
-      <a href="rolle-kaeufer.html">Rolle: Käufer</a>
+
+      <!-- Rollenkarten: Dropdown -->
+      <details class="navdrop">
+        <!-- Auf Rollenseiten: summary zusätzlich class="active" geben -->
+        <summary>Rollenkarten ▾</summary>
+        <div class="navdrop-menu">
+          <!-- Auf der jeweiligen Seite: dem passenden Link class="active" geben -->
+          <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
+          <a href="rolle-kaeufer.html">Rolle: Käufer</a>
+        </div>
+      </details>
+
       <a class="active" href="auswertung.html">Auswertung</a>
+      <a href="impressum.html">Impressum</a>
     </nav>
   </div>
 </header>
@@ -928,4 +940,5 @@ loadAll();
 
 </body>
 </html>
+
 
