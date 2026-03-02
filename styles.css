@@ -301,7 +301,7 @@ canvas{
 }
 
 
-/* Verkäuferbeobachtung: flexibles Grid für viele Anbieter */
+/* Verkäuferbeobachtung: flexibles Grid (skaliert sauber bei vielen Anbietern) */
 .seller-grid{
   display:grid;
   gap:14px;
@@ -310,7 +310,8 @@ canvas{
 }
 
 .seller-item{
-  min-width:0;
+  display:flex;
+  flex-direction:column;
 }
 
 /* Dynamische Anbieter-Buttons (wie Textboxen, mit grauem +) */
