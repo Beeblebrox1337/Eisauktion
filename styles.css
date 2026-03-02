@@ -522,3 +522,14 @@ textarea{
   width:100%;
   min-height:110px;
 }
+
+/* ===== Übersicht: Links nicht unterstrichen ===== */
+
+.container .card a{
+  text-decoration: none;
+}
+
+.container .card a:hover{
+  text-decoration: none;
+}
+
