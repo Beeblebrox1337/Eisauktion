@@ -68,6 +68,7 @@
       <button class="btn" type="button" onclick="downloadBundle()">Gesamtdatei herunterladen (JSON)</button>
       <button class="btn secondary" type="button" onclick="composeMail()">Mailprogramm öffnen</button>
       <button class="btn secondary" type="button" onclick="copyPreview()">Textvorschau kopieren</button>
+      <span class="badge" id="finishBadge">–</span>
     </div>
 
     <div class="hr"></div>
@@ -84,11 +85,93 @@
     </div>
   </section>
 
+  <!-- NEU: MODELLBILDUNG (gesperrt bis Spielende) -->
+  <details id="modelSection" class="card" style="margin-top:14px;">
+    <summary style="font-weight:800; cursor:pointer;">
+      Modellbildung (erst nach Spielende / nach dem Download freigeschaltet)
+    </summary>
+
+    <div id="modelLock" class="note" style="margin-top:12px;">
+      <strong>Gesperrt:</strong> Dieser Bereich bleibt eingeklappt, bis das Spiel beendet wurde.
+      <br/>
+      <span class="small">Zum Freischalten: oben die <strong>Gesamtdatei (JSON)</strong> herunterladen.</span>
+    </div>
+
+    <div id="modelContent" style="display:none; margin-top:12px;">
+      <div class="grid two">
+        <section class="card" style="margin:0; box-shadow:none;">
+          <h2>Info: Modellannahmen &amp; Begriffe</h2>
+          <p class="small">
+            Wir werten eure Simulation als Modellmarkt der <strong>absoluten Konkurrenz</strong> aus. Das ist ein idealtypisches Modell,
+            um Preisbildung zu erklären.
+          </p>
+
+          <h3>Absolute Konkurrenz (Kurzüberblick)</h3>
+          <ul>
+            <li><strong>Viele Anbieter &amp; viele Nachfrager</strong> → niemand setzt den Preis allein (Preisnehmer)</li>
+            <li><strong>Homogenes Gut</strong> → Unterschiede entstehen v. a. über Preis/Kosten</li>
+            <li><strong>Transparenz</strong> → Preise/Mengen sind beobachtbar</li>
+            <li><strong>Freier Ein-/Austritt</strong> → bei Verlusten wird reduziert/ausgestiegen</li>
+          </ul>
+
+          <h3>Überhang &amp; Gleichgewicht</h3>
+          <ul>
+            <li><strong>Nachfrageüberhang</strong>: Nachfrage &gt; Angebot → Knappheit → Preis tendiert ↑</li>
+            <li><strong>Angebotsüberhang</strong>: Angebot &gt; Nachfrage → Überschuss → Preis tendiert ↓</li>
+            <li><strong>Gleichgewicht</strong>: Angebot ≈ Nachfrage → Preis stabilisiert sich</li>
+          </ul>
+
+          <div class="note">
+            <strong>Hinweis:</strong> In der Realität sind Märkte selten „perfekt“. Trotzdem kann das Modell helfen,
+            Muster (Preisbewegungen, Knappheit/Überschüsse) zu erklären.
+          </div>
+        </section>
+
+        <section class="card" style="margin:0; box-shadow:none;">
+          <h2>Analyse: Eure Daten im Modell</h2>
+          <p class="small">
+            Hier werden die Rundenwerte der <strong>Unternehmen</strong> (Produktion/Verkauf/Preis) und der <strong>Käufer</strong> (Menge/Kaufpreis/Beobachtung)
+            zusammengeführt, um Überhang und Gleichgewicht zu untersuchen.
+          </p>
+
+          <div class="row">
+            <button class="btn" type="button" onclick="runModelAnalysis()">Analysen erstellen</button>
+            <span class="badge" id="analysisBadge">–</span>
+          </div>
+
+          <div class="hr"></div>
+          <div class="result" id="modelSummary">Noch nicht berechnet.</div>
+
+          <div class="hr"></div>
+          <h3>Grafiken</h3>
+          <p class="small">Die Grafiken basieren auf den Summen/Durchschnitten pro Runde.</p>
+
+          <label>1) Preisverlauf (Ø Marktpreis je Runde)</label>
+          <canvas id="chartPrice" height="260" style="width:100%;"></canvas>
+
+          <div class="hr"></div>
+          <label>2) Angebot vs. Nachfrage (Summen je Runde)</label>
+          <canvas id="chartSupplyDemand" height="280" style="width:100%;"></canvas>
+
+          <div class="hr"></div>
+          <label>3) Preis–Menge-Zusammenhang (Scatter) + Korrelation</label>
+          <canvas id="chartScatter" height="280" style="width:100%;"></canvas>
+
+          <p class="small" style="margin-top:10px;">
+            Tipp: Nutzt die Ergebnisse, um zu begründen, <em>in welchen Runden</em> Knappheit/Überschüsse vorlagen und
+            ob sich ein <em>Gleichgewichtspreis</em> andeutet.
+          </p>
+        </section>
+      </div>
+    </div>
+  </details>
+
   <p class="footer">Adresse: <strong>s_gruenberg@outlook.de</strong></p>
 </main>
 
 <script>
 const TARGET = "s_gruenberg@outlook.de";
+const FINISH_KEY = "eisauktion_gameFinished";
 
 function safeParse(key, fallback){
   try{
@@ -98,6 +181,13 @@ function safeParse(key, fallback){
   } catch {
     return fallback;
   }
+}
+
+function setBadge(id, type, text){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.className = "badge" + (type ? (" " + type) : "");
+  el.textContent = text || "–";
 }
 
 function loadAll(){
@@ -120,6 +210,7 @@ function loadAll(){
     `Unternehmensname: <strong>${uname}</strong><br/>Mitglieder: <strong>${members}</strong>`;
 
   buildPreview();
+  refreshModelLock();
 }
 
 function clearAll(){
@@ -127,13 +218,18 @@ function clearAll(){
     "eisauktion_questionnaire",
     "eisauktion_meta",
     "eisauktion_unternehmen_rounds",
-    "eisauktion_kaeufer_rounds"
+    "eisauktion_kaeufer_rounds",
+    FINISH_KEY
   ].forEach(k => localStorage.removeItem(k));
   window.__ALL__ = null;
   document.getElementById("status").textContent = "Alle Daten gelöscht.";
   document.getElementById("preview").value = "";
   document.getElementById("quick1").textContent = "–";
   document.getElementById("quick2").textContent = "–";
+  document.getElementById("modelSummary").textContent = "Noch nicht berechnet.";
+  setBadge("finishBadge", "", "–");
+  setBadge("analysisBadge", "", "–");
+  refreshModelLock();
 }
 
 function buildPreview(){
@@ -192,7 +288,6 @@ function buildPreview(){
   }
 
   lines.push("Hinweis: Die Datei 'eisauktion_bundle.json' bitte dieser Mail als Anhang hinzufügen.");
-
   document.getElementById("preview").value = lines.join("\n");
 }
 
@@ -218,6 +313,7 @@ function buildBundleObject(){
 function downloadBundle(){
   buildPreview();
   const bundle = buildBundleObject();
+
   const blob = new Blob([JSON.stringify(bundle, null, 2)], {type:"application/json;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -227,13 +323,17 @@ function downloadBundle(){
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+
+  // SPIELENDE markieren → Modellbereich freischalten
+  localStorage.setItem(FINISH_KEY, "true");
+  setBadge("finishBadge", "ok", "Spiel beendet");
+  refreshModelLock();
 }
 
 function composeMail(){
   buildPreview();
   const subject = "Eisauktion – Datenpaket (bitte Anhang hinzufügen)";
   const body = document.getElementById("preview").value;
-
   const mailto = `mailto:${TARGET}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailto;
 }
@@ -250,6 +350,423 @@ async function copyPreview(){
 
 ["who","role","note"].forEach(id=>{
   document.getElementById(id).addEventListener("input", buildPreview);
+});
+
+/* -----------------------------
+   MODELLBILDUNG: Lock/Unlock
+------------------------------*/
+function refreshModelLock(){
+  const finished = localStorage.getItem(FINISH_KEY) === "true";
+  const lock = document.getElementById("modelLock");
+  const content = document.getElementById("modelContent");
+  const details = document.getElementById("modelSection");
+
+  if(finished){
+    if(lock) lock.style.display = "none";
+    if(content) content.style.display = "block";
+    setBadge("finishBadge", "ok", "Spiel beendet");
+  } else {
+    if(lock) lock.style.display = "block";
+    if(content) content.style.display = "none";
+    // sicherheitshalber zugeklappt halten
+    if(details) details.open = false;
+    if(!document.getElementById("finishBadge").textContent || document.getElementById("finishBadge").textContent === "–"){
+      setBadge("finishBadge", "warn", "noch offen");
+    }
+  }
+}
+
+// Wenn Nutzer versucht zu öffnen, aber noch nicht freigeschaltet → wieder schließen
+document.getElementById("modelSection").addEventListener("toggle", (e)=>{
+  const finished = localStorage.getItem(FINISH_KEY) === "true";
+  if(!finished && e.target.open){
+    e.target.open = false;
+    alert("Dieser Bereich wird erst nach dem Download der Gesamtdatei freigeschaltet.");
+  }
+});
+
+/* -----------------------------
+   MODELLBILDUNG: Analyse
+------------------------------*/
+function num(v){
+  const n = Number(String(v ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function aggregateRounds(all){
+  // Map round -> aggregator
+  const map = new Map();
+
+  function ensure(r){
+    const key = Number(r);
+    if(!map.has(key)){
+      map.set(key, {
+        round: key,
+        supply_planned: 0,
+        supply_sold: 0,
+        demand_qty: 0,
+        prices_market: [],
+        prices_buyer: [],
+      });
+    }
+    return map.get(key);
+  }
+
+  // Unternehmen: planned/sold/price
+  for(const r of (all.roundsU || [])){
+    const a = ensure(r.round);
+    a.supply_planned += num(r.planned);
+    a.supply_sold += num(r.sold);
+    if(Number.isFinite(num(r.price)) && num(r.price) > 0) a.prices_market.push(num(r.price));
+  }
+
+  // Käufer: qty / payPrice
+  for(const r of (all.roundsK || [])){
+    const a = ensure(r.round);
+    a.demand_qty += num(r.qty);
+    if(Number.isFinite(num(r.payPrice)) && num(r.payPrice) > 0) a.prices_buyer.push(num(r.payPrice));
+  }
+
+  const arr = Array.from(map.values()).sort((x,y)=>x.round - y.round);
+
+  // derived
+  for(const r of arr){
+    r.avg_market_price = r.prices_market.length
+      ? r.prices_market.reduce((s,v)=>s+v,0) / r.prices_market.length
+      : null;
+
+    r.avg_buyer_price = r.prices_buyer.length
+      ? r.prices_buyer.reduce((s,v)=>s+v,0) / r.prices_buyer.length
+      : null;
+
+    // Für Überhang nutzen wir primär: Nachfrage (buyers qty) vs. Angebot (planned)
+    const diff = r.demand_qty - r.supply_planned; // >0 = Nachfrageüberhang
+    r.excess = diff;
+
+    // Zustand
+    const eps = 0.0001;
+    if(Math.abs(diff) <= eps) r.state = "Gleichgewicht (≈)";
+    else if(diff > 0) r.state = "Nachfrageüberhang";
+    else r.state = "Angebotsüberhang";
+  }
+
+  return arr;
+}
+
+function correlation(x, y){
+  // Pearson r (simple)
+  const n = Math.min(x.length, y.length);
+  if(n < 2) return null;
+  const mx = x.reduce((s,v)=>s+v,0)/n;
+  const my = y.reduce((s,v)=>s+v,0)/n;
+  let nume = 0, dx = 0, dy = 0;
+  for(let i=0;i<n;i++){
+    const vx = x[i]-mx;
+    const vy = y[i]-my;
+    nume += vx*vy;
+    dx += vx*vx;
+    dy += vy*vy;
+  }
+  const den = Math.sqrt(dx*dy);
+  if(den === 0) return null;
+  return nume/den;
+}
+
+function runModelAnalysis(){
+  const finished = localStorage.getItem(FINISH_KEY) === "true";
+  if(!finished){
+    alert("Bitte erst die Gesamtdatei herunterladen (Spielende), dann ist die Modellanalyse freigeschaltet.");
+    return;
+  }
+
+  const all = window.__ALL__ || { questionnaire:null, meta:{}, roundsU:[], roundsK:[] };
+  const agg = aggregateRounds(all);
+
+  if(!agg.length){
+    setBadge("analysisBadge", "bad", "keine Daten");
+    document.getElementById("modelSummary").textContent = "Keine Rundendaten gefunden.";
+    return;
+  }
+
+  // Gleichgewicht: Runde mit minimalem |excess|
+  let best = agg[0];
+  for(const r of agg){
+    if(Math.abs(r.excess) < Math.abs(best.excess)) best = r;
+  }
+
+  // Preisstabilität: grob über Preisänderungen
+  const prices = agg.map(r => r.avg_market_price ?? r.avg_buyer_price).filter(v => Number.isFinite(v));
+  let avgDelta = null;
+  if(prices.length >= 2){
+    let dsum = 0, cnt = 0;
+    for(let i=1;i<prices.length;i++){
+      dsum += Math.abs(prices[i]-prices[i-1]);
+      cnt++;
+    }
+    avgDelta = dsum / cnt;
+  }
+
+  // Scatter: (Menge, Preis) – wir nehmen Menge = demand_qty, Preis = avg_market_price fallback buyer
+  const sx = [], sy = [];
+  for(const r of agg){
+    const p = (r.avg_market_price ?? r.avg_buyer_price);
+    if(Number.isFinite(p) && Number.isFinite(r.demand_qty)){
+      sx.push(r.demand_qty);
+      sy.push(p);
+    }
+  }
+  const rCorr = correlation(sx, sy);
+
+  // Summary text
+  const lines = [];
+  lines.push(`Runden ausgewertet: ${agg.length}`);
+  lines.push(`Nächste „Gleichgewichts“-Runde (min. Überhang): Runde ${best.round} (${best.state}; Nachfrage-Angebot = ${best.excess.toFixed(0)})`);
+  if(avgDelta !== null) lines.push(`Ø absolute Preisänderung zwischen Runden: ${avgDelta.toFixed(2)} €`);
+  if(rCorr !== null) lines.push(`Korrelation Preis–Menge (Pearson r): ${rCorr.toFixed(2)}`);
+  lines.push("Interpretation:");
+  lines.push("- Nachfrageüberhang → Knappheit → Preisdruck nach oben");
+  lines.push("- Angebotsüberhang → Überschüsse → Preisdruck nach unten");
+  lines.push("- Gleichgewicht → Überhang klein & Preis stabilisiert sich eher");
+
+  document.getElementById("modelSummary").innerHTML =
+    "<strong>Ergebnisübersicht</strong><br/>" + lines.map(l=>`• ${l}`).join("<br/>");
+
+  // draw charts
+  drawLineChart("chartPrice", agg.map(r=>r.round), agg.map(r => r.avg_market_price ?? r.avg_buyer_price), "Preis (€)");
+  drawSupplyDemandChart("chartSupplyDemand", agg);
+  drawScatter("chartScatter", sx, sy, rCorr);
+
+  setBadge("analysisBadge", "ok", "erstellt");
+}
+
+function setupCanvas(canvasId){
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+
+  const cssW = canvas.clientWidth;
+  const cssH = canvas.getAttribute("height") ? Number(canvas.getAttribute("height")) : 260;
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  return { canvas, ctx, w: cssW, h: cssH };
+}
+
+function drawFrame(ctx, w, h, pad){
+  const {l,r,t,b} = pad;
+  const W = w - l - r;
+  const H = h - t - b;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(l,t,W,H);
+  return { W, H };
+}
+
+function drawLineChart(canvasId, labels, values, yLabel){
+  const {ctx,w,h} = setupCanvas(canvasId);
+  const pad = {l:44,r:16,t:16,b:34};
+  const {W,H} = drawFrame(ctx,w,h,pad);
+
+  const data = [];
+  for(let i=0;i<labels.length;i++){
+    const y = values[i];
+    if(Number.isFinite(y)) data.push({x: labels[i], y});
+  }
+  if(data.length === 0){
+    ctx.fillStyle = "#64748b";
+    ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillText("Keine Preisdaten vorhanden.", pad.l, pad.t + 22);
+    return;
+  }
+
+  const xs = data.map(d=>d.x);
+  const ys = data.map(d=>d.y);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const yPad = (yMax-yMin)*0.1 || 0.2;
+  yMin -= yPad; yMax += yPad;
+
+  const xScale = (x)=> pad.l + ((x-xMin)/(xMax-xMin||1))*W;
+  const yScale = (y)=> pad.t + (1-(y-yMin)/(yMax-yMin||1))*H;
+
+  // grid y ticks
+  ctx.fillStyle = "#475569";
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  ctx.fillText(yLabel, 6, pad.t + 12);
+
+  ctx.strokeStyle = "#eef2f7";
+  for(let i=0;i<=3;i++){
+    const t = i/3;
+    const yy = pad.t + t*H;
+    ctx.beginPath(); ctx.moveTo(pad.l,yy); ctx.lineTo(pad.l+W,yy); ctx.stroke();
+    const val = (yMax - t*(yMax-yMin));
+    ctx.fillText(val.toFixed(2), pad.l-38, yy+4);
+  }
+
+  // line
+  ctx.strokeStyle = "#1f4e79";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  data.sort((a,b)=>a.x-b.x).forEach((p,i)=>{
+    const X = xScale(p.x), Y = yScale(p.y);
+    if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+  });
+  ctx.stroke();
+
+  // points
+  ctx.fillStyle = "#1f4e79";
+  for(const p of data){
+    ctx.beginPath();
+    ctx.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // x label
+  ctx.fillStyle = "#475569";
+  ctx.fillText("Runde", pad.l + W - 34, pad.t + H + 24);
+}
+
+function drawSupplyDemandChart(canvasId, agg){
+  const {ctx,w,h} = setupCanvas(canvasId);
+  const pad = {l:44,r:16,t:16,b:34};
+  const {W,H} = drawFrame(ctx,w,h,pad);
+
+  if(!agg.length){
+    ctx.fillStyle = "#64748b";
+    ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillText("Keine Daten vorhanden.", pad.l, pad.t + 22);
+    return;
+  }
+
+  const rounds = agg.map(r=>r.round);
+  const supply = agg.map(r=>r.supply_planned);
+  const demand = agg.map(r=>r.demand_qty);
+
+  const xs = rounds;
+  const ys = [...supply, ...demand];
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = 0;
+  let yMax = Math.max(...ys);
+  const yPad = (yMax-yMin)*0.1 || 1;
+  yMax += yPad;
+
+  const xScale = (x)=> pad.l + ((x-xMin)/(xMax-xMin||1))*W;
+  const yScale = (y)=> pad.t + (1-(y-yMin)/(yMax-yMin||1))*H;
+
+  // ticks
+  ctx.fillStyle = "#475569";
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  ctx.fillText("Menge", 6, pad.t + 12);
+  ctx.strokeStyle = "#eef2f7";
+  for(let i=0;i<=3;i++){
+    const t = i/3;
+    const yy = pad.t + t*H;
+    ctx.beginPath(); ctx.moveTo(pad.l,yy); ctx.lineTo(pad.l+W,yy); ctx.stroke();
+    const val = (yMax - t*(yMax-yMin));
+    ctx.fillText(val.toFixed(0), pad.l-38, yy+4);
+  }
+
+  // supply line
+  ctx.strokeStyle = "#0f766e";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  agg.forEach((r,i)=>{
+    const X = xScale(r.round), Y = yScale(r.supply_planned);
+    if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+  });
+  ctx.stroke();
+
+  // demand line
+  ctx.strokeStyle = "#b45309";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  agg.forEach((r,i)=>{
+    const X = xScale(r.round), Y = yScale(r.demand_qty);
+    if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+  });
+  ctx.stroke();
+
+  // legend
+  const lx = pad.l + 10, ly = pad.t + 10;
+  const items = [
+    {label:"Angebot (geplant)", col:"#0f766e"},
+    {label:"Nachfrage (gekauft)", col:"#b45309"},
+  ];
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  let off = 0;
+  for(const it of items){
+    ctx.fillStyle = it.col;
+    ctx.fillRect(lx + off, ly, 10, 10);
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(it.label, lx + off + 14, ly + 10);
+    off += 150;
+  }
+
+  // x label
+  ctx.fillStyle = "#475569";
+  ctx.fillText("Runde", pad.l + W - 34, pad.t + H + 24);
+}
+
+function drawScatter(canvasId, xs, ys, rCorr){
+  const {ctx,w,h} = setupCanvas(canvasId);
+  const pad = {l:44,r:16,t:16,b:34};
+  const {W,H} = drawFrame(ctx,w,h,pad);
+
+  if(xs.length < 2){
+    ctx.fillStyle = "#64748b";
+    ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillText("Zu wenige Daten für Scatter/Korrelation.", pad.l, pad.t + 22);
+    return;
+  }
+
+  let xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const xPad = (xMax-xMin)*0.1 || 1;
+  const yPad = (yMax-yMin)*0.1 || 0.2;
+  xMin -= xPad; xMax += xPad;
+  yMin -= yPad; yMax += yPad;
+
+  const xScale = (x)=> pad.l + ((x-xMin)/(xMax-xMin||1))*W;
+  const yScale = (y)=> pad.t + (1-(y-yMin)/(yMax-yMin||1))*H;
+
+  ctx.fillStyle = "#475569";
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  ctx.fillText("Preis (€)", 6, pad.t + 12);
+  ctx.fillText("Menge", pad.l + W - 40, pad.t + H + 24);
+
+  ctx.strokeStyle = "#eef2f7";
+  for(let i=0;i<=3;i++){
+    const t = i/3;
+    const yy = pad.t + t*H;
+    ctx.beginPath(); ctx.moveTo(pad.l,yy); ctx.lineTo(pad.l+W,yy); ctx.stroke();
+  }
+
+  // points
+  ctx.fillStyle = "#1f4e79";
+  for(let i=0;i<xs.length;i++){
+    ctx.beginPath();
+    ctx.arc(xScale(xs[i]), yScale(ys[i]), 3, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // correlation text
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  const txt = (rCorr === null) ? "r: –" : `r: ${rCorr.toFixed(2)}`;
+  ctx.fillText(txt, pad.l + 10, pad.t + 24);
+}
+
+// redraw charts on resize (if unlocked & already computed)
+window.addEventListener("resize", ()=>{
+  const finished = localStorage.getItem(FINISH_KEY) === "true";
+  if(!finished) return;
+  // wenn schon erstellt: einfach nochmal laufen lassen
+  if(document.getElementById("analysisBadge")?.textContent === "erstellt"){
+    runModelAnalysis();
+  }
 });
 
 // Auto-load
