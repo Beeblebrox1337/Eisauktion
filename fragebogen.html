@@ -12,21 +12,27 @@
   <div class="navwrap">
     <div class="brand"><span class="dot"></span> Eisauktion</div>
 
+    <header class="sitebar">
+  <div class="navwrap">
+    <div class="brand">
+      <span class="dot"></span>
+      Eisauktion
+    </div>
+
     <nav>
       <a href="index.html">Übersicht</a>
       <a href="spielerklaerung.html">Spielerklärung</a>
-      <a href="fragebogen.html">Fragebogen</a>
+      <a class="active" href="fragebogen.html">Fragebogen</a>
 
-      <!-- Rollenkarten: Dropdown -->
-      <details class="navdrop">
-        <!-- Auf Rollenseiten: summary zusätzlich class="active" geben -->
-        <summary>Rollenkarten ▾</summary>
+      <!-- Rollenkarten Dropdown -->
+      <div class="navdrop">
+        <a class="navdrop-toggle" href="#">Rollenkarten ▾</a>
+
         <div class="navdrop-menu">
-          <!-- Auf der jeweiligen Seite: dem passenden Link class="active" geben -->
           <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
           <a href="rolle-kaeufer.html">Rolle: Käufer</a>
         </div>
-      </details>
+      </div>
 
       <a href="auswertung.html">Auswertung</a>
       <a href="impressum.html">Impressum</a>
@@ -442,4 +448,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
