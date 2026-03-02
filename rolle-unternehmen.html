@@ -138,7 +138,7 @@
 
     <h2>Verkäuferbeobachtung (Konkurrenz)</h2>
     <p class="small">Tragt ein, welche Preise ihr bei anderen Anbietern beobachtet habt (falls bekannt).</p>
-    <div class="seller-grid" id="sellerObsGrid">
+    <div class="grid three" id="sellerObsGrid">
       <div class="seller-item">
         <label>Anbieter A – Preis (€)</label>
         <input id="obs_pa" data-seller-key="a" type="number" step="0.01" placeholder="z. B. 1.30"/>
@@ -224,7 +224,6 @@ function eur(n){
   const x = Number.isFinite(n) ? n : 0;
   return x.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
 }
-
 
 function addSeller(){
   const grid = document.getElementById("sellerObsGrid");
@@ -371,7 +370,9 @@ function calc(){
     badge.textContent = 'Produktion finanzierbar';
   }
 
-  document.getElementById('cap').value = newCap.toFixed(2);  const obsNote = document.getElementById("obs_note").value || "";
+  document.getElementById('cap').value = newCap.toFixed(2);
+
+  const obsNote = document.getElementById("obs_note").value || "";
 
   // Dynamische Anbieter (A/B/C + hinzugefügte)
   const pricesObserved = {};
@@ -391,7 +392,8 @@ function calc(){
     profit: Number(profit.toFixed(2)),
     capital: Number(newCap.toFixed(2)),
     notes: document.getElementById('notes').value || "",
-    sellerObservation: Object.assign({ note: obsNote }, pricesObserved)});
+    sellerObservation: Object.assign({ note: obsNote }, pricesObserved)
+  });
 
   loadSaved();
 }
@@ -403,7 +405,9 @@ function nextRound(){
   document.getElementById('planned').value = '';
   document.getElementById('sold').value = '';
   document.getElementById('price').value = '';
-  document.getElementById('notes').value = '';  document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp => inp.value = '');
+  document.getElementById('notes').value = '';
+
+  document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp => inp.value = '');
   document.getElementById('obs_note').value = '';
 
   document.getElementById('liq_badge').className = 'badge';
@@ -423,7 +427,7 @@ function loadSaved(){
   tbody.innerHTML = "";
   if(!arr.length){
     tbody.innerHTML = `<tr><td colspan="8" class="small">Noch keine gespeicherten Rundendaten.</td></tr>`;
-    renderPriceChart([]);
+    if(typeof renderPriceChart === "function") renderPriceChart([]);
     return;
   }
 
@@ -442,142 +446,104 @@ function loadSaved(){
     tbody.appendChild(tr);
   }
 
-  renderPriceChart(arr);
+  if(typeof renderPriceChart === "function") renderPriceChart(arr);
 }
 
 function clearSaved(){
   localStorage.removeItem("eisauktion_unternehmen_rounds");
-  document.querySelector("#savedTable tbody").innerHTML = `<tr><td colspan="8" class="small">Daten gelöscht.</td></tr>`;
-  document.getElementById("savedInfo").textContent = "Gespeicherte Runden gelöscht.";
-  renderPriceChart([]);
+  loadSaved();
 }
 
-function renderPriceChart(rounds){
+/* ========== Simple Chart (Canvas) ========== */
+function renderPriceChart(arr){
   const canvas = document.getElementById("priceChart");
+  if(!canvas) return;
   const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.clientWidth * (window.devicePixelRatio || 1);
+  const h = canvas.height = 260 * (window.devicePixelRatio || 1);
 
-  const cssW = canvas.clientWidth;
-  const cssH = canvas.getAttribute("height") ? Number(canvas.getAttribute("height")) : 260;
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(cssW * dpr);
-  canvas.height = Math.floor(cssH * dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
 
-  const pts = { a:[], b:[], c:[] };
-  for(const r of rounds){
-    const rr = Number(r.round);
-    const so = r.sellerObservation || {};
-    if(Number.isFinite(Number(so.a))) pts.a.push({x: rr, y: Number(so.a)});
-    if(Number.isFinite(Number(so.b))) pts.b.push({x: rr, y: Number(so.b)});
-    if(Number.isFinite(Number(so.c))) pts.c.push({x: rr, y: Number(so.c)});
+  // A/B/C beobachten (bestehende Kurve bleibt)
+  const ptsA = [];
+  const ptsB = [];
+  const ptsC = [];
+  const rounds = arr.map(x=>Number(x.round));
+
+  for(const r of arr){
+    const o = r.sellerObservation || {};
+    const ra = o.a;
+    const rb = o.b;
+    const rc = o.c;
+    if(Number.isFinite(ra)) ptsA.push({x:Number(r.round), y:Number(ra)});
+    if(Number.isFinite(rb)) ptsB.push({x:Number(r.round), y:Number(rb)});
+    if(Number.isFinite(rc)) ptsC.push({x:Number(r.round), y:Number(rc)});
   }
 
-  const all = [...pts.a, ...pts.b, ...pts.c];
-  ctx.clearRect(0,0,cssW,cssH);
-
-  const padL=44, padR=16, padT=16, padB=34;
-  const W = cssW - padL - padR;
-  const H = cssH - padT - padB;
-
-  ctx.strokeStyle = "#e2e8f0";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(padL, padT, W, H);
-
-  if(!all.length){
-    ctx.fillStyle = "#64748b";
-    ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    ctx.fillText("Noch keine Verkäuferpreise gespeichert (A/B/C).", padL, padT + 22);
+  const allY = [...ptsA,...ptsB,...ptsC].map(p=>p.y);
+  if(!allY.length){
+    ctx.font = `${14*(window.devicePixelRatio||1)}px system-ui`;
+    ctx.fillText("Noch keine Verkäuferpreise (A/B/C) gespeichert.", 14*(window.devicePixelRatio||1), 28*(window.devicePixelRatio||1));
     return;
   }
 
-  const xs = all.map(p=>p.x);
-  const ys = all.map(p=>p.y);
-  const xMin = Math.min(...xs);
-  const xMax = Math.max(...xs);
-  let yMin = Math.min(...ys);
-  let yMax = Math.max(...ys);
+  const minX = Math.min(...rounds);
+  const maxX = Math.max(...rounds);
+  const minY = Math.min(...allY);
+  const maxY = Math.max(...allY);
 
-  const yPad = (yMax - yMin) * 0.1 || 0.2;
-  yMin -= yPad;
-  yMax += yPad;
+  const padL = 40*(window.devicePixelRatio||1);
+  const padR = 14*(window.devicePixelRatio||1);
+  const padT = 14*(window.devicePixelRatio||1);
+  const padB = 34*(window.devicePixelRatio||1);
 
-  const xScale = (x) => padL + ((x - xMin) / (xMax - xMin || 1)) * W;
-  const yScale = (y) => padT + (1 - (y - yMin) / (yMax - yMin || 1)) * H;
+  function sx(x){
+    if(maxX===minX) return padL;
+    return padL + (x-minX) * (w-padL-padR) / (maxX-minX);
+  }
+  function sy(y){
+    if(maxY===minY) return h-padB;
+    return padT + (maxY-y) * (h-padT-padB) / (maxY-minY);
+  }
 
+  // axes
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 1*(window.devicePixelRatio||1);
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.beginPath();
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, h-padB);
+  ctx.lineTo(w-padR, h-padB);
+  ctx.stroke();
+
+  function drawSeries(pts, color){
+    if(pts.length < 2) return;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2*(window.devicePixelRatio||1);
+    ctx.beginPath();
+    ctx.moveTo(sx(pts[0].x), sy(pts[0].y));
+    for(let i=1;i<pts.length;i++){
+      ctx.lineTo(sx(pts[i].x), sy(pts[i].y));
+    }
+    ctx.stroke();
+  }
+
+  drawSeries(ptsA, "#1f4e79");
+  drawSeries(ptsB, "#0f766e");
+  drawSeries(ptsC, "#b45309");
+
+  // labels minimal
   ctx.fillStyle = "#475569";
-  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("Runde", padL + W - 34, padT + H + 24);
-  ctx.fillText("Preis (€)", 6, padT + 12);
+  ctx.font = `${12*(window.devicePixelRatio||1)}px system-ui`;
 
-  const ticks = 3;
-  ctx.strokeStyle = "#eef2f7";
-  for(let i=0;i<=ticks;i++){
-    const t = i / ticks;
-    const y = padT + t * H;
-    ctx.beginPath();
-    ctx.moveTo(padL, y);
-    ctx.lineTo(padL + W, y);
-    ctx.stroke();
-    const val = (yMax - t*(yMax-yMin));
-    ctx.fillText(val.toFixed(2), padL - 38, y + 4);
-  }
-
-  function drawSeries(series, stroke){
-    if(series.length < 2) {
-      if(series.length === 1){
-        const p = series[0];
-        ctx.fillStyle = stroke;
-        ctx.beginPath();
-        ctx.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI*2);
-        ctx.fill();
-      }
-      return;
-    }
-    ctx.strokeStyle = stroke;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    series.sort((p,q)=>p.x-q.x);
-    series.forEach((p,i)=>{
-      const x = xScale(p.x), y = yScale(p.y);
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-
-    ctx.fillStyle = stroke;
-    for(const p of series){
-      ctx.beginPath();
-      ctx.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI*2);
-      ctx.fill();
-    }
-  }
-
-  drawSeries(pts.a, "#1f4e79");
-  drawSeries(pts.b, "#0f766e");
-  drawSeries(pts.c, "#b45309");
-
-  const lx = padL + 10, ly = padT + 10;
-  const items = [
-    {label:"A", col:"#1f4e79"},
-    {label:"B", col:"#0f766e"},
-    {label:"C", col:"#b45309"},
-  ];
-  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  let off = 0;
-  for(const it of items){
-    ctx.fillStyle = it.col;
-    ctx.fillRect(lx + off, ly, 10, 10);
-    ctx.fillStyle = "#0f172a";
-    ctx.fillText(it.label, lx + off + 14, ly + 10);
-    off += 34;
-  }
+  ctx.fillText(`Runde`, w/2, h-10*(window.devicePixelRatio||1));
+  ctx.save();
+  ctx.translate(12*(window.devicePixelRatio||1), h/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText(`Preis (€)`, 0, 0);
+  ctx.restore();
 }
 
-window.addEventListener("resize", () => {
-  const arr = JSON.parse(localStorage.getItem("eisauktion_unternehmen_rounds") || "[]");
-  renderPriceChart(arr);
-});
-
-// Init
 loadQuestionnaire();
 loadSaved();
 </script>
