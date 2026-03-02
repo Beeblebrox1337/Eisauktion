@@ -294,89 +294,53 @@ canvas{
   height:auto;
 }
 
-/* =========================
-   Dynamische Bereiche (Käufer + Unternehmen)
-   ========================= */
 
-/* Verkäuferbeobachtung: flexibles Grid für viele Anbieter */
-.seller-grid{
-  display:grid;
-  gap:14px;
-  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+
+/* ===== Eis-Icons als Gestaltungselemente ===== */
+.brand-icon{
+  width:18px;
+  height:18px;
+  display:inline-block;
+  object-fit:contain;
 }
 
-.seller-item{
-  min-width:0;
+/* Optional: falls alte .dot noch im HTML steckt */
+.brand .dot{ display:none; }
+
+/* Listen mit Eis-Gliederungspunkten */
+.ice-list{
+  list-style:none;
+  padding-left:0;
+  margin:10px 0 0;
+  --ice-bullet-url: url("assets/eis/eis3.png");
 }
 
-/* Käufe (Käufer): Karten + 3 gleich breite Felder */
-.purchase-list{
-  display:grid;
-  gap:14px;
-  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+.ice-list li{
+  position:relative;
+  padding-left:28px;
+  margin:8px 0;
 }
 
-.purchase-row{
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:#f8fafc;
-  padding:12px;
+.ice-list li::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:2px;
+  width:18px;
+  height:18px;
+  background-image: var(--ice-bullet-url);
+  background-size: contain;
+  background-repeat:no-repeat;
+  background-position:center;
+  opacity:0.9;
 }
 
-.purchase-row-head{
-  font-weight:800;
-  color:var(--muted);
-  margin-bottom:8px;
-}
-
-.purchase-fields{
-  display:grid;
-  gap:12px;
-  grid-template-columns:repeat(3, 1fr);
-}
-
-.purchase-fields label{
-  white-space:nowrap; /* sorgt dafür, dass "Preis/Einheit (€)" in einer Zeile bleibt */
-}
-
-@media (max-width:750px){
-  .purchase-fields{
-    grid-template-columns:1fr;
-  }
-}
-
-/* Add-Buttons: gleiche Designsprache wie Inputs */
-.add-seller-btn{
-  width:100%;
-  padding:10px;
-  border:1px solid #cbd5e1;
-  border-radius:10px;
-  background:#f8fafc;
-  color:var(--muted);
-  font-size:16px;
-  font-weight:700;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  cursor:pointer;
-}
-
-.add-seller-btn:hover{
-  background:#eef2f7;
-}
-
-.add-seller-btn .plus{
-  color:#94a3b8;
-  font-weight:900;
-  line-height:1;
-}
-
-.add-seller-btn.central{
-  margin-top:10px;
-}
-
-/* Strategie-Block (Käufer): volle Breite */
-.strategy-block textarea{
-  min-height:120px;
-}
+/* Varianten (wenn du unterschiedliche Eis-Icons pro Liste willst) */
+.ice-list.eis1{ --ice-bullet-url:url("assets/eis/eis1.png"); }
+.ice-list.eis2{ --ice-bullet-url:url("assets/eis/eis2.png"); }
+.ice-list.eis3{ --ice-bullet-url:url("assets/eis/eis3.png"); }
+.ice-list.eis4{ --ice-bullet-url:url("assets/eis/eis4.png"); }
+.ice-list.eis5{ --ice-bullet-url:url("assets/eis/eis5.png"); }
+.ice-list.eis6{ --ice-bullet-url:url("assets/eis/eis6.png"); }
+.ice-list.eis7{ --ice-bullet-url:url("assets/eis/eis7.png"); }
+.ice-list.eis8{ --ice-bullet-url:url("assets/eis/eis8.png"); }
