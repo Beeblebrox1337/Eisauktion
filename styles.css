@@ -17,8 +17,7 @@
   box-sizing:border-box;
 }
 
-/* ========== Grundlayout ========== */
-
+/* WICHTIG: iOS Scroll Fix */
 html, body{
   margin:0;
   padding:0;
@@ -35,15 +34,16 @@ body{
   -webkit-overflow-scrolling:touch;
 }
 
+/* Layout Container */
 .container{
   max-width:1100px;
   margin:0 auto;
   padding:24px 18px 60px;
 }
 
-/* ========== Header / Navigation ========== */
-
+/* Header */
 header.sitebar{
+  position:relative; /* kein sticky -> verhindert iOS Scrollbug */
   background:#ffffff;
   border-bottom:1px solid var(--border);
 }
@@ -79,6 +79,17 @@ nav{
   flex-wrap:wrap;
 }
 
+@media (max-width:700px){
+  nav{
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    width:100%;
+  }
+  nav a{
+    flex:0 0 auto;
+  }
+}
+
 nav a{
   text-decoration:none;
   color:var(--brand);
@@ -98,110 +109,7 @@ nav a.active{
   color:white;
 }
 
-/* ========== Hover Dropdown (Rollenkarten) ========== */
-
-nav .navdrop{
-  position:relative;
-  display:inline-block;
-}
-
-nav .navdrop-toggle{
-  text-decoration:none;
-  color:var(--brand);
-  font-weight:600;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid transparent;
-  white-space:nowrap;
-  display:inline-block;
-}
-
-nav .navdrop-toggle:hover{
-  background:#eef6ff;
-}
-
-nav .navdrop-toggle.active{
-  background:var(--brand);
-  color:#fff;
-}
-
-nav .navdrop-menu{
-  position:absolute;
-  top:calc(100% + 6px);
-  left:0;
-  background:#ffffff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:var(--shadow);
-  padding:6px;
-  min-width:220px;
-
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-
-  opacity:0;
-  transform:translateY(-6px);
-  pointer-events:none;
-  transition:all 0.18s ease;
-  z-index:50;
-}
-
-nav .navdrop-menu a{
-  border-radius:10px;
-  padding:10px 12px;
-  color:var(--text);
-}
-
-nav .navdrop-menu a:hover{
-  background:#f1f5f9;
-}
-
-nav .navdrop:hover .navdrop-menu{
-  opacity:1;
-  transform:translateY(0);
-  pointer-events:auto;
-}
-
-nav .navdrop::after{
-  content:"";
-  position:absolute;
-  height:12px;
-  left:0;
-  right:0;
-  bottom:-12px;
-}
-
-/* Mobile Navigation */
-
-@media (max-width:700px){
-  nav{
-    overflow-x:auto;
-    flex-wrap:nowrap;
-    width:100%;
-  }
-
-  nav a{
-    flex:0 0 auto;
-  }
-
-  nav .navdrop{
-    width:100%;
-  }
-
-  nav .navdrop-menu{
-    position:static;
-    opacity:1;
-    transform:none;
-    pointer-events:auto;
-    box-shadow:none;
-    border:none;
-    padding-left:12px;
-  }
-}
-
-/* ========== Typografie ========== */
-
+/* Typography */
 h1{font-size:28px;margin:18px 0 8px;}
 h2{font-size:18px;margin:0 0 10px;}
 h3{font-size:16px;margin:0 0 8px;}
@@ -211,8 +119,7 @@ h3{font-size:16px;margin:0 0 8px;}
   h1{font-size:24px;}
 }
 
-/* ========== Karten ========== */
-
+/* Cards */
 .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -222,8 +129,7 @@ h3{font-size:16px;margin:0 0 8px;}
   margin-bottom:18px;
 }
 
-/* ========== Grid ========== */
-
+/* Grid System */
 .grid{
   display:grid;
   gap:14px;
@@ -250,8 +156,7 @@ h3{font-size:16px;margin:0 0 8px;}
   }
 }
 
-/* ========== Formulare ========== */
-
+/* Forms */
 label{
   font-weight:700;
   display:block;
@@ -263,7 +168,7 @@ input, textarea, select{
   padding:10px;
   border:1px solid #cbd5e1;
   border-radius:10px;
-  font-size:16px;
+  font-size:16px; /* verhindert iOS Zoom */
 }
 
 textarea{
@@ -271,8 +176,7 @@ textarea{
   resize:vertical;
 }
 
-/* ========== Buttons ========== */
-
+/* Buttons */
 .row{
   display:flex;
   gap:10px;
@@ -305,8 +209,7 @@ textarea{
   }
 }
 
-/* ========== Badges ========== */
-
+/* Badges */
 .badge{
   display:inline-block;
   padding:4px 10px;
@@ -331,8 +234,24 @@ textarea{
   background:rgba(185,28,28,0.1);
 }
 
-/* ========== Tabellen ========== */
+/* Notes & Results */
+.note{
+  background:#fff7ed;
+  border:1px solid rgba(180,83,9,0.3);
+  border-radius:12px;
+  padding:12px;
+  color:#7c2d12;
+}
 
+.result{
+  background:#eef6ff;
+  border:1px solid #dbeafe;
+  border-radius:12px;
+  padding:12px;
+  font-weight:700;
+}
+
+/* Tables */
 .table{
   width:100%;
   border-collapse:collapse;
@@ -362,413 +281,102 @@ textarea{
   }
 }
 
-/* ========== Utilities ========== */
-
+/* Horizontal Rule */
 .hr{
   height:1px;
   background:var(--border);
   margin:14px 0;
 }
 
-.small{
-  font-size:13px;
-  color:var(--muted);
-}
-
-.footer{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:18px;
-}
-
-.span2{
-  grid-column:1 / -1;
-}
-
-:root{
-  --bg:#f4f6f8;
-  --card:#ffffff;
-  --text:#0f172a;
-  --muted:#475569;
-  --border:#e2e8f0;
-  --brand:#1f4e79;
-  --brand2:#163a5a;
-  --ok:#0f766e;
-  --warn:#b45309;
-  --bad:#b91c1c;
-  --shadow:0 8px 20px rgba(2,6,23,0.08);
-  --radius:14px;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-/* ========== Grundlayout ========== */
-
-html, body{
-  margin:0;
-  padding:0;
+/* Canvas responsive */
+canvas{
+  max-width:100%;
   height:auto;
-  min-height:100%;
 }
 
-body{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.5;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-}
+/* =========================
+   Dynamische Bereiche (Käufer + Unternehmen)
+   ========================= */
 
-.container{
-  max-width:1100px;
-  margin:0 auto;
-  padding:24px 18px 60px;
-}
-
-/* ========== Header / Navigation ========== */
-
-header.sitebar{
-  background:#ffffff;
-  border-bottom:1px solid var(--border);
-}
-
-.navwrap{
-  max-width:1100px;
-  margin:0 auto;
-  padding:12px 18px;
-  display:flex;
-  gap:14px;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:700;
-}
-
-.brand .dot{
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:var(--brand);
-}
-
-nav{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-nav a{
-  text-decoration:none;
-  color:var(--brand);
-  font-weight:600;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid transparent;
-  white-space:nowrap;
-}
-
-nav a:hover{
-  background:#eef6ff;
-}
-
-nav a.active{
-  background:var(--brand);
-  color:white;
-}
-
-/* ========== Hover Dropdown (Rollenkarten) ========== */
-
-nav .navdrop{
-  position:relative;
-  display:inline-block;
-}
-
-nav .navdrop-toggle{
-  text-decoration:none;
-  color:var(--brand);
-  font-weight:600;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid transparent;
-  white-space:nowrap;
-  display:inline-block;
-}
-
-nav .navdrop-toggle:hover{
-  background:#eef6ff;
-}
-
-nav .navdrop-toggle.active{
-  background:var(--brand);
-  color:#fff;
-}
-
-nav .navdrop-menu{
-  position:absolute;
-  top:calc(100% + 6px);
-  left:0;
-  background:#ffffff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:var(--shadow);
-  padding:6px;
-  min-width:220px;
-
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-
-  opacity:0;
-  transform:translateY(-6px);
-  pointer-events:none;
-  transition:all 0.18s ease;
-  z-index:50;
-}
-
-nav .navdrop-menu a{
-  border-radius:10px;
-  padding:10px 12px;
-  color:var(--text);
-}
-
-nav .navdrop-menu a:hover{
-  background:#f1f5f9;
-}
-
-nav .navdrop:hover .navdrop-menu{
-  opacity:1;
-  transform:translateY(0);
-  pointer-events:auto;
-}
-
-nav .navdrop::after{
-  content:"";
-  position:absolute;
-  height:12px;
-  left:0;
-  right:0;
-  bottom:-12px;
-}
-
-/* Mobile Navigation */
-
-@media (max-width:700px){
-  nav{
-    overflow-x:auto;
-    flex-wrap:nowrap;
-    width:100%;
-  }
-
-  nav a{
-    flex:0 0 auto;
-  }
-
-  nav .navdrop{
-    width:100%;
-  }
-
-  nav .navdrop-menu{
-    position:static;
-    opacity:1;
-    transform:none;
-    pointer-events:auto;
-    box-shadow:none;
-    border:none;
-    padding-left:12px;
-  }
-}
-
-/* ========== Typografie ========== */
-
-h1{font-size:28px;margin:18px 0 8px;}
-h2{font-size:18px;margin:0 0 10px;}
-h3{font-size:16px;margin:0 0 8px;}
-.lead{color:var(--muted);margin-bottom:16px;}
-
-@media (max-width:700px){
-  h1{font-size:24px;}
-}
-
-/* ========== Karten ========== */
-
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:18px;
-  margin-bottom:18px;
-}
-
-/* ========== Grid ========== */
-
-.grid{
+/* Verkäuferbeobachtung: flexibles Grid für viele Anbieter */
+.seller-grid{
   display:grid;
   gap:14px;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
 }
 
-.grid.two{
-  grid-template-columns:repeat(2,1fr);
+.seller-item{
+  min-width:0;
 }
 
-.grid.three{
-  grid-template-columns:repeat(3,1fr);
+/* Käufe (Käufer): Karten + 3 gleich breite Felder */
+.purchase-list{
+  display:grid;
+  gap:14px;
+  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
 }
 
-@media (max-width:1024px){
-  .grid.three{
-    grid-template-columns:repeat(2,1fr);
-  }
+.purchase-row{
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#f8fafc;
+  padding:12px;
+}
+
+.purchase-row-head{
+  font-weight:800;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+.purchase-fields{
+  display:grid;
+  gap:12px;
+  grid-template-columns:repeat(3, 1fr);
+}
+
+.purchase-fields label{
+  white-space:nowrap; /* sorgt dafür, dass "Preis/Einheit (€)" in einer Zeile bleibt */
 }
 
 @media (max-width:750px){
-  .grid.two,
-  .grid.three{
+  .purchase-fields{
     grid-template-columns:1fr;
   }
 }
 
-/* ========== Formulare ========== */
-
-label{
-  font-weight:700;
-  display:block;
-  margin:10px 0 6px;
-}
-
-input, textarea, select{
+/* Add-Buttons: gleiche Designsprache wie Inputs */
+.add-seller-btn{
   width:100%;
   padding:10px;
   border:1px solid #cbd5e1;
   border-radius:10px;
+  background:#f8fafc;
+  color:var(--muted);
   font-size:16px;
-}
-
-textarea{
-  min-height:100px;
-  resize:vertical;
-}
-
-/* ========== Buttons ========== */
-
-.row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  align-items:flex-end;
-}
-
-.btn{
-  background:var(--brand);
-  color:white;
-  border:none;
-  border-radius:999px;
-  padding:10px 16px;
   font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
   cursor:pointer;
 }
 
-.btn:hover{
-  background:var(--brand2);
+.add-seller-btn:hover{
+  background:#eef2f7;
 }
 
-.btn.secondary{
-  background:#e2e8f0;
-  color:#0f172a;
+.add-seller-btn .plus{
+  color:#94a3b8;
+  font-weight:900;
+  line-height:1;
 }
 
-@media (max-width:600px){
-  .btn{
-    width:100%;
-  }
+.add-seller-btn.central{
+  margin-top:10px;
 }
 
-/* ========== Badges ========== */
-
-.badge{
-  display:inline-block;
-  padding:4px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  font-size:12px;
-  font-weight:700;
+/* Strategie-Block (Käufer): volle Breite */
+.strategy-block textarea{
+  min-height:120px;
 }
-
-.badge.ok{
-  color:var(--ok);
-  background:rgba(15,118,110,0.1);
-}
-
-.badge.warn{
-  color:var(--warn);
-  background:rgba(180,83,9,0.1);
-}
-
-.badge.bad{
-  color:var(--bad);
-  background:rgba(185,28,28,0.1);
-}
-
-/* ========== Tabellen ========== */
-
-.table{
-  width:100%;
-  border-collapse:collapse;
-  border-radius:12px;
-  border:1px solid var(--border);
-  overflow:hidden;
-}
-
-.table th,
-.table td{
-  padding:10px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
-  font-size:14px;
-}
-
-.table th{
-  background:#f8fafc;
-  color:var(--muted);
-}
-
-@media (max-width:750px){
-  .table{
-    display:block;
-    overflow-x:auto;
-    white-space:nowrap;
-  }
-}
-
-/* ========== Utilities ========== */
-
-.hr{
-  height:1px;
-  background:var(--border);
-  margin:14px 0;
-}
-
-.small{
-  font-size:13px;
-  color:var(--muted);
-}
-
-.footer{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:18px;
-}
-
-.span2{
-  grid-column:1 / -1;
-}
-
