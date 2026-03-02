@@ -294,12 +294,11 @@ canvas{
   height:auto;
 }
 
-
 /* =========================
-   Käufer: dynamische Bereiche
+   Dynamische Bereiche (Käufer + Unternehmen)
    ========================= */
 
-/* Verkäuferbeobachtung: responsives Grid */
+/* Verkäuferbeobachtung: flexibles Grid für viele Anbieter */
 .seller-grid{
   display:grid;
   gap:14px;
@@ -310,7 +309,7 @@ canvas{
   min-width:0;
 }
 
-/* Käufe: Blöcke/Zeilen mit mehr Platz */
+/* Käufe (Käufer): Karten + 3 gleich breite Felder */
 .purchase-list{
   display:grid;
   gap:14px;
@@ -333,7 +332,11 @@ canvas{
 .purchase-fields{
   display:grid;
   gap:12px;
-  grid-template-columns: 1.2fr 0.8fr 1fr;
+  grid-template-columns:repeat(3, 1fr);
+}
+
+.purchase-fields label{
+  white-space:nowrap; /* sorgt dafür, dass "Preis/Einheit (€)" in einer Zeile bleibt */
 }
 
 @media (max-width:750px){
@@ -367,4 +370,13 @@ canvas{
   color:#94a3b8;
   font-weight:900;
   line-height:1;
+}
+
+.add-seller-btn.central{
+  margin-top:10px;
+}
+
+/* Strategie-Block (Käufer): volle Breite */
+.strategy-block textarea{
+  min-height:120px;
 }
