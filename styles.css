@@ -288,20 +288,29 @@ textarea{
   margin:14px 0;
 }
 
-.small{
-  font-size:13px;
-  color:var(--muted);
+/* Canvas responsive */
+canvas{
+  max-width:100%;
+  height:auto;
 }
 
-.footer{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:18px;
-}
 
 /* Grid helpers */
 .span2{
   grid-column:1 / -1;
+}
+
+
+/* Verkäuferbeobachtung: flexibles Grid für viele Anbieter */
+.seller-grid{
+  display:grid;
+  gap:14px;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  align-items:start;
+}
+
+.seller-item{
+  min-width:0;
 }
 
 /* Dynamische Anbieter-Buttons (wie Textboxen, mit grauem +) */
