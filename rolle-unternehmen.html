@@ -6,13 +6,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Rolle: Unternehmen – Eisauktion</title>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="icon" type="image/png" href="assets/eis/eis7.png"/>
 </head>
 <body>
 
 <header class="sitebar">
   <div class="navwrap">
-    <div class="brand"><img class="brand-icon" src="assets/eis/eis7.png" alt="" aria-hidden="true"> Eisauktion</div>
+    <div class="brand"><span class="dot"></span> Eisauktion</div>
     <nav>
       <a href="index.html">Übersicht</a>
       <a href="spielerklaerung.html">Spielerklärung</a>
@@ -67,8 +66,8 @@
   <div class="grid two" style="margin-top:14px;">
     <section class="card">
       <h2>Phasen je Runde</h2>
-      <ol class="ice-list eis3">
-<li><strong>Produktion</strong> festlegen (vor dem Markt, verbindlich)</li>
+      <ol>
+        <li><strong>Produktion</strong> festlegen (vor dem Markt, verbindlich)</li>
         <li><strong>Marktphase</strong> (Käufer kaufen; Preis entsteht; ggf. Preis anpassen)</li>
         <li><strong>Auswertung</strong> (Umsatz, Kosten, Gewinn/Verlust, Kapital)</li>
       </ol>
@@ -89,13 +88,9 @@
         </div>
       </div>
       <div class="grid two">
-        <div>
+        <div class="span2">
           <label>Aktuelles Kapital (€)</label>
           <input id="cap" type="number" step="0.01" placeholder="z. B. 25"/>
-        </div>
-        <div>
-          <label>Entsorgungskosten je unverkaufte Einheit (€) (optional)</label>
-          <input id="disp" type="number" step="0.01" value="0"/>
         </div>
       </div>
 
@@ -143,20 +138,27 @@
 
     <h2>Verkäuferbeobachtung (Konkurrenz)</h2>
     <p class="small">Tragt ein, welche Preise ihr bei anderen Anbietern beobachtet habt (falls bekannt).</p>
-    <div class="grid three">
-      <div>
+    <div class="seller-grid" id="sellerObsGrid">
+      <div class="seller-item">
         <label>Anbieter A – Preis (€)</label>
-        <input id="obs_pa" type="number" step="0.01" placeholder="z. B. 1.30"/>
+        <input id="obs_pa" data-seller-key="a" type="number" step="0.01" placeholder="z. B. 1.30"/>
       </div>
-      <div>
+
+      <div class="seller-item">
         <label>Anbieter B – Preis (€)</label>
-        <input id="obs_pb" type="number" step="0.01" placeholder="z. B. 1.20"/>
+        <input id="obs_pb" data-seller-key="b" type="number" step="0.01" placeholder="z. B. 1.20"/>
       </div>
-      <div>
+
+      <div class="seller-item">
         <label>Anbieter C – Preis (€)</label>
-        <input id="obs_pc" type="number" step="0.01" placeholder="z. B. 1.50"/>
+        <input id="obs_pc" data-seller-key="c" type="number" step="0.01" placeholder="z. B. 1.50"/>
       </div>
     </div>
+
+    <button class="add-seller-btn central" type="button" onclick="addSeller()">
+      <span class="plus">＋</span> Anbieter hinzufügen
+    </button>
+
     <label>Beobachtung/Kommentar (optional)</label>
     <input id="obs_note" type="text" placeholder="z. B. Anbieter B sehr aggressiv, A ausverkauft"/>
 
@@ -224,6 +226,45 @@ function eur(n){
   return x.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
 }
 
+
+function addSeller(){
+  const grid = document.getElementById("sellerObsGrid");
+  if(!grid) return;
+
+  // alle vorhandenen Keys sammeln
+  const used = new Set(
+    Array.from(grid.querySelectorAll("[data-seller-key]"))
+      .map(el => (el.getAttribute("data-seller-key") || "").toLowerCase())
+      .filter(Boolean)
+  );
+
+  // nächsten Buchstaben finden (d, e, f, ...)
+  const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+  let next = null;
+  for(const l of letters){
+    if(!used.has(l)){
+      // A/B/C sind schon da; wir beginnen sinnvollerweise ab D
+      if(["a","b","c"].includes(l)) continue;
+      next = l;
+      break;
+    }
+  }
+  if(!next){
+    alert("Maximale Anzahl Anbieter erreicht.");
+    return;
+  }
+
+  const upper = next.toUpperCase();
+
+  const wrap = document.createElement("div");
+  wrap.className = "seller-item";
+  wrap.innerHTML = `
+    <label>Anbieter ${upper} – Preis (€)</label>
+    <input id="obs_p${next}" data-seller-key="${next}" type="number" step="0.01" placeholder="z. B. 1.40"/>
+`;
+  grid.appendChild(wrap);
+}
+
 function loadQuestionnaire(){
   const raw = localStorage.getItem("eisauktion_questionnaire");
   const missingBox = document.getElementById("q_missing");
@@ -283,7 +324,6 @@ function saveMeta(){
   const meta = JSON.parse(localStorage.getItem(metaKey) || "{}");
   meta["fixkosten"] = document.getElementById("fix").value || "";
   meta["variable_kosten"] = document.getElementById("var").value || "";
-  meta["entsorgung"] = document.getElementById("disp").value || "";
   localStorage.setItem(metaKey, JSON.stringify(meta));
 }
 
@@ -300,21 +340,18 @@ function calc(){
   const fix = num(document.getElementById('fix').value);
   const vari = num(document.getElementById('var').value);
   const cap = num(document.getElementById('cap').value);
-  const disp = num(document.getElementById('disp').value);
 
   const planned = num(document.getElementById('planned').value);
   const sold = num(document.getElementById('sold').value);
   const price = num(document.getElementById('price').value);
 
-  const unsold = Math.max(0, planned - sold);
-
-  const cost = fix + (planned * vari) + (unsold * disp);
+  const cost = fix + (planned * vari);
   const revenue = sold * price;
   const profit = revenue - cost;
   const newCap = cap + profit;
 
   document.getElementById('cost_out').innerHTML =
-    `Kosten = Fix ${eur(fix)} + Variabel ${eur(planned*vari)}${disp>0?` + Entsorgung ${eur(unsold*disp)}`:''} = <strong>${eur(cost)}</strong>`;
+    `Kosten = Fix ${eur(fix)} + Variabel ${eur(planned*vari)} = <strong>${eur(cost)}</strong>`;
   document.getElementById('rev_out').innerHTML =
     `Umsatz = ${sold} × ${eur(price).replace(' €','')} = <strong>${eur(revenue)}</strong>`;
   document.getElementById('profit_out').innerHTML =
@@ -331,12 +368,16 @@ function calc(){
     badge.textContent = 'Produktion finanzierbar';
   }
 
-  document.getElementById('cap').value = newCap.toFixed(2);
+  document.getElementById('cap').value = newCap.toFixed(2);  const obsNote = document.getElementById("obs_note").value || "";
 
-  const obsA = num(document.getElementById("obs_pa").value);
-  const obsB = num(document.getElementById("obs_pb").value);
-  const obsC = num(document.getElementById("obs_pc").value);
-  const obsNote = document.getElementById("obs_note").value || "";
+  // Dynamische Anbieter (A/B/C + hinzugefügte)
+  const pricesObserved = {};
+  document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp => {
+    const key = (inp.getAttribute('data-seller-key') || '').toLowerCase();
+    if(!key) return;
+    const val = num(inp.value);
+    pricesObserved[key] = val || null;
+  });
 
   saveMeta();
   saveRound({
@@ -347,13 +388,7 @@ function calc(){
     profit: Number(profit.toFixed(2)),
     capital: Number(newCap.toFixed(2)),
     notes: document.getElementById('notes').value || "",
-    sellerObservation: {
-      a: obsA || null,
-      b: obsB || null,
-      c: obsC || null,
-      note: obsNote
-    }
-  });
+    sellerObservation: Object.assign({ note: obsNote }, pricesObserved)});
 
   loadSaved();
 }
@@ -365,11 +400,7 @@ function nextRound(){
   document.getElementById('planned').value = '';
   document.getElementById('sold').value = '';
   document.getElementById('price').value = '';
-  document.getElementById('notes').value = '';
-
-  document.getElementById('obs_pa').value = '';
-  document.getElementById('obs_pb').value = '';
-  document.getElementById('obs_pc').value = '';
+  document.getElementById('notes').value = '';  document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp => inp.value = '');
   document.getElementById('obs_note').value = '';
 
   document.getElementById('liq_badge').className = 'badge';
