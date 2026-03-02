@@ -32,15 +32,15 @@
       <li><strong>Budget erhalten</strong> (gilt nur diese Runde; Rest verfällt)</li>
       <li><strong>Kaufen</strong> (Preise vergleichen, Anbieter wählen, Menge festlegen)</li>
       <li><strong>Beobachten</strong> (steigen/fallen Preise? warum?)</li>
+      <li><strong>Speichern</strong> (damit die Auswertung klappt)</li>
     </ol>
-    <div class="note"><strong>Merke:</strong> Bei homogenem Gut zählt v. a. der Preis.</div>
-    <p class="small">Diese Seite speichert eure Rundendaten automatisch im Browser (für die Auswertung).</p>
+    <div class="note"><strong>Merke:</strong> Wenn ihr bei verschiedenen Verkäufern zu unterschiedlichen Preisen kauft, tragt jeden Kauf separat ein.</div>
   </section>
 
-  <section class="card" style="margin-top:14px;">
+  <section class="card">
     <h2>Rundenbogen</h2>
 
-    <div class="grid three">
+    <div class="grid two">
       <div>
         <label>Runde</label>
         <input id="round" type="number" step="1" value="1"/>
@@ -49,32 +49,57 @@
         <label>Mein Budget (€)</label>
         <input id="budget" type="number" step="0.01" placeholder="z. B. 5"/>
       </div>
-      <div>
-        <label>Gekaufte Einheiten</label>
-        <input id="qty" type="number" step="1" placeholder="z. B. 3"/>
-      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Käufe dokumentieren (Anbieter, Menge, Preis)</h2>
+    <p class="small" style="margin-top:-4px;">Standard: 3 Zeilen. Du kannst weitere Käufe hinzufügen (z. B. wenn du bei mehreren Verkäufern oder zu unterschiedlichen Preisen kaufst).</p>
+
+    <datalist id="sellerOptions"></datalist>
+
+    <div id="purchaseList" class="purchase-list"></div>
+
+    <div class="row" style="margin-top:10px;">
+      <button class="add-seller-btn" type="button" onclick="addPurchaseRow()">
+        <span class="plus">＋</span> Kauf hinzufügen
+      </button>
+      <button class="btn secondary" type="button" onclick="resetPurchasesToDefault()">Käufe zurücksetzen</button>
     </div>
 
     <div class="hr"></div>
 
     <h2>Verkäuferbeobachtung (Preise vergleichen)</h2>
-    <div class="grid three">
-      <div><label>Anbieter A (€)</label><input id="pa" type="number" step="0.01"/></div>
-      <div><label>Anbieter B (€)</label><input id="pb" type="number" step="0.01"/></div>
-      <div><label>Anbieter C (€)</label><input id="pc" type="number" step="0.01"/></div>
+    <p class="small" style="margin-top:-4px;">Tragt beobachtete Verkäuferpreise ein. Weitere Anbieter können ergänzt werden.</p>
+
+    <div class="seller-grid" id="sellerObsGrid">
+      <div class="seller-item">
+        <label>Anbieter A (€)</label>
+        <input id="pa" data-seller-key="a" type="number" step="0.01" placeholder="z. B. 1.30"/>
+      </div>
+
+      <div class="seller-item">
+        <label>Anbieter B (€)</label>
+        <input id="pb" data-seller-key="b" type="number" step="0.01" placeholder="z. B. 1.20"/>
+
+        <button class="add-seller-btn" type="button" onclick="addSeller()">
+          <span class="plus">＋</span> Anbieter hinzufügen
+        </button>
+      </div>
+
+      <div class="seller-item">
+        <label>Anbieter C (€)</label>
+        <input id="pc" data-seller-key="c" type="number" step="0.01" placeholder="z. B. 1.50"/>
+      </div>
     </div>
 
     <label>Beobachtung/Kommentar (optional)</label>
     <input id="seller_note" type="text" placeholder="z. B. B ist ausverkauft / A senkt Preis stark"/>
 
     <div class="grid two">
-      <div>
-        <label>Bei wem kaufe ich – und warum?</label>
-        <input id="why" type="text" placeholder="z. B. günstigster Preis"/>
-      </div>
-      <div>
-        <label>Preis je gekaufte Einheit (€)</label>
-        <input id="payPrice" type="number" step="0.01" placeholder="tatsächlicher Kaufpreis"/>
+      <div class="span2">
+        <label>Strategie</label>
+        <textarea id="strategy" placeholder="z. B. zuerst günstigster Anbieter, dann Restbudget bei zweitgünstigstem…"></textarea>
       </div>
     </div>
 
@@ -105,7 +130,11 @@
     <textarea id="reason"></textarea>
 
     <div class="hr"></div>
+    <div class="small">
+      <strong>Weiter:</strong> Am Ende auf <a href="auswertung.html">Auswertung</a> gehen → Gesamtdatei erstellen → Mail vorbereiten.
+    </div>
 
+    <div class="hr"></div>
     <div class="row">
       <button class="btn secondary" type="button" onclick="loadSaved()">Gespeicherte Runden anzeigen</button>
       <button class="btn secondary" type="button" onclick="clearSaved()">Gespeicherte Runden löschen</button>
@@ -120,11 +149,11 @@
         <tr>
           <th>Runde</th>
           <th>Budget</th>
-          <th>Gekauft</th>
-          <th>Kaufpreis</th>
+          <th>Gesamtmenge</th>
           <th>Ausgegeben</th>
           <th>Rest</th>
           <th>Trend</th>
+          <th>Käufe (kurz)</th>
         </tr>
       </thead>
       <tbody>
@@ -163,16 +192,154 @@ function saveRound(obj){
   localStorage.setItem(key, JSON.stringify(arr));
 }
 
+function getSellerKeys(){
+  const grid = document.getElementById("sellerObsGrid");
+  const used = new Set(
+    Array.from(grid.querySelectorAll("[data-seller-key]"))
+      .map(el => (el.getAttribute("data-seller-key") || "").toLowerCase())
+      .filter(Boolean)
+  );
+  return Array.from(used).sort();
+}
+
+function refreshSellerOptions(){
+  const dl = document.getElementById("sellerOptions");
+  if(!dl) return;
+  const keys = getSellerKeys().map(k => k.toUpperCase());
+  dl.innerHTML = keys.map(k => `<option value="${k}"></option>`).join("");
+}
+
+function addSeller(){
+  const grid = document.getElementById("sellerObsGrid");
+  if(!grid) return;
+
+  const used = new Set(
+    Array.from(grid.querySelectorAll("[data-seller-key]"))
+      .map(el => (el.getAttribute("data-seller-key") || "").toLowerCase())
+      .filter(Boolean)
+  );
+
+  const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+  let next = null;
+  for(const l of letters){
+    if(!used.has(l)){
+      if(["a","b","c"].includes(l)) continue;
+      next = l;
+      break;
+    }
+  }
+  if(!next){
+    alert("Maximale Anzahl Anbieter erreicht.");
+    return;
+  }
+
+  const upper = next.toUpperCase();
+  const wrap = document.createElement("div");
+  wrap.className = "seller-item";
+  wrap.innerHTML = `
+    <label>Anbieter ${upper} (€)</label>
+    <input id="p${next}" data-seller-key="${next}" type="number" step="0.01" placeholder="z. B. 1.40"/>
+
+    <button class="add-seller-btn" type="button" onclick="addSeller()">
+      <span class="plus">＋</span> Anbieter hinzufügen
+    </button>
+  `;
+  grid.appendChild(wrap);
+  refreshSellerOptions();
+}
+
+/* ===== Käufe (dynamisch; pro Runde zurücksetzen) ===== */
+function purchaseRowTemplate(idx, presetSeller=""){
+  const n = idx + 1;
+  return `
+    <div class="purchase-row">
+      <div class="purchase-row-head">Kauf ${n}</div>
+
+      <div class="purchase-fields">
+        <div>
+          <label>Anbieter</label>
+          <input class="purchase-seller" list="sellerOptions" type="text" placeholder="z. B. A" value="${presetSeller}"/>
+        </div>
+        <div>
+          <label>Menge</label>
+          <input class="purchase-qty" type="number" step="1" placeholder="z. B. 2"/>
+        </div>
+        <div>
+          <label>Preis / Einheit (€)</label>
+          <input class="purchase-price" type="number" step="0.01" placeholder="z. B. 1.30"/>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function resetPurchasesToDefault(){
+  const list = document.getElementById("purchaseList");
+  if(!list) return;
+  list.innerHTML = "";
+  // Standard 3 (A/B/C)
+  const presets = ["A","B","C"];
+  for(let i=0;i<3;i++){
+    list.insertAdjacentHTML("beforeend", purchaseRowTemplate(i, presets[i]));
+  }
+}
+
+function addPurchaseRow(){
+  const list = document.getElementById("purchaseList");
+  if(!list) return;
+  const idx = list.querySelectorAll(".purchase-row").length;
+  list.insertAdjacentHTML("beforeend", purchaseRowTemplate(idx, ""));
+}
+
+function readPurchases(){
+  const rows = Array.from(document.querySelectorAll("#purchaseList .purchase-row"));
+  const purchases = [];
+  for(const row of rows){
+    const seller = (row.querySelector(".purchase-seller")?.value || "").trim();
+    const qty = num(row.querySelector(".purchase-qty")?.value);
+    const price = num(row.querySelector(".purchase-price")?.value);
+
+    // Leere Zeilen ignorieren
+    if(!seller && qty === 0 && price === 0) continue;
+
+    purchases.push({
+      seller: seller || "",
+      qty: Number(qty || 0),
+      price: Number(price || 0)
+    });
+  }
+  return purchases;
+}
+
+function purchasesSummary(purchases){
+  // Kurze Darstellung für Tabelle
+  // Beispiel: A:2×1,30 | B:1×1,10
+  if(!purchases.length) return "";
+  return purchases
+    .map(p => {
+      const s = (p.seller || "–").toUpperCase();
+      const pr = (Number.isFinite(p.price) ? p.price : 0).toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2});
+      return `${s}:${p.qty}×${pr}`;
+    })
+    .join(" | ");
+}
+
 function calc(){
   const budget = num(document.getElementById('budget').value);
-  const qty = num(document.getElementById('qty').value);
-  const price = num(document.getElementById('payPrice').value);
 
-  const spent = qty * price;
+  const purchases = readPurchases();
+  let totalQty = 0;
+  let spent = 0;
+
+  for(const p of purchases){
+    totalQty += num(p.qty);
+    spent += num(p.qty) * num(p.price);
+  }
+
   const rest = budget - spent;
 
   document.getElementById('spent_out').innerHTML =
-    `Ausgegebenes Geld = ${qty} × ${eur(price).replace(' €','')} = <strong>${eur(spent)}</strong>`;
+    `Ausgegebenes Geld = <strong>${eur(spent)}</strong>`;
   document.getElementById('rest_out').innerHTML =
     `Restbudget (verfällt) = <strong>${eur(rest)}</strong>`;
 
@@ -188,27 +355,30 @@ function calc(){
     badge.textContent = 'Budget exakt genutzt';
   }
 
-  const obsA = num(document.getElementById('pa').value);
-  const obsB = num(document.getElementById('pb').value);
-  const obsC = num(document.getElementById('pc').value);
+  // Verkäuferbeobachtung dynamisch
+  const pricesObserved = {};
+  document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp => {
+    const key = (inp.getAttribute('data-seller-key') || '').toLowerCase();
+    if(!key) return;
+    const val = num(inp.value);
+    pricesObserved[key] = val || null;
+  });
+
   const sellerNote = document.getElementById('seller_note').value || "";
 
   saveRound({
     round: num(document.getElementById('round').value),
     budget,
-    qty,
-    payPrice: price,
+    purchases,
+    totalQty: Number(totalQty),
     spent: Number(spent.toFixed(2)),
     rest: Number(rest.toFixed(2)),
     trend: document.getElementById('trend').value || "",
-    pricesObserved: {
-      a: obsA || null,
-      b: obsB || null,
-      c: obsC || null
-    },
+    pricesObserved,
     sellerNote,
-    why: document.getElementById('why').value || "",
-    reason: document.getElementById('reason').value || ""
+    strategy: document.getElementById('strategy').value || "",
+    reason: document.getElementById('reason').value || "",
+    purchasesSummary: purchasesSummary(purchases)
   });
 
   loadSaved();
@@ -217,14 +387,14 @@ function calc(){
 function nextRound(){
   document.getElementById('round').value = num(document.getElementById('round').value) + 1;
 
-  document.getElementById('qty').value = '';
-  document.getElementById('pa').value = '';
-  document.getElementById('pb').value = '';
-  document.getElementById('pc').value = '';
+  // Käufe pro Runde zurücksetzen (Anforderung)
+  resetPurchasesToDefault();
+
+  // Verkäuferbeobachtung: Werte leeren (Anbieter-Struktur bleibt erhalten)
+  document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp => inp.value = '');
   document.getElementById('seller_note').value = '';
 
-  document.getElementById('why').value = '';
-  document.getElementById('payPrice').value = '';
+  document.getElementById('strategy').value = '';
   document.getElementById('trend').value = '';
   document.getElementById('reason').value = '';
 
@@ -252,11 +422,11 @@ function loadSaved(){
     tr.innerHTML = `
       <td>${r.round}</td>
       <td>${eur(num(r.budget))}</td>
-      <td>${r.qty}</td>
-      <td>${eur(num(r.payPrice))}</td>
+      <td>${Number(r.totalQty || 0)}</td>
       <td>${eur(num(r.spent))}</td>
       <td>${eur(num(r.rest))}</td>
-      <td>${r.trend || "-"}</td>
+      <td>${r.trend || ""}</td>
+      <td class="small">${(r.purchasesSummary || "").replaceAll("<","&lt;").replaceAll(">","&gt;")}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -266,136 +436,99 @@ function loadSaved(){
 
 function clearSaved(){
   localStorage.removeItem("eisauktion_kaeufer_rounds");
-  document.querySelector("#savedTable tbody").innerHTML = `<tr><td colspan="7" class="small">Daten gelöscht.</td></tr>`;
-  document.getElementById("savedInfo").textContent = "Gespeicherte Runden gelöscht.";
-  renderPriceChart([]);
+  loadSaved();
 }
 
-function renderPriceChart(rounds){
+/* ========== Simple Chart (Canvas) ========== */
+function renderPriceChart(arr){
   const canvas = document.getElementById("priceChart");
+  if(!canvas) return;
   const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.clientWidth * (window.devicePixelRatio || 1);
+  const h = canvas.height = 260 * (window.devicePixelRatio || 1);
 
-  const cssW = canvas.clientWidth;
-  const cssH = canvas.getAttribute("height") ? Number(canvas.getAttribute("height")) : 260;
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(cssW * dpr);
-  canvas.height = Math.floor(cssH * dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
 
-  const pts = { a:[], b:[], c:[] };
-  for(const r of rounds){
-    const rr = Number(r.round);
-    const po = r.pricesObserved || {};
-    if(Number.isFinite(Number(po.a))) pts.a.push({x: rr, y: Number(po.a)});
-    if(Number.isFinite(Number(po.b))) pts.b.push({x: rr, y: Number(po.b)});
-    if(Number.isFinite(Number(po.c))) pts.c.push({x: rr, y: Number(po.c)});
+  const ptsA = [];
+  const ptsB = [];
+  const ptsC = [];
+  const rounds = arr.map(x=>Number(x.round));
+
+  for(const r of arr){
+    const o = r.pricesObserved || {};
+    const ra = o.a;
+    const rb = o.b;
+    const rc = o.c;
+    if(Number.isFinite(ra)) ptsA.push({x:Number(r.round), y:Number(ra)});
+    if(Number.isFinite(rb)) ptsB.push({x:Number(r.round), y:Number(rb)});
+    if(Number.isFinite(rc)) ptsC.push({x:Number(r.round), y:Number(rc)});
   }
-  const all = [...pts.a, ...pts.b, ...pts.c];
 
-  ctx.clearRect(0,0,cssW,cssH);
-
-  const padL=44, padR=16, padT=16, padB=34;
-  const W = cssW - padL - padR;
-  const H = cssH - padT - padB;
-
-  ctx.strokeStyle = "#e2e8f0";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(padL, padT, W, H);
-
-  if(!all.length){
-    ctx.fillStyle = "#64748b";
-    ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    ctx.fillText("Noch keine Verkäuferpreise gespeichert (A/B/C).", padL, padT + 22);
+  const allY = [...ptsA,...ptsB,...ptsC].map(p=>p.y);
+  if(!allY.length){
+    ctx.font = `${14*(window.devicePixelRatio||1)}px system-ui`;
+    ctx.fillText("Noch keine Verkäuferpreise (A/B/C) gespeichert.", 14*(window.devicePixelRatio||1), 28*(window.devicePixelRatio||1));
     return;
   }
 
-  const xs = all.map(p=>p.x);
-  const ys = all.map(p=>p.y);
-  const xMin = Math.min(...xs);
-  const xMax = Math.max(...xs);
-  let yMin = Math.min(...ys);
-  let yMax = Math.max(...ys);
+  const minX = Math.min(...rounds);
+  const maxX = Math.max(...rounds);
+  const minY = Math.min(...allY);
+  const maxY = Math.max(...allY);
 
-  const yPad = (yMax - yMin) * 0.1 || 0.2;
-  yMin -= yPad;
-  yMax += yPad;
+  const padL = 40*(window.devicePixelRatio||1);
+  const padR = 14*(window.devicePixelRatio||1);
+  const padT = 14*(window.devicePixelRatio||1);
+  const padB = 34*(window.devicePixelRatio||1);
 
-  const xScale = (x) => padL + ((x - xMin) / (xMax - xMin || 1)) * W;
-  const yScale = (y) => padT + (1 - (y - yMin) / (yMax - yMin || 1)) * H;
+  function sx(x){
+    if(maxX===minX) return padL;
+    return padL + (x-minX) * (w-padL-padR) / (maxX-minX);
+  }
+  function sy(y){
+    if(maxY===minY) return h-padB;
+    return padT + (maxY-y) * (h-padT-padB) / (maxY-minY);
+  }
+
+  // axes
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 1*(window.devicePixelRatio||1);
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.beginPath();
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, h-padB);
+  ctx.lineTo(w-padR, h-padB);
+  ctx.stroke();
+
+  function drawSeries(pts, color){
+    if(pts.length < 2) return;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2*(window.devicePixelRatio||1);
+    ctx.beginPath();
+    ctx.moveTo(sx(pts[0].x), sy(pts[0].y));
+    for(let i=1;i<pts.length;i++){
+      ctx.lineTo(sx(pts[i].x), sy(pts[i].y));
+    }
+    ctx.stroke();
+  }
+
+  drawSeries(ptsA, "#1f4e79");
+  drawSeries(ptsB, "#0f766e");
+  drawSeries(ptsC, "#b45309");
 
   ctx.fillStyle = "#475569";
-  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  ctx.fillText("Runde", padL + W - 34, padT + H + 24);
-  ctx.fillText("Preis (€)", 6, padT + 12);
+  ctx.font = `${12*(window.devicePixelRatio||1)}px system-ui`;
 
-  const ticks = 3;
-  ctx.strokeStyle = "#eef2f7";
-  for(let i=0;i<=ticks;i++){
-    const t = i / ticks;
-    const y = padT + t * H;
-    ctx.beginPath();
-    ctx.moveTo(padL, y);
-    ctx.lineTo(padL + W, y);
-    ctx.stroke();
-    const val = (yMax - t*(yMax-yMin));
-    ctx.fillText(val.toFixed(2), padL - 38, y + 4);
-  }
-
-  function drawSeries(series, stroke){
-    if(series.length < 2) {
-      if(series.length === 1){
-        const p = series[0];
-        ctx.fillStyle = stroke;
-        ctx.beginPath();
-        ctx.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI*2);
-        ctx.fill();
-      }
-      return;
-    }
-    ctx.strokeStyle = stroke;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    series.sort((p,q)=>p.x-q.x);
-    series.forEach((p,i)=>{
-      const x = xScale(p.x), y = yScale(p.y);
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-
-    ctx.fillStyle = stroke;
-    for(const p of series){
-      ctx.beginPath();
-      ctx.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI*2);
-      ctx.fill();
-    }
-  }
-
-  drawSeries(pts.a, "#1f4e79");
-  drawSeries(pts.b, "#0f766e");
-  drawSeries(pts.c, "#b45309");
-
-  const lx = padL + 10, ly = padT + 10;
-  const items = [
-    {label:"A", col:"#1f4e79"},
-    {label:"B", col:"#0f766e"},
-    {label:"C", col:"#b45309"},
-  ];
-  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  let off = 0;
-  for(const it of items){
-    ctx.fillStyle = it.col;
-    ctx.fillRect(lx + off, ly, 10, 10);
-    ctx.fillStyle = "#0f172a";
-    ctx.fillText(it.label, lx + off + 14, ly + 10);
-    off += 34;
-  }
+  ctx.fillText(`Runde`, w/2, h-10*(window.devicePixelRatio||1));
+  ctx.save();
+  ctx.translate(12*(window.devicePixelRatio||1), h/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText(`Preis (€)`, 0, 0);
+  ctx.restore();
 }
 
-window.addEventListener("resize", () => {
-  const arr = JSON.parse(localStorage.getItem("eisauktion_kaeufer_rounds") || "[]");
-  renderPriceChart(arr);
-});
-
+refreshSellerOptions();
+resetPurchasesToDefault();
 loadSaved();
 </script>
 
