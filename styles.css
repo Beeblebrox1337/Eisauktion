@@ -1,0 +1,285 @@
+:root{
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#475569;
+  --border:#e2e8f0;
+  --brand:#1f4e79;
+  --brand2:#163a5a;
+  --ok:#0f766e;
+  --warn:#b45309;
+  --bad:#b91c1c;
+  --shadow: 0 8px 20px rgba(2,6,23,0.08);
+  --radius:14px;
+
+  /* Responsive spacing helpers */
+  --padX: 16px;
+  --padY: 22px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+}
+
+/* Container */
+.container{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--padY) var(--padX) 48px;
+}
+
+/* Header / Nav */
+header.sitebar{
+  position: sticky;
+  top: 0;
+  background: rgba(244,246,248,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid var(--border);
+  z-index: 10;
+}
+
+.navwrap{
+  max-width:1100px;
+  margin:0 auto;
+  padding: 10px var(--padX);
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+/* Allow wrapping on smaller screens */
+@media (max-width: 900px){
+  .navwrap{
+    flex-wrap:wrap;
+    align-items:flex-start;
+  }
+}
+
+/* Brand */
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.brand .dot{
+  width:12px;height:12px;border-radius:999px;background:var(--brand);
+  box-shadow:0 0 0 4px rgba(31,78,121,0.15);
+}
+
+/* Navigation links */
+nav{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* On small screens, make nav horizontally scrollable rather than squeezing */
+@media (max-width: 700px){
+  nav{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    width:100%;
+  }
+  nav::-webkit-scrollbar{height:8px}
+  nav::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+}
+
+nav a{
+  color: var(--brand);
+  text-decoration:none;
+  font-weight:600;
+  padding:8px 10px;
+  border-radius: 999px;
+  border:1px solid transparent;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+nav a:hover{background:#eef6ff;border-color:#dbeafe}
+nav a.active{
+  background: var(--brand);
+  color: white;
+  border-color: var(--brand);
+}
+
+/* Typography */
+h1{font-size: 28px; margin: 18px 0 8px}
+h2{font-size: 18px; margin: 0 0 10px}
+h3{font-size: 16px; margin: 0 0 8px}
+p.lead{color:var(--muted); margin:0 0 16px}
+
+/* Responsive type scaling */
+@media (max-width: 900px){
+  h1{font-size: 26px}
+}
+@media (max-width: 600px){
+  h1{font-size: 24px}
+  .container{padding-top: 18px}
+}
+
+/* Grid system */
+.grid{
+  display:grid;
+  gap:14px;
+}
+.grid.one{grid-template-columns: 1fr;}
+.grid.two{grid-template-columns: repeat(2, minmax(0,1fr));}
+.grid.three{grid-template-columns: repeat(3, minmax(0,1fr));}
+
+/* Tablet: 3 -> 2 cols, Mobile: 2/3 -> 1 col */
+@media (max-width: 1024px){
+  .grid.three{grid-template-columns: repeat(2, minmax(0,1fr));}
+}
+@media (max-width: 750px){
+  .grid.two, .grid.three{grid-template-columns: 1fr;}
+}
+
+/* Cards */
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+/* Forms */
+.small{font-size: 13px; color: var(--muted);}
+.hr{height:1px;background:var(--border); margin: 14px 0;}
+
+label{font-weight:700; display:block; margin: 10px 0 6px;}
+input, textarea, select{
+  width:100%;
+  padding:10px 10px;
+  border:1px solid #cbd5e1;
+  border-radius: 10px;
+  background:#fff;
+  font-size: 14px;
+}
+textarea{min-height: 90px; resize: vertical;}
+
+/* Make inputs easier on tablets */
+@media (max-width: 1024px){
+  input, textarea, select{font-size:16px;} /* avoids iOS zoom on focus */
+}
+
+/* Rows / Buttons */
+.row{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+.row .field{flex:1; min-width: 180px;}
+
+.btn{
+  background: var(--brand);
+  color:#fff;
+  border:none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn:hover{background: var(--brand2);}
+.btn.secondary{
+  background:#e2e8f0;
+  color:#0f172a;
+}
+.btn.secondary:hover{background:#cbd5e1;}
+
+/* Mobile: buttons full width for easy tapping */
+@media (max-width: 600px){
+  .row{
+    align-items:stretch;
+  }
+  .btn, .btn.secondary{
+    width:100%;
+    justify-content:center;
+    text-align:center;
+  }
+  .row .field{min-width: 100%;}
+}
+
+/* Badges */
+.badge{
+  display:inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border:1px solid var(--border);
+  font-size: 12px;
+  font-weight:700;
+  color: var(--muted);
+  background:#fff;
+}
+.badge.ok{color: var(--ok); border-color: rgba(15,118,110,0.35); background: rgba(15,118,110,0.08);}
+.badge.warn{color: var(--warn); border-color: rgba(180,83,9,0.35); background: rgba(180,83,9,0.08);}
+.badge.bad{color: var(--bad); border-color: rgba(185,28,28,0.35); background: rgba(185,28,28,0.08);}
+
+/* Tables: allow horizontal scroll on small screens */
+.table{
+  width:100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  border:1px solid var(--border);
+  overflow:hidden;
+}
+
+/* Key change: make table scrollable on narrow viewports */
+@media (max-width: 750px){
+  .table{
+    display:block;
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+    white-space:nowrap;
+  }
+  .table th, .table td{
+    white-space:nowrap;
+  }
+}
+
+.table th, .table td{
+  padding:10px 10px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  font-size: 14px;
+}
+.table th{background:#f8fafc; font-size:13px; color: var(--muted);}
+
+/* Results / Notes */
+.result{
+  background:#eef6ff;
+  border:1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 800;
+  overflow-wrap:anywhere;
+}
+
+.note{
+  background: #fff7ed;
+  border: 1px solid rgba(180,83,9,0.25);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color:#7c2d12;
+}
+
+/* Canvas / charts should not overflow */
+canvas{max-width:100%;}
+
+/* Footer helper (used in some pages) */
+.footer{
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}

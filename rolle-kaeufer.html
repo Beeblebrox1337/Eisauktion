@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Rolle: Käufer – Eisauktion</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header class="sitebar">
+  <div class="navwrap">
+    <div class="brand"><span class="dot"></span> Eisauktion</div>
+    <nav>
+      <a href="index.html">Übersicht</a>
+      <a href="spielerklaerung.html">Spielerklärung</a>
+      <a href="fragebogen.html">Fragebogen</a>
+      <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
+      <a class="active" href="rolle-kaeufer.html">Rolle: Käufer</a>
+      <a href="auswertung.html">Auswertung</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Rolle: Käufer (Nachfrager)</h1>
+  <p class="lead">Euer Ziel: <strong>möglichst viel Eis</strong> für euer <strong>begrenztes Budget</strong> bekommen.</p>
+
+  <section class="card">
+    <h2>Phasen je Runde</h2>
+    <ol>
+      <li><strong>Budget erhalten</strong> (gilt nur diese Runde; Rest verfällt)</li>
+      <li><strong>Kaufen</strong> (Preise vergleichen, Anbieter wählen, Menge festlegen)</li>
+      <li><strong>Beobachten</strong> (steigen/fallen Preise? warum?)</li>
+    </ol>
+    <div class="note"><strong>Merke:</strong> Bei homogenem Gut zählt v. a. der Preis.</div>
+    <p class="small">Diese Seite speichert eure Rundendaten automatisch im Browser (für die Auswertung).</p>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Rundenbogen</h2>
+
+    <div class="grid three">
+      <div>
+        <label>Runde</label>
+        <input id="round" type="number" step="1" value="1"/>
+      </div>
+      <div>
+        <label>Mein Budget (€)</label>
+        <input id="budget" type="number" step="0.01" placeholder="z. B. 5"/>
+      </div>
+      <div>
+        <label>Gekaufte Einheiten</label>
+        <input id="qty" type="number" step="1" placeholder="z. B. 3"/>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Verkäuferbeobachtung (Preise vergleichen)</h2>
+    <div class="grid three">
+      <div><label>Anbieter A (€)</label><input id="pa" type="number" step="0.01"/></div>
+      <div><label>Anbieter B (€)</label><input id="pb" type="number" step="0.01"/></div>
+      <div><label>Anbieter C (€)</label><input id="pc" type="number" step="0.01"/></div>
+    </div>
+
+    <label>Beobachtung/Kommentar (optional)</label>
+    <input id="seller_note" type="text" placeholder="z. B. B ist ausverkauft / A senkt Preis stark"/>
+
+    <div class="grid two">
+      <div>
+        <label>Bei wem kaufe ich – und warum?</label>
+        <input id="why" type="text" placeholder="z. B. günstigster Preis"/>
+      </div>
+      <div>
+        <label>Preis je gekaufte Einheit (€)</label>
+        <input id="payPrice" type="number" step="0.01" placeholder="tatsächlicher Kaufpreis"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn" type="button" onclick="calc()">Ausgaben berechnen & speichern</button>
+      <button class="btn secondary" type="button" onclick="nextRound()">Nächste Runde</button>
+      <span class="badge" id="badge">–</span>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="grid two">
+      <div class="result" id="spent_out">Ausgegebenes Geld: –</div>
+      <div class="result" id="rest_out">Restbudget (verfällt): –</div>
+    </div>
+
+    <div class="hr"></div>
+
+    <label>Marktbeobachtung: Preise im Vergleich zur letzten Runde</label>
+    <select id="trend">
+      <option value="">Bitte wählen …</option>
+      <option>gestiegen</option>
+      <option>gefallen</option>
+      <option>gleich geblieben</option>
+    </select>
+
+    <label>Warum könnte das so sein?</label>
+    <textarea id="reason"></textarea>
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <button class="btn secondary" type="button" onclick="loadSaved()">Gespeicherte Runden anzeigen</button>
+      <button class="btn secondary" type="button" onclick="clearSaved()">Gespeicherte Runden löschen</button>
+    </div>
+    <div id="savedInfo" class="small">Noch keine gespeicherten Daten geladen.</div>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Gespeicherte Runden (Übersicht)</h2>
+    <table class="table" id="savedTable">
+      <thead>
+        <tr>
+          <th>Runde</th>
+          <th>Budget</th>
+          <th>Gekauft</th>
+          <th>Kaufpreis</th>
+          <th>Ausgegeben</th>
+          <th>Rest</th>
+          <th>Trend</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="7" class="small">Noch keine Daten geladen.</td></tr>
+      </tbody>
+    </table>
+    <p class="small">Auswertung & Versand: <a href="auswertung.html">Auswertung</a>.</p>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Preisverlaufskurve (Verkäuferpreise A/B/C)</h2>
+    <p class="small">Diese Kurve nutzt eure gespeicherten Beobachtungen der Verkäuferpreise (A/B/C) pro Runde.</p>
+    <canvas id="priceChart" height="260" style="width:100%;"></canvas>
+    <div class="small" style="margin-top:8px;">
+      Legende: A/B/C = beobachtete Verkäuferpreise. (Nicht eingetragene Werte werden übersprungen.)
+    </div>
+  </section>
+</main>
+
+<script>
+function num(v){
+  const n = Number(String(v ?? '').replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+}
+function eur(n){
+  const x = Number.isFinite(n) ? n : 0;
+  return x.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+}
+
+function saveRound(obj){
+  const key = "eisauktion_kaeufer_rounds";
+  const arr = JSON.parse(localStorage.getItem(key) || "[]");
+  const idx = arr.findIndex(x => Number(x.round) === Number(obj.round));
+  if(idx >= 0) arr[idx] = obj; else arr.push(obj);
+  arr.sort((a,b)=>Number(a.round)-Number(b.round));
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+function calc(){
+  const budget = num(document.getElementById('budget').value);
+  const qty = num(document.getElementById('qty').value);
+  const price = num(document.getElementById('payPrice').value);
+
+  const spent = qty * price;
+  const rest = budget - spent;
+
+  document.getElementById('spent_out').innerHTML =
+    `Ausgegebenes Geld = ${qty} × ${eur(price).replace(' €','')} = <strong>${eur(spent)}</strong>`;
+  document.getElementById('rest_out').innerHTML =
+    `Restbudget (verfällt) = <strong>${eur(rest)}</strong>`;
+
+  const badge = document.getElementById('badge');
+  if(rest < -0.001){
+    badge.className = 'badge bad';
+    badge.textContent = 'Budget überschritten → Kauf anpassen';
+  }else if(rest > 0.001){
+    badge.className = 'badge warn';
+    badge.textContent = 'Restbudget verfällt → ggf. mehr kaufen';
+  }else{
+    badge.className = 'badge ok';
+    badge.textContent = 'Budget exakt genutzt';
+  }
+
+  const obsA = num(document.getElementById('pa').value);
+  const obsB = num(document.getElementById('pb').value);
+  const obsC = num(document.getElementById('pc').value);
+  const sellerNote = document.getElementById('seller_note').value || "";
+
+  saveRound({
+    round: num(document.getElementById('round').value),
+    budget,
+    qty,
+    payPrice: price,
+    spent: Number(spent.toFixed(2)),
+    rest: Number(rest.toFixed(2)),
+    trend: document.getElementById('trend').value || "",
+    pricesObserved: {
+      a: obsA || null,
+      b: obsB || null,
+      c: obsC || null
+    },
+    sellerNote,
+    why: document.getElementById('why').value || "",
+    reason: document.getElementById('reason').value || ""
+  });
+
+  loadSaved();
+}
+
+function nextRound(){
+  document.getElementById('round').value = num(document.getElementById('round').value) + 1;
+
+  document.getElementById('qty').value = '';
+  document.getElementById('pa').value = '';
+  document.getElementById('pb').value = '';
+  document.getElementById('pc').value = '';
+  document.getElementById('seller_note').value = '';
+
+  document.getElementById('why').value = '';
+  document.getElementById('payPrice').value = '';
+  document.getElementById('trend').value = '';
+  document.getElementById('reason').value = '';
+
+  document.getElementById('badge').className = 'badge';
+  document.getElementById('badge').textContent = '–';
+  document.getElementById('spent_out').textContent = 'Ausgegebenes Geld: –';
+  document.getElementById('rest_out').textContent = 'Restbudget (verfällt): –';
+}
+
+function loadSaved(){
+  const key = "eisauktion_kaeufer_rounds";
+  const arr = JSON.parse(localStorage.getItem(key) || "[]");
+  document.getElementById("savedInfo").innerHTML = `Gespeicherte Runden: <strong>${arr.length}</strong>`;
+
+  const tbody = document.querySelector("#savedTable tbody");
+  tbody.innerHTML = "";
+  if(!arr.length){
+    tbody.innerHTML = `<tr><td colspan="7" class="small">Noch keine gespeicherten Rundendaten.</td></tr>`;
+    renderPriceChart([]);
+    return;
+  }
+
+  for(const r of arr){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.round}</td>
+      <td>${eur(num(r.budget))}</td>
+      <td>${r.qty}</td>
+      <td>${eur(num(r.payPrice))}</td>
+      <td>${eur(num(r.spent))}</td>
+      <td>${eur(num(r.rest))}</td>
+      <td>${r.trend || "-"}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  renderPriceChart(arr);
+}
+
+function clearSaved(){
+  localStorage.removeItem("eisauktion_kaeufer_rounds");
+  document.querySelector("#savedTable tbody").innerHTML = `<tr><td colspan="7" class="small">Daten gelöscht.</td></tr>`;
+  document.getElementById("savedInfo").textContent = "Gespeicherte Runden gelöscht.";
+  renderPriceChart([]);
+}
+
+function renderPriceChart(rounds){
+  const canvas = document.getElementById("priceChart");
+  const ctx = canvas.getContext("2d");
+
+  const cssW = canvas.clientWidth;
+  const cssH = canvas.getAttribute("height") ? Number(canvas.getAttribute("height")) : 260;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  const pts = { a:[], b:[], c:[] };
+  for(const r of rounds){
+    const rr = Number(r.round);
+    const po = r.pricesObserved || {};
+    if(Number.isFinite(Number(po.a))) pts.a.push({x: rr, y: Number(po.a)});
+    if(Number.isFinite(Number(po.b))) pts.b.push({x: rr, y: Number(po.b)});
+    if(Number.isFinite(Number(po.c))) pts.c.push({x: rr, y: Number(po.c)});
+  }
+  const all = [...pts.a, ...pts.b, ...pts.c];
+
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const padL=44, padR=16, padT=16, padB=34;
+  const W = cssW - padL - padR;
+  const H = cssH - padT - padB;
+
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(padL, padT, W, H);
+
+  if(!all.length){
+    ctx.fillStyle = "#64748b";
+    ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillText("Noch keine Verkäuferpreise gespeichert (A/B/C).", padL, padT + 22);
+    return;
+  }
+
+  const xs = all.map(p=>p.x);
+  const ys = all.map(p=>p.y);
+  const xMin = Math.min(...xs);
+  const xMax = Math.max(...xs);
+  let yMin = Math.min(...ys);
+  let yMax = Math.max(...ys);
+
+  const yPad = (yMax - yMin) * 0.1 || 0.2;
+  yMin -= yPad;
+  yMax += yPad;
+
+  const xScale = (x) => padL + ((x - xMin) / (xMax - xMin || 1)) * W;
+  const yScale = (y) => padT + (1 - (y - yMin) / (yMax - yMin || 1)) * H;
+
+  ctx.fillStyle = "#475569";
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  ctx.fillText("Runde", padL + W - 34, padT + H + 24);
+  ctx.fillText("Preis (€)", 6, padT + 12);
+
+  const ticks = 3;
+  ctx.strokeStyle = "#eef2f7";
+  for(let i=0;i<=ticks;i++){
+    const t = i / ticks;
+    const y = padT + t * H;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + W, y);
+    ctx.stroke();
+    const val = (yMax - t*(yMax-yMin));
+    ctx.fillText(val.toFixed(2), padL - 38, y + 4);
+  }
+
+  function drawSeries(series, stroke){
+    if(series.length < 2) {
+      if(series.length === 1){
+        const p = series[0];
+        ctx.fillStyle = stroke;
+        ctx.beginPath();
+        ctx.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI*2);
+        ctx.fill();
+      }
+      return;
+    }
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    series.sort((p,q)=>p.x-q.x);
+    series.forEach((p,i)=>{
+      const x = xScale(p.x), y = yScale(p.y);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = stroke;
+    for(const p of series){
+      ctx.beginPath();
+      ctx.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  drawSeries(pts.a, "#1f4e79");
+  drawSeries(pts.b, "#0f766e");
+  drawSeries(pts.c, "#b45309");
+
+  const lx = padL + 10, ly = padT + 10;
+  const items = [
+    {label:"A", col:"#1f4e79"},
+    {label:"B", col:"#0f766e"},
+    {label:"C", col:"#b45309"},
+  ];
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  let off = 0;
+  for(const it of items){
+    ctx.fillStyle = it.col;
+    ctx.fillRect(lx + off, ly, 10, 10);
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(it.label, lx + off + 14, ly + 10);
+    off += 34;
+  }
+}
+
+window.addEventListener("resize", () => {
+  const arr = JSON.parse(localStorage.getItem("eisauktion_kaeufer_rounds") || "[]");
+  renderPriceChart(arr);
+});
+
+loadSaved();
+</script>
+
+</body>
+</html>

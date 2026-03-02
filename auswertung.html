@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Auswertung – Eisauktion</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header class="sitebar">
+  <div class="navwrap">
+    <div class="brand"><span class="dot"></span> Eisauktion</div>
+    <nav>
+      <a href="index.html">Übersicht</a>
+      <a href="spielerklaerung.html">Spielerklärung</a>
+      <a href="fragebogen.html">Fragebogen</a>
+      <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
+      <a href="rolle-kaeufer.html">Rolle: Käufer</a>
+      <a class="active" href="auswertung.html">Auswertung</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Auswertung</h1>
+  <p class="lead">Hier wird alles zusammengeführt: <strong>Fragebogen + Rundendaten</strong>. Danach erstellt ihr eine Datei und bereitet eine Mail an die Lehrkraft vor.</p>
+
+  <div class="grid two">
+    <section class="card">
+      <h2>Gespeicherte Daten prüfen</h2>
+      <p class="small">Daten liegen im Browser (LocalStorage) auf diesem Gerät.</p>
+
+      <div class="row">
+        <button class="btn secondary" type="button" onclick="loadAll()">Daten neu laden</button>
+        <button class="btn secondary" type="button" onclick="clearAll()">Alle gespeicherten Daten löschen</button>
+      </div>
+
+      <div class="hr"></div>
+      <div class="result" id="status">Noch nicht geladen.</div>
+
+      <div class="hr"></div>
+      <div class="small">
+        <strong>Wichtig:</strong> Mailto kann i. d. R. keine Datei automatisch anhängen. Ihr ladet die Datei herunter und hängt sie dann im Mailprogramm an.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Identifikation</h2>
+      <label>Name / Gruppe</label>
+      <input id="who" type="text" placeholder="z. B. Gruppe 3 / Max Mustermann"/>
+
+      <label>Rolle</label>
+      <select id="role">
+        <option value="">Bitte wählen …</option>
+        <option value="unternehmen">Unternehmen</option>
+        <option value="kaeufer">Käufer</option>
+      </select>
+
+      <label>Zusätzliche Notiz (optional)</label>
+      <textarea id="note" placeholder="z. B. besondere Beobachtungen / Probleme"></textarea>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>1 Datei erstellen</h2>
+    <div class="row">
+      <button class="btn" type="button" onclick="downloadBundle()">Gesamtdatei herunterladen (JSON)</button>
+      <button class="btn secondary" type="button" onclick="composeMail()">Mailprogramm öffnen</button>
+      <button class="btn secondary" type="button" onclick="copyPreview()">Textvorschau kopieren</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <label>Textvorschau (für Mailtext)</label>
+    <textarea id="preview" readonly style="min-height:260px;"></textarea>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Kurzübersicht</h2>
+    <div class="grid two">
+      <div class="result" id="quick1">–</div>
+      <div class="result" id="quick2">–</div>
+    </div>
+  </section>
+
+  <p class="footer">Adresse: <strong>s_gruenberg@outlook.de</strong></p>
+</main>
+
+<script>
+const TARGET = "s_gruenberg@outlook.de";
+
+function safeParse(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function loadAll(){
+  const questionnaire = safeParse("eisauktion_questionnaire", null);
+  const meta = safeParse("eisauktion_meta", {});
+  const roundsU = safeParse("eisauktion_unternehmen_rounds", []);
+  const roundsK = safeParse("eisauktion_kaeufer_rounds", []);
+
+  window.__ALL__ = { questionnaire, meta, roundsU, roundsK };
+
+  document.getElementById("status").innerHTML =
+    `Fragebogen: <strong>${questionnaire ? "ja" : "nein"}</strong> · Unternehmen-Runden: <strong>${roundsU.length}</strong> · Käufer-Runden: <strong>${roundsK.length}</strong>`;
+
+  document.getElementById("quick1").innerHTML =
+    `Unternehmen-Runden gespeichert: <strong>${roundsU.length}</strong><br/>Käufer-Runden gespeichert: <strong>${roundsK.length}</strong>`;
+
+  const uname = questionnaire?.u_name ? questionnaire.u_name : "(kein Unternehmensname)";
+  const members = questionnaire?.u_members ? questionnaire.u_members : "(keine Mitglieder)";
+  document.getElementById("quick2").innerHTML =
+    `Unternehmensname: <strong>${uname}</strong><br/>Mitglieder: <strong>${members}</strong>`;
+
+  buildPreview();
+}
+
+function clearAll(){
+  [
+    "eisauktion_questionnaire",
+    "eisauktion_meta",
+    "eisauktion_unternehmen_rounds",
+    "eisauktion_kaeufer_rounds"
+  ].forEach(k => localStorage.removeItem(k));
+  window.__ALL__ = null;
+  document.getElementById("status").textContent = "Alle Daten gelöscht.";
+  document.getElementById("preview").value = "";
+  document.getElementById("quick1").textContent = "–";
+  document.getElementById("quick2").textContent = "–";
+}
+
+function buildPreview(){
+  const who = document.getElementById("who").value.trim();
+  const role = document.getElementById("role").value;
+  const note = document.getElementById("note").value.trim();
+  const all = window.__ALL__ || { questionnaire:null, meta:{}, roundsU:[], roundsK:[] };
+
+  const lines = [];
+  lines.push("Eisauktion – Datenpaket (Fragebogen + Runden)");
+  lines.push("-------------------------------------------------");
+  lines.push(`Name/Gruppe: ${who || "(nicht angegeben)"}`);
+  lines.push(`Rolle: ${role || "(nicht gewählt)"}`);
+  lines.push("");
+
+  if(all.questionnaire){
+    lines.push("FRAGEBOGEN (Auszug):");
+    lines.push(`- Unternehmensname: ${all.questionnaire.u_name || "-"}`);
+    lines.push(`- Mitglieder: ${all.questionnaire.u_members || "-"}`);
+    lines.push(`- Startkapital: ${all.questionnaire.startkapital || "-"}`);
+    lines.push(`- Fixkosten: ${all.questionnaire.fix || "-"}`);
+    lines.push(`- Variable Kosten (Summe): ${all.questionnaire.var_sum || "-"}`);
+    lines.push(`- Entscheidungsregel (über/unter): ${all.questionnaire.rule_over || "-"} / ${all.questionnaire.rule_under || "-"}`);
+    lines.push("");
+  } else {
+    lines.push("FRAGEBOGEN: (nicht gespeichert)");
+    lines.push("");
+  }
+
+  if(Object.keys(all.meta || {}).length){
+    lines.push("Meta (Rollen-Seite):");
+    for(const [k,v] of Object.entries(all.meta)) lines.push(`- ${k}: ${v}`);
+    lines.push("");
+  }
+
+  if(all.roundsU.length){
+    lines.push("UNTERNEHMEN – Rundendaten:");
+    all.roundsU.forEach(r=>{
+      lines.push(`R${r.round}: geplant=${r.planned}, verkauft=${r.sold}, preis=${r.price}, kosten=${r.cost}, umsatz=${r.revenue}, gewinn=${r.profit}, kapital=${r.capital}`);
+    });
+    lines.push("");
+  }
+
+  if(all.roundsK.length){
+    lines.push("KÄUFER – Rundendaten:");
+    all.roundsK.forEach(r=>{
+      lines.push(`R${r.round}: budget=${r.budget}, gekauft=${r.qty} @ ${r.payPrice}, ausgegeben=${r.spent}, rest=${r.rest}, trend=${r.trend || "-"}`);
+    });
+    lines.push("");
+  }
+
+  if(note){
+    lines.push("Notiz:");
+    lines.push(note);
+    lines.push("");
+  }
+
+  lines.push("Hinweis: Die Datei 'eisauktion_bundle.json' bitte dieser Mail als Anhang hinzufügen.");
+
+  document.getElementById("preview").value = lines.join("\n");
+}
+
+function buildBundleObject(){
+  const who = document.getElementById("who").value.trim();
+  const role = document.getElementById("role").value;
+  const note = document.getElementById("note").value.trim();
+
+  const all = window.__ALL__ || { questionnaire:null, meta:{}, roundsU:[], roundsK:[] };
+
+  return {
+    createdAt: new Date().toISOString(),
+    sender: { who, role, note },
+    questionnaire: all.questionnaire,
+    meta: all.meta,
+    rounds: {
+      unternehmen: all.roundsU,
+      kaeufer: all.roundsK
+    }
+  };
+}
+
+function downloadBundle(){
+  buildPreview();
+  const bundle = buildBundleObject();
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], {type:"application/json;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "eisauktion_bundle.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function composeMail(){
+  buildPreview();
+  const subject = "Eisauktion – Datenpaket (bitte Anhang hinzufügen)";
+  const body = document.getElementById("preview").value;
+
+  const mailto = `mailto:${TARGET}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+}
+
+async function copyPreview(){
+  const text = document.getElementById("preview").value;
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("Textvorschau kopiert.");
+  }catch{
+    alert("Kopieren nicht möglich. Bitte Text manuell markieren und kopieren.");
+  }
+}
+
+["who","role","note"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", buildPreview);
+});
+
+// Auto-load
+loadAll();
+</script>
+
+</body>
+</html>

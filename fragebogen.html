@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Eisauktion – Fragebogen</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header class="sitebar">
+  <div class="navwrap">
+    <div class="brand"><span class="dot"></span> Eisauktion</div>
+    <nav>
+      <a href="index.html">Übersicht</a>
+      <a href="spielerklaerung.html">Spielerklärung</a>
+      <a class="active" href="fragebogen.html">Fragebogen</a>
+      <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
+      <a href="rolle-kaeufer.html">Rolle: Käufer</a>
+	  <a href="auswertung.html">Auswertung</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Fragebogen zur Unternehmensgründung</h1>
+  <p class="lead">Vorbereitung auf die Eisauktion (Markt der absoluten Konkurrenz)</p>
+
+  <section class="card">
+    <h2>Unternehmensdaten</h2>
+    <div class="grid two">
+      <div>
+        <label>Unternehmensname</label>
+        <input id="u_name" type="text" placeholder="z. B. Eis & Co."/>
+      </div>
+      <div>
+        <label>Mitglieder</label>
+        <input id="u_members" type="text" placeholder="Namen der Gruppenmitglieder"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 + 2 nebeneinander -->
+  <div class="grid two" style="margin-top:14px;">
+    <section class="card">
+      <h2>1. Unser Startkapital</h2>
+      <label>Eigenkapital zu Beginn (€)</label>
+      <input id="startkapital" type="number" step="0.01" placeholder="z. B. 25"/>
+      <p class="small">
+        Dieses Kapital nutzt ihr, um Fixkosten zu bezahlen, Produktion vorzufinanzieren und Verluste auszuhalten.
+        Wenn Kapital aufgebraucht ist, scheidet ihr aus dem Markt aus.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>2. Produktionskosten vorfinanzieren</h2>
+      <p>Produktion kostet Geld, <strong>bevor</strong> ihr etwas verkauft.</p>
+      <div class="result">
+        Kostenformel pro Runde:<br/>
+        <strong>Gesamtkosten = Fixkosten + (Produktionsmenge × variable Kosten)</strong>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Unsere Ausgangsüberlegung</h2>
+    <label>Wollen wir eher viel produzieren oder vorsichtig bleiben?</label>
+    <textarea id="grundidee_1"></textarea>
+
+    <label>Wo sehen wir unser Risiko?</label>
+    <textarea id="grundidee_2"></textarea>
+
+    <label>Was könnte unser Unternehmen erfolgreicher machen als andere?</label>
+    <textarea id="grundidee_3"></textarea>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>2. Produktionsplanung – Unsere Kapazitäten</h2>
+    <div class="grid two">
+      <div>
+        <label>Maximale Produktion pro Runde (Einheiten)</label>
+        <input id="max_prod" type="number" step="1" placeholder="z. B. 15"/>
+      </div>
+      <div>
+        <label>Sinnvoller Startwert (Menge) – und warum?</label>
+        <textarea id="startwert_warum"></textarea>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Produktionsmenge</th>
+          <th>Einschätzung (problemlos / riskant / unrealistisch)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>5 Einheiten</td>
+          <td><input id="eins_5" type="text" placeholder="…"/></td>
+        </tr>
+        <tr>
+          <td>10 Einheiten</td>
+          <td><input id="eins_10" type="text" placeholder="…"/></td>
+        </tr>
+        <tr>
+          <td>15 Einheiten</td>
+          <td><input id="eins_15" type="text" placeholder="…"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>3. Unsere Kostenstruktur</h2>
+
+    <div class="grid two">
+      <div>
+        <h2 style="margin-top:0;">a) Fixkosten</h2>
+        <label>Summe Fixkosten pro Runde (€)</label>
+        <input id="fix" type="number" step="0.01" placeholder="z. B. 5"/>
+        <p class="small">Fixkosten fallen immer an – auch wenn ihr nichts verkauft.</p>
+      </div>
+
+      <div>
+        <h2 style="margin-top:0;">b) Variable Kosten (pro Einheit)</h2>
+        <table class="table">
+          <thead>
+            <tr><th>Kostenbestandteil</th><th>Kosten pro Einheit (€)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Zutaten</td><td><input id="v_zutaten" type="number" step="0.01"/></td></tr>
+            <tr><td>Herstellung</td><td><input id="v_herstellung" type="number" step="0.01"/></td></tr>
+            <tr><td>Material</td><td><input id="v_material" type="number" step="0.01"/></td></tr>
+          </tbody>
+        </table>
+        <div class="row" style="margin-top:10px;">
+          <div class="field">
+            <label>Variable Kosten pro Einheit (Summe)</label>
+            <input id="var_sum" type="number" step="0.01" readonly/>
+          </div>
+          <button class="btn secondary" type="button" onclick="calcVar()">Summe bilden</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>c) Gesamtkosten berechnen</h2>
+    <div class="row">
+      <div class="field">
+        <label>Geplante Menge (Einheiten)</label>
+        <input id="menge" type="number" step="1" placeholder="z. B. 10"/>
+      </div>
+      <button class="btn" type="button" onclick="calcTotal()">Berechnen</button>
+    </div>
+
+    <div class="grid two">
+      <div class="result" id="total_out">Gesamtkosten: –</div>
+      <div class="result" id="mc_out">Grenzkosten pro Einheit: –</div>
+    </div>
+
+    <div class="note" id="liq_note" style="margin-top:10px; display:none;"></div>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>5. Unsere Entscheidungsregel für den Markt</h2>
+    <p>Da wir Preisnehmer sind, entscheidet nicht unser Wunschpreis, sondern der Marktpreis.</p>
+
+    <div class="grid two">
+      <div>
+        <label>Wenn der Marktpreis über … € liegt → wir produzieren.</label>
+        <input id="rule_over" type="number" step="0.01"/>
+      </div>
+      <div>
+        <label>Wenn der Marktpreis unter … € liegt → wir reduzieren / stoppen Produktion.</label>
+        <input id="rule_under" type="number" step="0.01"/>
+      </div>
+    </div>
+
+    <label>Warum?</label>
+    <textarea id="rule_why"></textarea>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>6. Risikoeinschätzung</h2>
+    <p>Nicht verkauftes Eis verfällt. Produktion kann also Verlust bedeuten.</p>
+    <label>Welche Folgen hätte Überproduktion für unser Unternehmen?</label>
+    <textarea id="risk_1"></textarea>
+
+    <label>Welche Strategie hilft, dieses Risiko zu begrenzen?</label>
+    <textarea id="risk_2"></textarea>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>7. Strategie für die zweite Runde (Vorausdenken)</h2>
+    <label>Wann würden wir unsere Produktion erhöhen?</label>
+    <textarea id="s2_1"></textarea>
+
+    <label>Wann würden wir sie senken?</label>
+    <textarea id="s2_2"></textarea>
+
+    <label>Woran erkennen wir, wie sich Angebot und Nachfrage entwickeln?</label>
+    <textarea id="s2_3"></textarea>
+  </section>
+
+  <p class="footer">Hinweis: Die Berechnungen dienen als Unterstützung. Entscheidungen trefft ihr im Spiel rundenweise.</p>
+</main>
+
+<script>
+function num(v){
+  const n = Number(String(v ?? '').replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+}
+function eur(n){ return n.toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €'; }
+
+function calcVar(){
+  const vz = num(document.getElementById('v_zutaten').value);
+  const vh = num(document.getElementById('v_herstellung').value);
+  const vm = num(document.getElementById('v_material').value);
+  const sum = vz + vh + vm;
+  document.getElementById('var_sum').value = sum.toFixed(2);
+  return sum;
+}
+
+function calcTotal(){
+  const fix = num(document.getElementById('fix').value);
+  const varSum = num(document.getElementById('var_sum').value) || calcVar();
+  const q = num(document.getElementById('menge').value);
+
+  const total = fix + (q * varSum);
+  const mc = varSum; // im Modell: Grenzkosten ≈ variable Stückkosten
+
+  document.getElementById('total_out').innerHTML =
+    `Gesamtkosten = ${eur(fix)} + (${q} × ${eur(varSum).replace(' €','')}) = <strong>${eur(total)}</strong>`;
+
+  document.getElementById('mc_out').innerHTML =
+    `Grenzkosten pro Einheit ≈ <strong>${eur(mc)}</strong>`;
+
+  // einfache Liquiditätsprüfung
+  const cap = num(document.getElementById('startkapital').value);
+  const note = document.getElementById('liq_note');
+  if(cap > 0){
+    if(total > cap){
+      note.style.display = 'block';
+      note.innerHTML = `<strong>Liquiditätscheck:</strong> Eure Produktionskosten (${eur(total)}) liegen über eurem Kapital (${eur(cap)}). → Menge reduzieren oder Kosten senken.`;
+    } else {
+      note.style.display = 'block';
+      note.innerHTML = `<strong>Liquiditätscheck:</strong> Produktionskosten (${eur(total)}) sind durch Kapital (${eur(cap)}) gedeckt.`;
+    }
+  } else {
+    note.style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>
