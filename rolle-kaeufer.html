@@ -10,14 +10,28 @@
 
 <header class="sitebar">
   <div class="navwrap">
-    <div class="brand"><img class="brand-icon" src="assets/eis/eis7.png" alt="" aria-hidden="true"> Eisauktion</div>
+    <div class="brand">
+      <span class="dot"></span>
+      Eisauktion
+    </div>
+
     <nav>
       <a href="index.html">Übersicht</a>
       <a href="spielerklaerung.html">Spielerklärung</a>
       <a href="fragebogen.html">Fragebogen</a>
-      <a class="active" href="rolle-unternehmen.html">Rolle: Unternehmen</a>
-      <a href="rolle-kaeufer.html">Rolle: Käufer</a>
+
+      <!-- Rollenkarten Dropdown -->
+      <div class="navdrop">
+        <a class="navdrop-toggle active" href="#">Rollenkarten ▾</a>
+
+        <div class="navdrop-menu">
+          <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
+          <a class="active" href="rolle-kaeufer.html">Rolle: Käufer</a>
+        </div>
+      </div>
+
       <a href="auswertung.html">Auswertung</a>
+      <a href="impressum.html">Impressum</a>
     </nav>
   </div>
 </header>
@@ -530,3 +544,4 @@ loadSaved();
 
 </body>
 </html>
+
