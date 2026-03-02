@@ -24,7 +24,10 @@
 
 <main class="container">
   <h1>Auswertung</h1>
-  <p class="lead">Hier wird alles zusammengeführt: <strong>Fragebogen + Rundendaten</strong>. Danach erstellt ihr eine Datei und bereitet eine Mail an die Lehrkraft vor.</p>
+  <p class="lead">
+    Hier wird alles zusammengeführt: <strong>Fragebogen + Rundendaten</strong>.
+    Ihr erstellt eine Datei (JSON) und könnt die Daten zusätzlich direkt senden.
+  </p>
 
   <div class="grid two">
     <section class="card">
@@ -41,14 +44,14 @@
 
       <div class="hr"></div>
       <div class="small">
-        <strong>Wichtig:</strong> Mailto kann i. d. R. keine Datei automatisch anhängen. Ihr ladet die Datei herunter und hängt sie dann im Mailprogramm an.
+        <strong>Hinweis:</strong> Die Direkt-Senden-Funktion löscht nichts. Download bleibt empfohlen.
       </div>
     </section>
 
     <section class="card">
       <h2>Identifikation</h2>
       <label>Name / Gruppe</label>
-      <input id="who" type="text" placeholder="z. B. Gruppe 3 / Max Mustermann"/>
+      <input id="who" type="text" placeholder="z. B. Gruppe 3 / Team Eis"/>
 
       <label>Rolle</label>
       <select id="role">
@@ -59,11 +62,45 @@
 
       <label>Zusätzliche Notiz (optional)</label>
       <textarea id="note" placeholder="z. B. besondere Beobachtungen / Probleme"></textarea>
+
+      <div class="hr"></div>
+      <div class="result" id="idHint">Tipp: Tragt mindestens <strong>Name/Gruppe</strong> ein.</div>
     </section>
   </div>
 
+  <!-- NEU: Direkt senden (parallel) -->
   <section class="card" style="margin-top:14px;">
-    <h2>1 Datei erstellen</h2>
+    <h2>Daten direkt senden (Formular)</h2>
+    <p class="small">
+      Optionaler Parallelweg: Sendet euer komplettes Datenpaket direkt an die Lehrkraft.
+      <strong>Download der JSON-Datei bleibt weiterhin empfohlen</strong> (Backup & Spielende).
+    </p>
+
+    <div class="row">
+      <button class="btn" type="button" id="sendBtn" onclick="sendToFormspree()">
+        Direkt senden
+      </button>
+      <span class="badge" id="sendBadge">–</span>
+    </div>
+
+    <div class="hr"></div>
+    <div class="note" id="sendNote" style="display:none;"></div>
+
+    <!-- Hidden fallback form (falls Fetch blockiert wird) -->
+    <form id="fallbackForm" action="https://formspree.io/f/xvzbjzge" method="POST" style="display:none;">
+      <input type="hidden" name="gruppe" id="f_gruppe">
+      <input type="hidden" name="rolle" id="f_rolle">
+      <input type="hidden" name="meta" id="f_meta">
+      <textarea name="daten" id="f_daten" style="display:none;"></textarea>
+    </form>
+
+    <p class="small" style="margin-top:10px;">
+      Falls das Senden im Schulnetz blockiert ist: Nutzt den Download unten (Backup).
+    </p>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>1 Datei erstellen (Backup / empfohlen)</h2>
     <div class="row">
       <button class="btn" type="button" onclick="downloadBundle()">Gesamtdatei herunterladen (JSON)</button>
       <button class="btn secondary" type="button" onclick="composeMail()">Mailprogramm öffnen</button>
@@ -75,6 +112,12 @@
 
     <label>Textvorschau (für Mailtext)</label>
     <textarea id="preview" readonly style="min-height:260px;"></textarea>
+
+    <div class="hr"></div>
+    <div class="small">
+      <strong>Wichtig:</strong> Mailto kann i. d. R. keine Datei automatisch anhängen.
+      Ihr ladet die Datei herunter und hängt sie dann im Mailprogramm an.
+    </div>
   </section>
 
   <section class="card" style="margin-top:14px;">
@@ -97,90 +140,51 @@
       <span class="small">Zum Freischalten: oben die <strong>Gesamtdatei (JSON)</strong> herunterladen.</span>
     </div>
 
-    <!-- NEU: gestapelter Aufbau (Info -> Analyse) -->
     <div id="modelContent" style="display:none; margin-top:12px;">
 
-      <!-- INFO-TEIL (Erweiterung, Fokus: Überhang & Gleichgewicht + Modellbildung/-kritik) -->
       <section class="card" style="margin:0; box-shadow:none;">
-        <h2>Info: Modellbildung – vom Spiel zur Erklärung</h2>
+        <h2>Info: Modellbildung – Fokus Überhang & Gleichgewicht</h2>
         <p class="small">
-          In der Auswertung geht es nicht mehr darum, <em>wie das Spiel funktioniert</em>, sondern darum, wie ihr eure Beobachtungen
-          als <strong>Modell</strong> formuliert: Welche Variablen sind wichtig? Welche Ursache-Wirkung-Beziehungen nehmt ihr an?
-          Und wo sind Grenzen dieser Modellannahmen?
+          Hier geht es darum, eure Beobachtungen als <strong>Modell</strong> zu interpretieren:
+          Welche Indikatoren sprechen für <strong>Nachfrageüberhang</strong>, <strong>Angebotsüberhang</strong>
+          oder eine Annäherung an einen <strong>Gleichgewichtspreis</strong>?
         </p>
 
         <div class="hr"></div>
 
-        <h3>1) Modelllogik: exogene & endogene Variablen</h3>
+        <h3>Indikatoren (aus euren Daten)</h3>
         <ul>
-          <li><strong>Exogen</strong> (von außen gegeben): z. B. rundenweises Käuferbudget, Anzahl der Käufer, Regeln „Eis verfällt“</li>
-          <li><strong>Endogen</strong> (im Modell erklärt): Preisentwicklung, gekaufte Menge, Überhang/Knappheit, (Exit/Reduktion)</li>
-        </ul>
-
-        <h3>2) Hypothesen, die ihr mit euren Daten prüfen könnt</h3>
-        <div class="grid two">
-          <div class="result">
-            <strong>H1 (Nachfrageüberhang):</strong><br/>
-            Wenn <em>Nachfrage &gt; Angebot</em>, entsteht Knappheit → Käufer konkurrieren → Preis tendiert ↑.
-          </div>
-          <div class="result">
-            <strong>H2 (Angebotsüberhang):</strong><br/>
-            Wenn <em>Angebot &gt; Nachfrage</em>, bleibt Ware übrig → Anbieter konkurrieren → Preis tendiert ↓.
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <h3>3) Gleichgewichtspreis als „Stabilisierungspunkt“</h3>
-        <p>
-          Im Modell ist der <strong>Gleichgewichtspreis</strong> der Preis, bei dem Angebot und Nachfrage zusammenpassen.
-          In der Simulation erkennt ihr das nicht an „Perfektion“, sondern an <strong>Indikatoren</strong>:
-        </p>
-        <ul>
-          <li>Der Überhang (Nachfrage − Angebot) wird <strong>klein</strong> oder wechselt nur gering um 0.</li>
-          <li>Der Preisverlauf zeigt <strong>weniger starke Sprünge</strong> (Stabilisierung).</li>
-          <li>Es gibt weder systematisch „alles sofort ausverkauft“ noch „viel bleibt übrig“.</li>
+          <li><strong>Nachfrageüberhang</strong>: Nachfrage &gt; Angebot → Knappheit → Preisdruck nach oben</li>
+          <li><strong>Angebotsüberhang</strong>: Angebot &gt; Nachfrage → Überschuss → Preisdruck nach unten</li>
+          <li><strong>≈ Gleichgewicht</strong>: Überhang klein &amp; Preisstreuung sinkt (Konvergenz)</li>
         </ul>
 
         <div class="note">
-          <strong>Wichtig:</strong> Ein Gleichgewicht ist im Spiel oft nur „annähernd“ (≈), weil Budgets, Mengen und Entscheidungen diskret sind.
+          <strong>Merke:</strong> Im Spiel ist „Gleichgewicht“ meistens nur annähernd (≈),
+          weil in Runden entschieden wird und Mengen/Preise diskret sind.
         </div>
 
         <div class="hr"></div>
 
-        <h3>4) Beispielgrafiken (M1) – so sieht Überhang/Gleichgewicht im Modell aus</h3>
+        <h3>Beispielgrafiken (Referenz)</h3>
         <p class="small">
-          Diese drei Darstellungen zeigen (1) Marktgleichgewicht, (2) Angebotsüberhang und (3) Nachfrageüberhang.
-          Nutzt sie als Referenz für eure Interpretation eurer Runden.
+          Legt eure Rundenwerte in Beziehung zu diesen typischen Mustern (Gleichgewicht / Angebotsüberhang / Nachfrageüberhang).
         </p>
 
-        <!-- WICHTIG: Diese Datei muss im Repo liegen -->
         <img
           src="marktgleichgewicht.png"
-          alt="Marktgleichgewicht, Angebotsüberhang und Nachfrageüberhang (Beispielgrafiken)"
+          alt="Beispielgrafiken: Marktgleichgewicht, Angebotsüberhang, Nachfrageüberhang"
           style="width:100%; height:auto; border:1px solid #e2e8f0; border-radius:12px;"
         />
-
-        <div class="hr"></div>
-
-        <h3>5) Modellkritik (warum weicht die Realität vom Modell ab?)</h3>
-        <ul>
-          <li><strong>Diskrete Runden</strong> statt kontinuierlicher Anpassung: Entscheidungen passieren „sprunghaft“.</li>
-          <li><strong>Begrenzte Informationslage</strong>: Beobachtungen sind nicht immer vollständig/gleichzeitig.</li>
-          <li><strong>Strategisches Verhalten</strong>: Anbieter können bewusst Risiko eingehen (z. B. Dumping) oder „spekulieren“.</li>
-          <li><strong>Budget-Regeln</strong> beeinflussen Nachfrage: Nachfrage ist nicht nur „Wunsch“, sondern auch Kaufkraft.</li>
-        </ul>
       </section>
 
       <div class="hr"></div>
 
-      <!-- ANALYSE-TEIL (gestapelt darunter) -->
       <section class="card" style="margin:0; box-shadow:none;">
-        <h2>Analyse: Überhang, Gleichgewicht und Zusammenhang von Preis & Menge</h2>
+        <h2>Analyse: Eure Daten im Modell</h2>
         <p class="small">
-          Hier werden eure Rundenwerte der <strong>Unternehmen</strong> (Angebot/Preis) und der <strong>Käufer</strong> (Nachfrage/Kaufpreis)
-          zusammengeführt. Ziel ist, in jeder Runde zu prüfen: <strong>Überhang?</strong> <strong>Stabilisierung?</strong>
-          <strong>Hinweise auf einen Gleichgewichtspreis?</strong>
+          Hier werden Unternehmens- und Käuferdaten pro Runde zusammengeführt:
+          Preisverlauf, Angebot vs. Nachfrage und ein einfacher Preis–Menge-Zusammenhang.
         </p>
 
         <div class="row">
@@ -207,8 +211,7 @@
 
         <div class="note" style="margin-top:12px;">
           <strong>Interpretationshilfe:</strong> Markiert in eurer Auswertung 1–2 Runden als
-          „Nachfrageüberhang“, 1–2 als „Angebotsüberhang“ und die Runde mit dem kleinsten Überhang als „≈ Gleichgewicht“.
-          Begründet das jeweils mit Grafik 2 (Mengen) und Grafik 1 (Preisreaktion).
+          Nachfrageüberhang, 1–2 als Angebotsüberhang und die Runde mit dem kleinsten Überhang als ≈ Gleichgewicht.
         </div>
       </section>
 
@@ -219,9 +222,12 @@
 </main>
 
 <script>
+/* ========= Config ========= */
 const TARGET = "s_gruenberg@outlook.de";
+const FORMSPREE_URL = "https://formspree.io/f/xvzbjzge";
 const FINISH_KEY = "eisauktion_gameFinished";
 
+/* ========= Helpers ========= */
 function safeParse(key, fallback){
   try{
     const raw = localStorage.getItem(key);
@@ -239,6 +245,20 @@ function setBadge(id, type, text){
   el.textContent = text || "–";
 }
 
+function hasAnyData(all){
+  return !!(all?.questionnaire || (all?.roundsU?.length) || (all?.roundsK?.length));
+}
+
+function updateIdHint(){
+  const who = document.getElementById("who").value.trim();
+  const role = document.getElementById("role").value;
+  const ok = who.length > 0 && role.length > 0;
+  document.getElementById("idHint").innerHTML = ok
+    ? "✔ Identifikation gesetzt."
+    : "Tipp: Tragt mindestens <strong>Name/Gruppe</strong> und <strong>Rolle</strong> ein.";
+}
+
+/* ========= Load / Clear ========= */
 function loadAll(){
   const questionnaire = safeParse("eisauktion_questionnaire", null);
   const meta = safeParse("eisauktion_meta", {});
@@ -260,6 +280,7 @@ function loadAll(){
 
   buildPreview();
   refreshModelLock();
+  refreshSendUI();
 }
 
 function clearAll(){
@@ -271,16 +292,26 @@ function clearAll(){
     FINISH_KEY
   ].forEach(k => localStorage.removeItem(k));
   window.__ALL__ = null;
+
   document.getElementById("status").textContent = "Alle Daten gelöscht.";
   document.getElementById("preview").value = "";
   document.getElementById("quick1").textContent = "–";
   document.getElementById("quick2").textContent = "–";
   document.getElementById("modelSummary").textContent = "Noch nicht berechnet.";
+
   setBadge("finishBadge", "", "–");
   setBadge("analysisBadge", "", "–");
+  setBadge("sendBadge", "", "–");
+
+  const sendNote = document.getElementById("sendNote");
+  sendNote.style.display = "none";
+  sendNote.textContent = "";
+
   refreshModelLock();
+  refreshSendUI();
 }
 
+/* ========= Preview + Bundle ========= */
 function buildPreview(){
   const who = document.getElementById("who").value.trim();
   const role = document.getElementById("role").value;
@@ -344,7 +375,6 @@ function buildBundleObject(){
   const who = document.getElementById("who").value.trim();
   const role = document.getElementById("role").value;
   const note = document.getElementById("note").value.trim();
-
   const all = window.__ALL__ || { questionnaire:null, meta:{}, roundsU:[], roundsK:[] };
 
   return {
@@ -359,6 +389,7 @@ function buildBundleObject(){
   };
 }
 
+/* ========= Download + Mail ========= */
 function downloadBundle(){
   buildPreview();
   const bundle = buildBundleObject();
@@ -373,6 +404,7 @@ function downloadBundle(){
   a.remove();
   URL.revokeObjectURL(url);
 
+  // Spielende markieren → Modellbereich freischalten (wie gewünscht NUR über Download)
   localStorage.setItem(FINISH_KEY, "true");
   setBadge("finishBadge", "ok", "Spiel beendet");
   refreshModelLock();
@@ -396,11 +428,106 @@ async function copyPreview(){
   }
 }
 
-["who","role","note"].forEach(id=>{
-  document.getElementById(id).addEventListener("input", buildPreview);
-});
+/* ========= Formspree send (parallel) ========= */
+function refreshSendUI(){
+  const all = window.__ALL__ || { questionnaire:null, meta:{}, roundsU:[], roundsK:[] };
+  const ok = hasAnyData(all);
+  const btn = document.getElementById("sendBtn");
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? "1" : "0.6";
+  btn.style.cursor = ok ? "pointer" : "not-allowed";
+  if(!ok){
+    setBadge("sendBadge", "warn", "keine Daten");
+  } else if(document.getElementById("sendBadge").textContent === "–") {
+    setBadge("sendBadge", "", "bereit");
+  }
+}
 
-/* Lock/Unlock Modellbildung */
+function showSendNote(kind, html){
+  const el = document.getElementById("sendNote");
+  el.style.display = "block";
+  el.className = kind === "ok" ? "note" : "note";
+  el.innerHTML = html;
+}
+
+async function sendToFormspree(){
+  buildPreview();
+  updateIdHint();
+
+  const who = document.getElementById("who").value.trim();
+  const role = document.getElementById("role").value.trim();
+
+  const all = window.__ALL__ || { questionnaire:null, meta:{}, roundsU:[], roundsK:[] };
+  if(!hasAnyData(all)){
+    setBadge("sendBadge", "bad", "keine Daten");
+    showSendNote("bad", "<strong>Fehler:</strong> Keine gespeicherten Daten gefunden. Bitte zuerst spielen oder Daten neu laden.");
+    return;
+  }
+
+  // Wir verlangen nicht zwingend, aber weisen darauf hin:
+  if(!who || !role){
+    showSendNote("warn",
+      "<strong>Hinweis:</strong> Bitte tragt Name/Gruppe und Rolle ein. (Senden ist trotzdem möglich.)"
+    );
+  }
+
+  const bundle = buildBundleObject();
+
+  // Formspree Payload: als Text (JSON String) + Meta-Felder
+  const payload = {
+    gruppe: who || "(nicht angegeben)",
+    rolle: role || "(nicht gewählt)",
+    meta: JSON.stringify({ createdAt: bundle.createdAt }, null, 2),
+    daten: JSON.stringify(bundle, null, 2)
+  };
+
+  // UI state
+  setBadge("sendBadge", "warn", "sendet…");
+  document.getElementById("sendBtn").disabled = true;
+
+  try{
+    const res = await fetch(FORMSPREE_URL, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      // Fallback: klassisches Form POST (öffnet ggf. redirect)
+      // Befüllen und submitten
+      document.getElementById("f_gruppe").value = payload.gruppe;
+      document.getElementById("f_rolle").value = payload.rolle;
+      document.getElementById("f_meta").value = payload.meta;
+      document.getElementById("f_daten").value = payload.daten;
+
+      setBadge("sendBadge", "warn", "Fallback…");
+      showSendNote("warn",
+        "<strong>Hinweis:</strong> Direkter Versand per Fetch war blockiert. Es wird jetzt der Formular-Fallback verwendet."
+      );
+      document.getElementById("fallbackForm").submit();
+      return;
+    }
+
+    setBadge("sendBadge", "ok", "gesendet");
+    showSendNote("ok",
+      "✔ <strong>Daten gesendet.</strong> Download bleibt empfohlen (Backup)."
+    );
+
+  } catch(err){
+    setBadge("sendBadge", "bad", "Fehler");
+    showSendNote("bad",
+      "<strong>Fehler:</strong> Senden nicht möglich (z. B. Netzwerk/Filter). Bitte Download nutzen."
+    );
+  } finally {
+    document.getElementById("sendBtn").disabled = false;
+    refreshSendUI();
+  }
+}
+
+/* ========= Modellbildung Lock ========= */
 function refreshModelLock(){
   const finished = localStorage.getItem(FINISH_KEY) === "true";
   const lock = document.getElementById("modelLock");
@@ -415,7 +542,7 @@ function refreshModelLock(){
     if(lock) lock.style.display = "block";
     if(content) content.style.display = "none";
     if(details) details.open = false;
-    if(!document.getElementById("finishBadge").textContent || document.getElementById("finishBadge").textContent === "–"){
+    if(document.getElementById("finishBadge").textContent === "–"){
       setBadge("finishBadge", "warn", "noch offen");
     }
   }
@@ -429,7 +556,7 @@ document.getElementById("modelSection").addEventListener("toggle", (e)=>{
   }
 });
 
-/* Analyse */
+/* ========= Analyse (unverändert) ========= */
 function num(v){
   const n = Number(String(v ?? "").replace(",", "."));
   return Number.isFinite(n) ? n : 0;
@@ -776,6 +903,16 @@ function drawScatter(canvasId, xs, ys, rCorr){
   ctx.fillText(txt, pad.l + 10, pad.t + 24);
 }
 
+/* ========= Listeners ========= */
+["who","role","note"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", () => {
+    buildPreview();
+    updateIdHint();
+  });
+});
+document.getElementById("role").addEventListener("change", updateIdHint);
+
+/* Redraw charts on resize (if unlocked & already computed) */
 window.addEventListener("resize", ()=>{
   const finished = localStorage.getItem(FINISH_KEY) === "true";
   if(!finished) return;
@@ -784,6 +921,8 @@ window.addEventListener("resize", ()=>{
   }
 });
 
+/* ========= Init ========= */
+updateIdHint();
 loadAll();
 </script>
 
