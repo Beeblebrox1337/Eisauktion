@@ -85,7 +85,7 @@
     </div>
   </section>
 
-  <!-- NEU: MODELLBILDUNG (gesperrt bis Spielende) -->
+  <!-- MODELLBILDUNG (gesperrt bis Spielende) -->
   <details id="modelSection" class="card" style="margin-top:14px;">
     <summary style="font-weight:800; cursor:pointer;">
       Modellbildung (erst nach Spielende / nach dem Download freigeschaltet)
@@ -97,72 +97,121 @@
       <span class="small">Zum Freischalten: oben die <strong>Gesamtdatei (JSON)</strong> herunterladen.</span>
     </div>
 
+    <!-- NEU: gestapelter Aufbau (Info -> Analyse) -->
     <div id="modelContent" style="display:none; margin-top:12px;">
-      <div class="grid two">
-        <section class="card" style="margin:0; box-shadow:none;">
-          <h2>Info: Modellannahmen &amp; Begriffe</h2>
-          <p class="small">
-            Wir werten eure Simulation als Modellmarkt der <strong>absoluten Konkurrenz</strong> aus. Das ist ein idealtypisches Modell,
-            um Preisbildung zu erklären.
-          </p>
 
-          <h3>Absolute Konkurrenz (Kurzüberblick)</h3>
-          <ul>
-            <li><strong>Viele Anbieter &amp; viele Nachfrager</strong> → niemand setzt den Preis allein (Preisnehmer)</li>
-            <li><strong>Homogenes Gut</strong> → Unterschiede entstehen v. a. über Preis/Kosten</li>
-            <li><strong>Transparenz</strong> → Preise/Mengen sind beobachtbar</li>
-            <li><strong>Freier Ein-/Austritt</strong> → bei Verlusten wird reduziert/ausgestiegen</li>
-          </ul>
+      <!-- INFO-TEIL (Erweiterung, Fokus: Überhang & Gleichgewicht + Modellbildung/-kritik) -->
+      <section class="card" style="margin:0; box-shadow:none;">
+        <h2>Info: Modellbildung – vom Spiel zur Erklärung</h2>
+        <p class="small">
+          In der Auswertung geht es nicht mehr darum, <em>wie das Spiel funktioniert</em>, sondern darum, wie ihr eure Beobachtungen
+          als <strong>Modell</strong> formuliert: Welche Variablen sind wichtig? Welche Ursache-Wirkung-Beziehungen nehmt ihr an?
+          Und wo sind Grenzen dieser Modellannahmen?
+        </p>
 
-          <h3>Überhang &amp; Gleichgewicht</h3>
-          <ul>
-            <li><strong>Nachfrageüberhang</strong>: Nachfrage &gt; Angebot → Knappheit → Preis tendiert ↑</li>
-            <li><strong>Angebotsüberhang</strong>: Angebot &gt; Nachfrage → Überschuss → Preis tendiert ↓</li>
-            <li><strong>Gleichgewicht</strong>: Angebot ≈ Nachfrage → Preis stabilisiert sich</li>
-          </ul>
+        <div class="hr"></div>
 
-          <div class="note">
-            <strong>Hinweis:</strong> In der Realität sind Märkte selten „perfekt“. Trotzdem kann das Modell helfen,
-            Muster (Preisbewegungen, Knappheit/Überschüsse) zu erklären.
+        <h3>1) Modelllogik: exogene & endogene Variablen</h3>
+        <ul>
+          <li><strong>Exogen</strong> (von außen gegeben): z. B. rundenweises Käuferbudget, Anzahl der Käufer, Regeln „Eis verfällt“</li>
+          <li><strong>Endogen</strong> (im Modell erklärt): Preisentwicklung, gekaufte Menge, Überhang/Knappheit, (Exit/Reduktion)</li>
+        </ul>
+
+        <h3>2) Hypothesen, die ihr mit euren Daten prüfen könnt</h3>
+        <div class="grid two">
+          <div class="result">
+            <strong>H1 (Nachfrageüberhang):</strong><br/>
+            Wenn <em>Nachfrage &gt; Angebot</em>, entsteht Knappheit → Käufer konkurrieren → Preis tendiert ↑.
           </div>
-        </section>
-
-        <section class="card" style="margin:0; box-shadow:none;">
-          <h2>Analyse: Eure Daten im Modell</h2>
-          <p class="small">
-            Hier werden die Rundenwerte der <strong>Unternehmen</strong> (Produktion/Verkauf/Preis) und der <strong>Käufer</strong> (Menge/Kaufpreis/Beobachtung)
-            zusammengeführt, um Überhang und Gleichgewicht zu untersuchen.
-          </p>
-
-          <div class="row">
-            <button class="btn" type="button" onclick="runModelAnalysis()">Analysen erstellen</button>
-            <span class="badge" id="analysisBadge">–</span>
+          <div class="result">
+            <strong>H2 (Angebotsüberhang):</strong><br/>
+            Wenn <em>Angebot &gt; Nachfrage</em>, bleibt Ware übrig → Anbieter konkurrieren → Preis tendiert ↓.
           </div>
+        </div>
 
-          <div class="hr"></div>
-          <div class="result" id="modelSummary">Noch nicht berechnet.</div>
+        <div class="hr"></div>
 
-          <div class="hr"></div>
-          <h3>Grafiken</h3>
-          <p class="small">Die Grafiken basieren auf den Summen/Durchschnitten pro Runde.</p>
+        <h3>3) Gleichgewichtspreis als „Stabilisierungspunkt“</h3>
+        <p>
+          Im Modell ist der <strong>Gleichgewichtspreis</strong> der Preis, bei dem Angebot und Nachfrage zusammenpassen.
+          In der Simulation erkennt ihr das nicht an „Perfektion“, sondern an <strong>Indikatoren</strong>:
+        </p>
+        <ul>
+          <li>Der Überhang (Nachfrage − Angebot) wird <strong>klein</strong> oder wechselt nur gering um 0.</li>
+          <li>Der Preisverlauf zeigt <strong>weniger starke Sprünge</strong> (Stabilisierung).</li>
+          <li>Es gibt weder systematisch „alles sofort ausverkauft“ noch „viel bleibt übrig“.</li>
+        </ul>
 
-          <label>1) Preisverlauf (Ø Marktpreis je Runde)</label>
-          <canvas id="chartPrice" height="260" style="width:100%;"></canvas>
+        <div class="note">
+          <strong>Wichtig:</strong> Ein Gleichgewicht ist im Spiel oft nur „annähernd“ (≈), weil Budgets, Mengen und Entscheidungen diskret sind.
+        </div>
 
-          <div class="hr"></div>
-          <label>2) Angebot vs. Nachfrage (Summen je Runde)</label>
-          <canvas id="chartSupplyDemand" height="280" style="width:100%;"></canvas>
+        <div class="hr"></div>
 
-          <div class="hr"></div>
-          <label>3) Preis–Menge-Zusammenhang (Scatter) + Korrelation</label>
-          <canvas id="chartScatter" height="280" style="width:100%;"></canvas>
+        <h3>4) Beispielgrafiken (M1) – so sieht Überhang/Gleichgewicht im Modell aus</h3>
+        <p class="small">
+          Diese drei Darstellungen zeigen (1) Marktgleichgewicht, (2) Angebotsüberhang und (3) Nachfrageüberhang.
+          Nutzt sie als Referenz für eure Interpretation eurer Runden.
+        </p>
 
-          <p class="small" style="margin-top:10px;">
-            Tipp: Nutzt die Ergebnisse, um zu begründen, <em>in welchen Runden</em> Knappheit/Überschüsse vorlagen und
-            ob sich ein <em>Gleichgewichtspreis</em> andeutet.
-          </p>
-        </section>
-      </div>
+        <!-- WICHTIG: Diese Datei muss im Repo liegen -->
+        <img
+          src="marktgleichgewicht.png"
+          alt="Marktgleichgewicht, Angebotsüberhang und Nachfrageüberhang (Beispielgrafiken)"
+          style="width:100%; height:auto; border:1px solid #e2e8f0; border-radius:12px;"
+        />
+
+        <div class="hr"></div>
+
+        <h3>5) Modellkritik (warum weicht die Realität vom Modell ab?)</h3>
+        <ul>
+          <li><strong>Diskrete Runden</strong> statt kontinuierlicher Anpassung: Entscheidungen passieren „sprunghaft“.</li>
+          <li><strong>Begrenzte Informationslage</strong>: Beobachtungen sind nicht immer vollständig/gleichzeitig.</li>
+          <li><strong>Strategisches Verhalten</strong>: Anbieter können bewusst Risiko eingehen (z. B. Dumping) oder „spekulieren“.</li>
+          <li><strong>Budget-Regeln</strong> beeinflussen Nachfrage: Nachfrage ist nicht nur „Wunsch“, sondern auch Kaufkraft.</li>
+        </ul>
+      </section>
+
+      <div class="hr"></div>
+
+      <!-- ANALYSE-TEIL (gestapelt darunter) -->
+      <section class="card" style="margin:0; box-shadow:none;">
+        <h2>Analyse: Überhang, Gleichgewicht und Zusammenhang von Preis & Menge</h2>
+        <p class="small">
+          Hier werden eure Rundenwerte der <strong>Unternehmen</strong> (Angebot/Preis) und der <strong>Käufer</strong> (Nachfrage/Kaufpreis)
+          zusammengeführt. Ziel ist, in jeder Runde zu prüfen: <strong>Überhang?</strong> <strong>Stabilisierung?</strong>
+          <strong>Hinweise auf einen Gleichgewichtspreis?</strong>
+        </p>
+
+        <div class="row">
+          <button class="btn" type="button" onclick="runModelAnalysis()">Analysen erstellen</button>
+          <span class="badge" id="analysisBadge">–</span>
+        </div>
+
+        <div class="hr"></div>
+        <div class="result" id="modelSummary">Noch nicht berechnet.</div>
+
+        <div class="hr"></div>
+        <h3>Grafiken</h3>
+
+        <label>1) Preisverlauf (Ø Marktpreis je Runde)</label>
+        <canvas id="chartPrice" height="260" style="width:100%;"></canvas>
+
+        <div class="hr"></div>
+        <label>2) Angebot vs. Nachfrage (Summen je Runde)</label>
+        <canvas id="chartSupplyDemand" height="280" style="width:100%;"></canvas>
+
+        <div class="hr"></div>
+        <label>3) Preis–Menge-Zusammenhang (Scatter) + Korrelation</label>
+        <canvas id="chartScatter" height="280" style="width:100%;"></canvas>
+
+        <div class="note" style="margin-top:12px;">
+          <strong>Interpretationshilfe:</strong> Markiert in eurer Auswertung 1–2 Runden als
+          „Nachfrageüberhang“, 1–2 als „Angebotsüberhang“ und die Runde mit dem kleinsten Überhang als „≈ Gleichgewicht“.
+          Begründet das jeweils mit Grafik 2 (Mengen) und Grafik 1 (Preisreaktion).
+        </div>
+      </section>
+
     </div>
   </details>
 
@@ -324,7 +373,6 @@ function downloadBundle(){
   a.remove();
   URL.revokeObjectURL(url);
 
-  // SPIELENDE markieren → Modellbereich freischalten
   localStorage.setItem(FINISH_KEY, "true");
   setBadge("finishBadge", "ok", "Spiel beendet");
   refreshModelLock();
@@ -352,9 +400,7 @@ async function copyPreview(){
   document.getElementById(id).addEventListener("input", buildPreview);
 });
 
-/* -----------------------------
-   MODELLBILDUNG: Lock/Unlock
-------------------------------*/
+/* Lock/Unlock Modellbildung */
 function refreshModelLock(){
   const finished = localStorage.getItem(FINISH_KEY) === "true";
   const lock = document.getElementById("modelLock");
@@ -368,7 +414,6 @@ function refreshModelLock(){
   } else {
     if(lock) lock.style.display = "block";
     if(content) content.style.display = "none";
-    // sicherheitshalber zugeklappt halten
     if(details) details.open = false;
     if(!document.getElementById("finishBadge").textContent || document.getElementById("finishBadge").textContent === "–"){
       setBadge("finishBadge", "warn", "noch offen");
@@ -376,7 +421,6 @@ function refreshModelLock(){
   }
 }
 
-// Wenn Nutzer versucht zu öffnen, aber noch nicht freigeschaltet → wieder schließen
 document.getElementById("modelSection").addEventListener("toggle", (e)=>{
   const finished = localStorage.getItem(FINISH_KEY) === "true";
   if(!finished && e.target.open){
@@ -385,16 +429,13 @@ document.getElementById("modelSection").addEventListener("toggle", (e)=>{
   }
 });
 
-/* -----------------------------
-   MODELLBILDUNG: Analyse
-------------------------------*/
+/* Analyse */
 function num(v){
   const n = Number(String(v ?? "").replace(",", "."));
   return Number.isFinite(n) ? n : 0;
 }
 
 function aggregateRounds(all){
-  // Map round -> aggregator
   const map = new Map();
 
   function ensure(r){
@@ -412,7 +453,6 @@ function aggregateRounds(all){
     return map.get(key);
   }
 
-  // Unternehmen: planned/sold/price
   for(const r of (all.roundsU || [])){
     const a = ensure(r.round);
     a.supply_planned += num(r.planned);
@@ -420,7 +460,6 @@ function aggregateRounds(all){
     if(Number.isFinite(num(r.price)) && num(r.price) > 0) a.prices_market.push(num(r.price));
   }
 
-  // Käufer: qty / payPrice
   for(const r of (all.roundsK || [])){
     const a = ensure(r.round);
     a.demand_qty += num(r.qty);
@@ -429,7 +468,6 @@ function aggregateRounds(all){
 
   const arr = Array.from(map.values()).sort((x,y)=>x.round - y.round);
 
-  // derived
   for(const r of arr){
     r.avg_market_price = r.prices_market.length
       ? r.prices_market.reduce((s,v)=>s+v,0) / r.prices_market.length
@@ -439,11 +477,9 @@ function aggregateRounds(all){
       ? r.prices_buyer.reduce((s,v)=>s+v,0) / r.prices_buyer.length
       : null;
 
-    // Für Überhang nutzen wir primär: Nachfrage (buyers qty) vs. Angebot (planned)
-    const diff = r.demand_qty - r.supply_planned; // >0 = Nachfrageüberhang
+    const diff = r.demand_qty - r.supply_planned;
     r.excess = diff;
 
-    // Zustand
     const eps = 0.0001;
     if(Math.abs(diff) <= eps) r.state = "Gleichgewicht (≈)";
     else if(diff > 0) r.state = "Nachfrageüberhang";
@@ -454,7 +490,6 @@ function aggregateRounds(all){
 }
 
 function correlation(x, y){
-  // Pearson r (simple)
   const n = Math.min(x.length, y.length);
   if(n < 2) return null;
   const mx = x.reduce((s,v)=>s+v,0)/n;
@@ -488,13 +523,11 @@ function runModelAnalysis(){
     return;
   }
 
-  // Gleichgewicht: Runde mit minimalem |excess|
   let best = agg[0];
   for(const r of agg){
     if(Math.abs(r.excess) < Math.abs(best.excess)) best = r;
   }
 
-  // Preisstabilität: grob über Preisänderungen
   const prices = agg.map(r => r.avg_market_price ?? r.avg_buyer_price).filter(v => Number.isFinite(v));
   let avgDelta = null;
   if(prices.length >= 2){
@@ -506,7 +539,6 @@ function runModelAnalysis(){
     avgDelta = dsum / cnt;
   }
 
-  // Scatter: (Menge, Preis) – wir nehmen Menge = demand_qty, Preis = avg_market_price fallback buyer
   const sx = [], sy = [];
   for(const r of agg){
     const p = (r.avg_market_price ?? r.avg_buyer_price);
@@ -517,21 +549,19 @@ function runModelAnalysis(){
   }
   const rCorr = correlation(sx, sy);
 
-  // Summary text
   const lines = [];
   lines.push(`Runden ausgewertet: ${agg.length}`);
-  lines.push(`Nächste „Gleichgewichts“-Runde (min. Überhang): Runde ${best.round} (${best.state}; Nachfrage-Angebot = ${best.excess.toFixed(0)})`);
+  lines.push(`≈ Gleichgewicht (min. Überhang): Runde ${best.round} (${best.state}; Nachfrage-Angebot = ${best.excess.toFixed(0)})`);
   if(avgDelta !== null) lines.push(`Ø absolute Preisänderung zwischen Runden: ${avgDelta.toFixed(2)} €`);
   if(rCorr !== null) lines.push(`Korrelation Preis–Menge (Pearson r): ${rCorr.toFixed(2)}`);
-  lines.push("Interpretation:");
-  lines.push("- Nachfrageüberhang → Knappheit → Preisdruck nach oben");
-  lines.push("- Angebotsüberhang → Überschüsse → Preisdruck nach unten");
+  lines.push("Kurzdeutung:");
+  lines.push("- Nachfrageüberhang → Knappheit → Preisreaktion nach oben");
+  lines.push("- Angebotsüberhang → Überschuss → Preisreaktion nach unten");
   lines.push("- Gleichgewicht → Überhang klein & Preis stabilisiert sich eher");
 
   document.getElementById("modelSummary").innerHTML =
     "<strong>Ergebnisübersicht</strong><br/>" + lines.map(l=>`• ${l}`).join("<br/>");
 
-  // draw charts
   drawLineChart("chartPrice", agg.map(r=>r.round), agg.map(r => r.avg_market_price ?? r.avg_buyer_price), "Preis (€)");
   drawSupplyDemandChart("chartSupplyDemand", agg);
   drawScatter("chartScatter", sx, sy, rCorr);
@@ -542,16 +572,13 @@ function runModelAnalysis(){
 function setupCanvas(canvasId){
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
-
   const cssW = canvas.clientWidth;
   const cssH = canvas.getAttribute("height") ? Number(canvas.getAttribute("height")) : 260;
   const dpr = window.devicePixelRatio || 1;
-
   canvas.width = Math.floor(cssW * dpr);
   canvas.height = Math.floor(cssH * dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
-
-  return { canvas, ctx, w: cssW, h: cssH };
+  return { ctx, w: cssW, h: cssH };
 }
 
 function drawFrame(ctx, w, h, pad){
@@ -592,7 +619,6 @@ function drawLineChart(canvasId, labels, values, yLabel){
   const xScale = (x)=> pad.l + ((x-xMin)/(xMax-xMin||1))*W;
   const yScale = (y)=> pad.t + (1-(y-yMin)/(yMax-yMin||1))*H;
 
-  // grid y ticks
   ctx.fillStyle = "#475569";
   ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
   ctx.fillText(yLabel, 6, pad.t + 12);
@@ -606,7 +632,6 @@ function drawLineChart(canvasId, labels, values, yLabel){
     ctx.fillText(val.toFixed(2), pad.l-38, yy+4);
   }
 
-  // line
   ctx.strokeStyle = "#1f4e79";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -616,7 +641,6 @@ function drawLineChart(canvasId, labels, values, yLabel){
   });
   ctx.stroke();
 
-  // points
   ctx.fillStyle = "#1f4e79";
   for(const p of data){
     ctx.beginPath();
@@ -624,7 +648,6 @@ function drawLineChart(canvasId, labels, values, yLabel){
     ctx.fill();
   }
 
-  // x label
   ctx.fillStyle = "#475569";
   ctx.fillText("Runde", pad.l + W - 34, pad.t + H + 24);
 }
@@ -656,10 +679,10 @@ function drawSupplyDemandChart(canvasId, agg){
   const xScale = (x)=> pad.l + ((x-xMin)/(xMax-xMin||1))*W;
   const yScale = (y)=> pad.t + (1-(y-yMin)/(yMax-yMin||1))*H;
 
-  // ticks
   ctx.fillStyle = "#475569";
   ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
   ctx.fillText("Menge", 6, pad.t + 12);
+
   ctx.strokeStyle = "#eef2f7";
   for(let i=0;i<=3;i++){
     const t = i/3;
@@ -669,7 +692,6 @@ function drawSupplyDemandChart(canvasId, agg){
     ctx.fillText(val.toFixed(0), pad.l-38, yy+4);
   }
 
-  // supply line
   ctx.strokeStyle = "#0f766e";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -679,7 +701,6 @@ function drawSupplyDemandChart(canvasId, agg){
   });
   ctx.stroke();
 
-  // demand line
   ctx.strokeStyle = "#b45309";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -689,7 +710,6 @@ function drawSupplyDemandChart(canvasId, agg){
   });
   ctx.stroke();
 
-  // legend
   const lx = pad.l + 10, ly = pad.t + 10;
   const items = [
     {label:"Angebot (geplant)", col:"#0f766e"},
@@ -705,7 +725,6 @@ function drawSupplyDemandChart(canvasId, agg){
     off += 150;
   }
 
-  // x label
   ctx.fillStyle = "#475569";
   ctx.fillText("Runde", pad.l + W - 34, pad.t + H + 24);
 }
@@ -744,7 +763,6 @@ function drawScatter(canvasId, xs, ys, rCorr){
     ctx.beginPath(); ctx.moveTo(pad.l,yy); ctx.lineTo(pad.l+W,yy); ctx.stroke();
   }
 
-  // points
   ctx.fillStyle = "#1f4e79";
   for(let i=0;i<xs.length;i++){
     ctx.beginPath();
@@ -752,24 +770,20 @@ function drawScatter(canvasId, xs, ys, rCorr){
     ctx.fill();
   }
 
-  // correlation text
   ctx.fillStyle = "#0f172a";
   ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
   const txt = (rCorr === null) ? "r: –" : `r: ${rCorr.toFixed(2)}`;
   ctx.fillText(txt, pad.l + 10, pad.t + 24);
 }
 
-// redraw charts on resize (if unlocked & already computed)
 window.addEventListener("resize", ()=>{
   const finished = localStorage.getItem(FINISH_KEY) === "true";
   if(!finished) return;
-  // wenn schon erstellt: einfach nochmal laufen lassen
   if(document.getElementById("analysisBadge")?.textContent === "erstellt"){
     runModelAnalysis();
   }
 });
 
-// Auto-load
 loadAll();
 </script>
 
