@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Rolle: Moderation / Lehrer – Eisauktion</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<header class="sitebar">
+  <div class="navwrap">
+    <div class="brand">
+      <span class="dot"></span>
+      Eisauktion
+    </div>
+    <nav>
+      <a href="index.html">Übersicht</a>
+      <a href="spielerklaerung.html">Spielerklärung</a>
+      <div class="navdrop">
+        <a class="navdrop-toggle" href="#">Theorie ▾</a>
+        <div class="navdrop-menu">
+          <a href="theorie-absolute-konkurrenz.html">Absolute Konkurrenz</a>
+          <a href="theorie-speiseeis-markt.html">Speiseeismarkt: Realität vs. Modell</a>
+        </div>
+      </div>
+      <a href="fragebogen.html">Fragebogen</a>
+      <div class="navdrop">
+        <a class="navdrop-toggle active" href="#">Rollenkarten ▾</a>
+        <div class="navdrop-menu">
+          <a href="rolle-unternehmen.html">Rolle: Unternehmen</a>
+          <a href="rolle-kaeufer.html">Rolle: Käufer</a>
+          <a class="active" href="rolle-moderation.html">Rolle: Moderation / Lehrer</a>
+        </div>
+      </div>
+      <a href="auswertung.html">Auswertung</a>
+      <a href="impressum.html">Impressum</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Rolle: Moderation / Lehrer</h1>
+  <p class="lead">Moderation steuert den Rahmen: Budget, Kostenimpulse, Zeitstruktur und kurze Diagnosen zur Marktbewegung.</p>
+
+  <section class="card">
+    <h2>Allgemeiner Überblick (Moderationsperspektive)</h2>
+    <ul>
+      <li><strong>Rahmen:</strong> 4 Unternehmensgruppen, Käufer = Rest der Klasse, Startkapital je Unternehmen 25 €.</li>
+      <li><strong>Ausgangskosten:</strong> Fixkosten 5 € pro Runde, variable Kosten 1 € pro Einheit (Grenzkosten = 1 €).</li>
+      <li><strong>Primärer Steuerhebel:</strong> Käuferbudget pro Runde anpassen, sonst möglichst keine Paralleländerungen.</li>
+      <li><strong>Zielbild:</strong> Nachfrageüberhang (Start) → Reaktion/Überproduktion → Angebotsüberhang → neues Gleichgewicht.</li>
+      <li><strong>Regelklarheit:</strong> homogenes Produkt, Unternehmen als Preisnehmer, Eis verfällt (Überproduktion ist Risiko).</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Moderations-Rundenbogen (Vorlage)</h2>
+    <div class="grid two">
+      <div class="result">Runde: ________</div>
+      <div class="result">Käuferbudget pro Käufer: ________ €</div>
+    </div>
+    <div class="grid two" style="margin-top:10px;">
+      <div class="result">Fixkosten (global / je Gruppe): ________ €</div>
+      <div class="result">Variable Kosten (Karte/Faktor): ________</div>
+    </div>
+    <div class="hr"></div>
+    <div class="grid three">
+      <div class="result">Gesamtangebot: ________ Einheiten</div>
+      <div class="result">Gesamtnachfrage: ________ Einheiten</div>
+      <div class="result">Marktpreis (Ø / Leitpreis): ________ €</div>
+    </div>
+    <p class="small" style="margin-top:10px;">
+      Überhang = Nachfrage − Angebot. Interpretation: 0 = Nachfrageüberhang, &lt;0 = Angebotsüberhang.
+    </p>
+    <ul>
+      <li>Kurzdiagnose: ☐ Nachfrageüberhang ☐ Angebotsüberhang ☐ ≈ Gleichgewicht</li>
+      <li>Preisreaktion: ☐ steigt ☐ fällt ☐ stabil</li>
+      <li>Warum? (1 Satz): _______________________________________</li>
+    </ul>
+  </section>
+
+  <details class="card">
+    <summary><strong>Simulation: Absolute Konkurrenz</strong></summary>
+    <p class="small" style="margin-top:8px;">Steuerungsprinzip: Nur Budget ändern – sonst nichts.</p>
+
+    <h3>Rundensteuerung</h3>
+    <ol>
+      <li><strong>Runde 1:</strong> Budget pro Käufer 5 € (Nachfrageüberhang erzeugen).</li>
+      <li><strong>Runde 2:</strong> Budget bleibt 5 € (Unternehmen reagieren oft mit höherer Produktion).</li>
+      <li><strong>Runde 3:</strong> Budget auf 3 € senken (Angebotsüberhang sichtbar machen).</li>
+      <li><strong>Runde 4:</strong> Budget auf 4 € anpassen (Annäherung ans Gleichgewicht).</li>
+    </ol>
+
+    <h3>Einsatz durch die Moderation</h3>
+    <ul>
+      <li>Pro Runde feste Taktung setzen: Produktion (2 Min.), Marktphase (3–6 Min.), Auswertung (2–3 Min.).</li>
+      <li>Nur kurze Ansagen geben, dann Markt selbst laufen lassen.</li>
+      <li>Am Ende jeder Runde 30-Sekunden-Plenumsdiagnose mit Marktdaten moderieren.</li>
+    </ul>
+  </details>
+
+  <details class="card">
+    <summary><strong>Simulation: Realistischer Markt</strong></summary>
+    <p class="small" style="margin-top:8px;">Steuerungsprinzip: Ab Runde 2 einen Kosten-Schock einführen (Durchlauf B).</p>
+
+    <h3>Grundidee: Zwei Durchläufe</h3>
+    <ul>
+      <li><strong>Durchlauf A (Runde 1):</strong> normale Kosten aus dem Fragebogen.</li>
+      <li><strong>Durchlauf B (ab Runde 2):</strong> Fix- und variable Kosten werden neu gesetzt, Firmen werden relativ günstiger/teurer.</li>
+    </ul>
+
+    <h3>Moderationsablauf ab Runde 2</h3>
+    <ol>
+      <li><strong>Kosten ansagen (20–30 Sek.):</strong> „Fixkosten: ___ €, variable Kosten gemäß Karte/Tabelle."</li>
+      <li><strong>Produktion (2 Min.):</strong> Menge festlegen und Finanzierbarkeit prüfen.</li>
+      <li><strong>Marktphase (3–6 Min.):</strong> Käuferbudget ausgeben, Preisbildung beobachten.</li>
+      <li><strong>Auswertung (2–3 Min.):</strong> Kosten, Gewinn/Verlust, Kapital und Überhänge erfassen.</li>
+    </ol>
+
+    <h3>Kosten-Schock-Optionen</h3>
+    <ul>
+      <li><strong>Option 1 (schnell, deutlich):</strong> Fixkosten +2 € für alle, variable Kosten per Karte (z. B. 0,60 / 0,90 / 1,20 / 1,50 €).</li>
+      <li><strong>Option 2 (realistischer):</strong> unterschiedliche Fixkosten nach „Standort" plus rundenweise Änderungen der variablen Kosten.</li>
+    </ul>
+
+    <h3>Kostenkarten-Set (druckbar)</h3>
+    <ul>
+      <li>Karte G (günstig): var = 0,70 €</li>
+      <li>Karte M (mittel): var = 1,00 €</li>
+      <li>Karte T (teuer): var = 1,30 €</li>
+      <li>Karte X (sehr teuer): var = 1,60 €</li>
+      <li>Optional: Fixkosten-Schock „Fix +2 €" (für alle)</li>
+    </ul>
+
+    <div class="note"><strong>Didaktischer Effekt:</strong> Hohe variable Kosten drücken Mengen schnell nach unten; niedrige variable Kosten erlauben Ausweitung und erzeugen bei stabiler Nachfrage Preisdruck.</div>
+  </details>
+</main>
+</body>
+</html>
