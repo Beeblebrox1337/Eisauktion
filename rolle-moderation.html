@@ -3,8 +3,21 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Rolle: Moderation / Lehrer – Eisauktion</title>
+  <title>Rolle: Moderation / Lehrkraft – Eisauktion</title>
   <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+    .group-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+    .group-card{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:12px;}
+    .group-card h3{margin-bottom:6px;}
+    .group-meta{font-size:14px;color:var(--muted);margin:3px 0;}
+    .group-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+    .hidden{display:none;}
+    .status-line{font-size:13px;color:var(--muted);margin-top:8px;}
+    .inline-note{background:#eef6ff;border:1px solid #dbeafe;border-radius:10px;padding:10px;font-size:14px;color:#1e3a5f;}
+    @media (max-width:900px){.group-list,.stat-grid{grid-template-columns:1fr;}}
+  </style>
 </head>
 <body>
 <header class="sitebar">
@@ -39,101 +52,433 @@
 </header>
 
 <main class="container">
-  <h1>Rolle: Moderation / Lehrer</h1>
-  <p class="lead">Moderation steuert den Rahmen: Budget, Kostenimpulse, Zeitstruktur und kurze Diagnosen zur Marktbewegung.</p>
+  <h1>Moderation / Lehrkraft – Kontrollzentrum</h1>
+  <p class="lead">Verwaltung von Gruppen, Runde und Eingriffen für das Rollenspiel.</p>
 
   <section class="card">
-    <h2>Allgemeiner Überblick (Moderationsperspektive)</h2>
-    <ul>
-      <li><strong>Rahmen:</strong> 4 Unternehmensgruppen, Käufer = Rest der Klasse, Startkapital je Unternehmen 25 €.</li>
-      <li><strong>Ausgangskosten:</strong> Fixkosten 5 € pro Runde, variable Kosten 1 € pro Einheit (Grenzkosten = 1 €).</li>
-      <li><strong>Primärer Steuerhebel:</strong> Käuferbudget pro Runde anpassen, sonst möglichst keine Paralleländerungen.</li>
-      <li><strong>Zielbild:</strong> Nachfrageüberhang (Start) → Reaktion/Überproduktion → Angebotsüberhang → neues Gleichgewicht.</li>
-      <li><strong>Regelklarheit:</strong> homogenes Produkt, Unternehmen als Preisnehmer, Eis verfällt (Überproduktion ist Risiko).</li>
-    </ul>
+    <h2>1) Spielübersicht</h2>
+    <div class="stat-grid">
+      <div class="result" id="current-round">Aktuelle Runde: 1</div>
+      <div class="result" id="seller-count">Verkäufergruppen: 0</div>
+      <div class="result" id="buyer-count">Käufergruppen: 0</div>
+    </div>
+    <div class="row">
+      <button class="btn" id="switch-round">Runde wechseln</button>
+      <button class="btn secondary" id="reset-game">Spiel zurücksetzen</button>
+    </div>
+    <div class="status-line" id="storage-status">Datenstand: noch nicht gespeichert.</div>
   </section>
 
   <section class="card">
-    <h2>Moderations-Rundenbogen (Vorlage)</h2>
-    <div class="grid two">
-      <div class="result">Runde: ________</div>
-      <div class="result">Käuferbudget pro Käufer: ________ €</div>
+    <div class="section-head">
+      <h2>2) Verkäufergruppen</h2>
+      <button class="btn" id="open-seller-form">Neue Verkäufergruppe hinzufügen</button>
     </div>
-    <div class="grid two" style="margin-top:10px;">
-      <div class="result">Fixkosten (global / je Gruppe): ________ €</div>
-      <div class="result">Variable Kosten (Karte/Faktor): ________</div>
-    </div>
-    <div class="hr"></div>
-    <div class="grid three">
-      <div class="result">Gesamtangebot: ________ Einheiten</div>
-      <div class="result">Gesamtnachfrage: ________ Einheiten</div>
-      <div class="result">Marktpreis (Ø / Leitpreis): ________ €</div>
-    </div>
-    <p class="small" style="margin-top:10px;">
-      Überhang = Nachfrage − Angebot. Interpretation: 0 = Nachfrageüberhang, &lt;0 = Angebotsüberhang.
-    </p>
-    <ul>
-      <li>Kurzdiagnose: ☐ Nachfrageüberhang ☐ Angebotsüberhang ☐ ≈ Gleichgewicht</li>
-      <li>Preisreaktion: ☐ steigt ☐ fällt ☐ stabil</li>
-      <li>Warum? (1 Satz): _______________________________________</li>
-    </ul>
+
+    <form id="seller-form" class="hidden">
+      <div class="grid two">
+        <div>
+          <label for="seller-team">Teamname</label>
+          <input id="seller-team" name="teamName" required>
+        </div>
+        <div>
+          <label for="seller-profile">Verkäuferprofil</label>
+          <select id="seller-profile" name="profileId" required></select>
+        </div>
+      </div>
+      <label for="seller-members">Mitglieder (mit Komma trennen)</label>
+      <input id="seller-members" name="members" placeholder="Anna, Tom">
+      <div class="grid two">
+        <div>
+          <label for="seller-budget">Startbudget</label>
+          <input id="seller-budget" name="startBudget" type="number" min="0" step="0.1" required>
+        </div>
+        <div>
+          <label for="seller-cost">Variable Kosten</label>
+          <input id="seller-cost" name="variableCost" type="number" min="0" step="0.1" required>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" type="submit">Verkäufergruppe speichern</button>
+        <button class="btn secondary" type="button" id="cancel-seller-form">Abbrechen</button>
+      </div>
+    </form>
+
+    <div class="group-list" id="seller-list"></div>
+    <p class="small" id="seller-empty">Noch keine Verkäufergruppe angelegt.</p>
   </section>
 
-  <details class="card">
-    <summary><strong>Simulation: Absolute Konkurrenz</strong></summary>
-    <p class="small" style="margin-top:8px;">Steuerungsprinzip: Nur Budget ändern – sonst nichts.</p>
+  <section class="card">
+    <div class="section-head">
+      <h2>3) Käufergruppen</h2>
+      <button class="btn" id="open-buyer-form">Neue Käufergruppe hinzufügen</button>
+    </div>
 
-    <h3>Rundensteuerung</h3>
-    <ol>
-      <li><strong>Runde 1:</strong> Budget pro Käufer 5 € (Nachfrageüberhang erzeugen).</li>
-      <li><strong>Runde 2:</strong> Budget bleibt 5 € (Unternehmen reagieren oft mit höherer Produktion).</li>
-      <li><strong>Runde 3:</strong> Budget auf 3 € senken (Angebotsüberhang sichtbar machen).</li>
-      <li><strong>Runde 4:</strong> Budget auf 4 € anpassen (Annäherung ans Gleichgewicht).</li>
-    </ol>
+    <form id="buyer-form" class="hidden">
+      <div class="grid two">
+        <div>
+          <label for="buyer-team">Gruppenname</label>
+          <input id="buyer-team" name="teamName" required>
+        </div>
+        <div>
+          <label for="buyer-profile">Käuferprofil</label>
+          <select id="buyer-profile" name="profileId" required></select>
+        </div>
+      </div>
+      <label for="buyer-members">Mitglieder (mit Komma trennen)</label>
+      <input id="buyer-members" name="members" placeholder="Lina, Max">
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" type="submit">Käufergruppe speichern</button>
+        <button class="btn secondary" type="button" id="cancel-buyer-form">Abbrechen</button>
+      </div>
+    </form>
 
-    <h3>Einsatz durch die Moderation</h3>
-    <ul>
-      <li>Pro Runde feste Taktung setzen: Produktion (2 Min.), Marktphase (3–6 Min.), Auswertung (2–3 Min.).</li>
-      <li>Nur kurze Ansagen geben, dann Markt selbst laufen lassen.</li>
-      <li>Am Ende jeder Runde 30-Sekunden-Plenumsdiagnose mit Marktdaten moderieren.</li>
-    </ul>
-  </details>
+    <div class="group-list" id="buyer-list"></div>
+    <p class="small" id="buyer-empty">Noch keine Käufergruppe angelegt.</p>
+  </section>
 
-  <details class="card">
-    <summary><strong>Simulation: Realistischer Markt</strong></summary>
-    <p class="small" style="margin-top:8px;">Steuerungsprinzip: Ab Runde 2 einen Kosten-Schock einführen (Durchlauf B).</p>
+  <section class="card">
+    <h2>4) Rundeneinstellungen</h2>
+    <form id="round-form">
+      <div class="grid two">
+        <div>
+          <label for="season-effect">Saison-Effekt</label>
+          <select id="season-effect" name="seasonEffect">
+            <option value="neutral">neutral</option>
+            <option value="high-demand">hohe Nachfrage</option>
+            <option value="low-demand">geringe Nachfrage</option>
+          </select>
+        </div>
+        <div>
+          <label for="demand-shock">Nachfrage-Schock</label>
+          <select id="demand-shock" name="demandShock">
+            <option value="none">keine</option>
+            <option value="event-boom">Stadtfest (+Nachfrage)</option>
+            <option value="rain-slump">Schlechtes Wetter (-Nachfrage)</option>
+          </select>
+        </div>
+        <div>
+          <label for="cost-change">Kostenänderung</label>
+          <select id="cost-change" name="costChange">
+            <option value="none">keine</option>
+            <option value="energy+0.3">Energiepreisschock (+0,3)</option>
+            <option value="raw-0.2">günstige Rohstoffe (-0,2)</option>
+          </select>
+        </div>
+        <div>
+          <label for="image-effect">Image-Effekt</label>
+          <select id="image-effect" name="imageEffect">
+            <option value="neutral">neutral</option>
+            <option value="brand-boom">Markenboom</option>
+            <option value="quality-focus">Qualitätsbewusstsein</option>
+          </select>
+        </div>
+      </div>
+      <label for="location-cost">Standortkosten (numerisch)</label>
+      <input id="location-cost" type="number" name="locationCost" step="0.1" value="0">
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" type="submit">Rundeneinstellungen speichern</button>
+      </div>
+    </form>
+  </section>
 
-    <h3>Grundidee: Zwei Durchläufe</h3>
-    <ul>
-      <li><strong>Durchlauf A (Runde 1):</strong> normale Kosten aus dem Fragebogen.</li>
-      <li><strong>Durchlauf B (ab Runde 2):</strong> Fix- und variable Kosten werden neu gesetzt, Firmen werden relativ günstiger/teurer.</li>
-    </ul>
-
-    <h3>Moderationsablauf ab Runde 2</h3>
-    <ol>
-      <li><strong>Kosten ansagen (20–30 Sek.):</strong> „Fixkosten: ___ €, variable Kosten gemäß Karte/Tabelle."</li>
-      <li><strong>Produktion (2 Min.):</strong> Menge festlegen und Finanzierbarkeit prüfen.</li>
-      <li><strong>Marktphase (3–6 Min.):</strong> Käuferbudget ausgeben, Preisbildung beobachten.</li>
-      <li><strong>Auswertung (2–3 Min.):</strong> Kosten, Gewinn/Verlust, Kapital und Überhänge erfassen.</li>
-    </ol>
-
-    <h3>Kosten-Schock-Optionen</h3>
-    <ul>
-      <li><strong>Option 1 (schnell, deutlich):</strong> Fixkosten +2 € für alle, variable Kosten per Karte (z. B. 0,60 / 0,90 / 1,20 / 1,50 €).</li>
-      <li><strong>Option 2 (realistischer):</strong> unterschiedliche Fixkosten nach „Standort" plus rundenweise Änderungen der variablen Kosten.</li>
-    </ul>
-
-    <h3>Kostenkarten-Set (druckbar)</h3>
-    <ul>
-      <li>Karte G (günstig): var = 0,70 €</li>
-      <li>Karte M (mittel): var = 1,00 €</li>
-      <li>Karte T (teuer): var = 1,30 €</li>
-      <li>Karte X (sehr teuer): var = 1,60 €</li>
-      <li>Optional: Fixkosten-Schock „Fix +2 €" (für alle)</li>
-    </ul>
-
-    <div class="note"><strong>Didaktischer Effekt:</strong> Hohe variable Kosten drücken Mengen schnell nach unten; niedrige variable Kosten erlauben Ausweitung und erzeugen bei stabiler Nachfrage Preisdruck.</div>
-  </details>
+  <section class="card">
+    <h2>5) Spielparameter / dynamische Eingriffe</h2>
+    <p class="inline-note">Die obenigen Werte werden als <strong>roundModifiers</strong> im zentralen Datenmodell gespeichert und sind vorbereitet für spätere automatische Marktberechnungen, Nachfragekurven und Auswertungsdiagramme.</p>
+  </section>
 </main>
+
+<script src="app-state.js"></script>
+<script>
+(function(){
+  const app = window.EisauktionState;
+  const state = app.readState();
+  const game = state.game || app.defaultGameState();
+
+  let editingSellerId = null;
+  let editingBuyerId = null;
+
+  const sellerForm = document.getElementById('seller-form');
+  const buyerForm = document.getElementById('buyer-form');
+
+  function makeId(prefix){
+    return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+  }
+
+  function splitMembers(text){
+    return String(text || '')
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+
+  function save(message){
+    state.game = game;
+    app.writeState(state);
+    document.getElementById('storage-status').textContent = 'Datenstand: ' + message;
+    renderOverview();
+  }
+
+  function renderOverview(){
+    document.getElementById('current-round').textContent = 'Aktuelle Runde: ' + game.currentRound;
+    document.getElementById('seller-count').textContent = 'Verkäufergruppen: ' + game.sellers.length;
+    document.getElementById('buyer-count').textContent = 'Käufergruppen: ' + game.buyers.length;
+  }
+
+  function renderSellerProfiles(){
+    const select = document.getElementById('seller-profile');
+    select.innerHTML = '';
+    Object.entries(app.SELLER_PROFILES).forEach(([id, profile]) => {
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = profile.label;
+      select.appendChild(option);
+    });
+  }
+
+  function renderBuyerProfiles(){
+    const select = document.getElementById('buyer-profile');
+    select.innerHTML = '';
+    Object.entries(app.BUYER_PROFILES).forEach(([id, profile]) => {
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = profile.label;
+      select.appendChild(option);
+    });
+  }
+
+  function applySellerProfileDefaults(){
+    const profileId = document.getElementById('seller-profile').value;
+    const profile = app.SELLER_PROFILES[profileId];
+    if(!profile || editingSellerId) return;
+    document.getElementById('seller-budget').value = profile.baseValues.startBudget;
+    document.getElementById('seller-cost').value = profile.baseValues.variableCost;
+  }
+
+  function renderSellerCards(){
+    const list = document.getElementById('seller-list');
+    list.innerHTML = '';
+
+    game.sellers.forEach((seller) => {
+      const card = document.createElement('article');
+      card.className = 'group-card';
+      const profile = app.SELLER_PROFILES[seller.profileId];
+      card.innerHTML = `
+        <h3>${seller.teamName}</h3>
+        <div class="group-meta"><strong>Mitglieder:</strong> ${(seller.members || []).join(', ') || '—'}</div>
+        <div class="group-meta"><strong>Profil:</strong> ${profile ? profile.label : seller.profileId}</div>
+        <div class="group-meta"><strong>Startbudget:</strong> ${seller.baseValues.startBudget}</div>
+        <div class="group-meta"><strong>Variable Kosten:</strong> ${seller.baseValues.variableCost}</div>
+      `;
+      const actions = document.createElement('div');
+      actions.className = 'group-actions';
+      actions.innerHTML = '<button class="btn secondary" data-action="edit">Bearbeiten</button><button class="btn secondary" data-action="delete">Löschen</button>';
+      actions.querySelector('[data-action="edit"]').addEventListener('click', () => editSeller(seller.id));
+      actions.querySelector('[data-action="delete"]').addEventListener('click', () => deleteSeller(seller.id));
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+
+    document.getElementById('seller-empty').classList.toggle('hidden', game.sellers.length > 0);
+  }
+
+  function renderBuyerCards(){
+    const list = document.getElementById('buyer-list');
+    list.innerHTML = '';
+
+    game.buyers.forEach((buyer) => {
+      const card = document.createElement('article');
+      card.className = 'group-card';
+      const profile = app.BUYER_PROFILES[buyer.profileId];
+      card.innerHTML = `
+        <h3>${buyer.teamName}</h3>
+        <div class="group-meta"><strong>Mitglieder:</strong> ${(buyer.members || []).join(', ') || '—'}</div>
+        <div class="group-meta"><strong>Profil:</strong> ${profile ? profile.label : buyer.profileId}</div>
+        <div class="group-meta"><strong>Nachfrageparameter:</strong> Preisfokus ${buyer.preferences.priceFocus}, Qualitätsfokus ${buyer.preferences.qualityFocus}</div>
+      `;
+      const actions = document.createElement('div');
+      actions.className = 'group-actions';
+      actions.innerHTML = '<button class="btn secondary" data-action="edit">Bearbeiten</button><button class="btn secondary" data-action="delete">Löschen</button>';
+      actions.querySelector('[data-action="edit"]').addEventListener('click', () => editBuyer(buyer.id));
+      actions.querySelector('[data-action="delete"]').addEventListener('click', () => deleteBuyer(buyer.id));
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+
+    document.getElementById('buyer-empty').classList.toggle('hidden', game.buyers.length > 0);
+  }
+
+  function resetSellerForm(){
+    editingSellerId = null;
+    sellerForm.reset();
+    applySellerProfileDefaults();
+  }
+
+  function resetBuyerForm(){
+    editingBuyerId = null;
+    buyerForm.reset();
+  }
+
+  function editSeller(id){
+    const seller = game.sellers.find((entry) => entry.id === id);
+    if(!seller) return;
+    editingSellerId = id;
+    sellerForm.classList.remove('hidden');
+    sellerForm.teamName.value = seller.teamName;
+    sellerForm.members.value = (seller.members || []).join(', ');
+    sellerForm.profileId.value = seller.profileId;
+    sellerForm.startBudget.value = seller.baseValues.startBudget;
+    sellerForm.variableCost.value = seller.baseValues.variableCost;
+  }
+
+  function editBuyer(id){
+    const buyer = game.buyers.find((entry) => entry.id === id);
+    if(!buyer) return;
+    editingBuyerId = id;
+    buyerForm.classList.remove('hidden');
+    buyerForm.teamName.value = buyer.teamName;
+    buyerForm.members.value = (buyer.members || []).join(', ');
+    buyerForm.profileId.value = buyer.profileId;
+  }
+
+  function deleteSeller(id){
+    game.sellers = game.sellers.filter((entry) => entry.id !== id);
+    renderSellerCards();
+    save('Verkäufergruppe gelöscht und gespeichert.');
+  }
+
+  function deleteBuyer(id){
+    game.buyers = game.buyers.filter((entry) => entry.id !== id);
+    renderBuyerCards();
+    save('Käufergruppe gelöscht und gespeichert.');
+  }
+
+  function loadRoundModifiers(){
+    const mods = game.roundModifiers;
+    const form = document.getElementById('round-form');
+    form.seasonEffect.value = mods.seasonEffect;
+    form.demandShock.value = mods.demandShock;
+    form.costChange.value = mods.costChange;
+    form.imageEffect.value = mods.imageEffect;
+    form.locationCost.value = mods.locationCost;
+  }
+
+  document.getElementById('open-seller-form').addEventListener('click', () => {
+    resetSellerForm();
+    sellerForm.classList.toggle('hidden');
+  });
+
+  document.getElementById('cancel-seller-form').addEventListener('click', () => {
+    resetSellerForm();
+    sellerForm.classList.add('hidden');
+  });
+
+  document.getElementById('open-buyer-form').addEventListener('click', () => {
+    resetBuyerForm();
+    buyerForm.classList.toggle('hidden');
+  });
+
+  document.getElementById('cancel-buyer-form').addEventListener('click', () => {
+    resetBuyerForm();
+    buyerForm.classList.add('hidden');
+  });
+
+  document.getElementById('seller-profile').addEventListener('change', applySellerProfileDefaults);
+
+  sellerForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const profile = app.SELLER_PROFILES[sellerForm.profileId.value];
+    const seller = {
+      id: editingSellerId || makeId('seller'),
+      teamName: sellerForm.teamName.value.trim(),
+      members: splitMembers(sellerForm.members.value),
+      profileId: sellerForm.profileId.value,
+      baseValues: {
+        startBudget: Number(sellerForm.startBudget.value || profile.baseValues.startBudget),
+        variableCost: Number(sellerForm.variableCost.value || profile.baseValues.variableCost)
+      },
+      dynamicModifiers: {
+        season: 0,
+        energyShock: 0,
+        locationCost: Number(game.roundModifiers.locationCost || 0)
+      }
+    };
+
+    const index = game.sellers.findIndex((entry) => entry.id === seller.id);
+    if(index >= 0) game.sellers[index] = seller;
+    else game.sellers.push(seller);
+
+    renderSellerCards();
+    save(index >= 0 ? 'Verkäufergruppe aktualisiert und gespeichert.' : 'Verkäufergruppe angelegt und gespeichert.');
+    resetSellerForm();
+    sellerForm.classList.add('hidden');
+  });
+
+  buyerForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const profile = app.BUYER_PROFILES[buyerForm.profileId.value];
+    const buyer = {
+      id: editingBuyerId || makeId('buyer'),
+      teamName: buyerForm.teamName.value.trim(),
+      members: splitMembers(buyerForm.members.value),
+      profileId: buyerForm.profileId.value,
+      preferences: {
+        priceFocus: profile.preferences.priceFocus,
+        qualityFocus: profile.preferences.qualityFocus
+      }
+    };
+
+    const index = game.buyers.findIndex((entry) => entry.id === buyer.id);
+    if(index >= 0) game.buyers[index] = buyer;
+    else game.buyers.push(buyer);
+
+    renderBuyerCards();
+    save(index >= 0 ? 'Käufergruppe aktualisiert und gespeichert.' : 'Käufergruppe angelegt und gespeichert.');
+    resetBuyerForm();
+    buyerForm.classList.add('hidden');
+  });
+
+  document.getElementById('round-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    game.roundModifiers = {
+      seasonEffect: form.seasonEffect.value,
+      demandShock: form.demandShock.value,
+      costChange: form.costChange.value,
+      imageEffect: form.imageEffect.value,
+      locationCost: Number(form.locationCost.value || 0)
+    };
+    save('Rundeneinstellungen gespeichert.');
+  });
+
+  document.getElementById('switch-round').addEventListener('click', () => {
+    game.currentRound = game.currentRound === 1 ? 2 : 1;
+    save('Runde gewechselt.');
+  });
+
+  document.getElementById('reset-game').addEventListener('click', () => {
+    state.game = app.defaultGameState();
+    game.currentRound = state.game.currentRound;
+    game.sellers = state.game.sellers;
+    game.buyers = state.game.buyers;
+    game.roundModifiers = state.game.roundModifiers;
+    renderSellerCards();
+    renderBuyerCards();
+    loadRoundModifiers();
+    resetSellerForm();
+    resetBuyerForm();
+    save('Spiel wurde zurückgesetzt.');
+  });
+
+  renderSellerProfiles();
+  renderBuyerProfiles();
+  applySellerProfileDefaults();
+  loadRoundModifiers();
+  renderOverview();
+  renderSellerCards();
+  renderBuyerCards();
+  save('Daten aus LocalStorage geladen.');
+})();
+</script>
 </body>
 </html>
