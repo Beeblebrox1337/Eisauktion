@@ -67,10 +67,28 @@
     <p class="small" id="buyerProfileHints">Fokus in Runde 2: Preis, Qualität, Budget, Gewohnheit und Image.</p>
   </section>
 
+  <section class="card run-panel" id="buyerBudgetPlanner">
+    <h2>Budget und Ausgabenplanung</h2>
+    <div class="grid two budget-meta">
+      <div class="result" id="income_out">Einkommen pro Runde: –</div>
+      <div class="result" id="current_budget_out">Aktuelles Budget: –</div>
+    </div>
+
+    <label>Ausgabenentscheidung für diese Runde</label>
+    <select id="spendingDecision">
+      <option value="sparsam">sparsam (ca. 30 %)</option>
+      <option value="normal">normal (ca. 60 %)</option>
+      <option value="viel">viel (ca. 90 %)</option>
+    </select>
+
+    <div class="profile-box small" id="profileSpendingHint">Wähle ein Käuferprofil, um eine Empfehlung zu sehen.</div>
+    <div class="small" id="spending_out">Empfohlenes Ausgabenlimit: –</div>
+  </section>
+
   <section class="card">
     <h2>Phasen je Runde</h2>
     <ol>
-      <li><strong>Budget erhalten</strong> (gilt nur diese Runde; Rest verfällt)</li>
+      <li><strong>Budget erhalten</strong> (Einkommen kommt pro Runde dazu; Rest kann in Runde 2 gespart werden)</li>
       <li><strong>Kaufen</strong> (Preise vergleichen, Anbieter wählen, Menge festlegen)</li>
       <li><strong>Beobachten</strong> (steigen/fallen Preise? warum?)</li>
       <li><strong>Speichern</strong> (damit die Auswertung klappt)</li>
@@ -87,7 +105,7 @@
         <input id="round" type="number" step="1" value="1"/>
       </div>
       <div>
-        <label>Mein Budget (€)</label>
+        <label id="budgetLabel">Mein Budget (€)</label>
         <input id="budget" type="number" step="0.01" placeholder="z. B. 5"/>
       </div>
     </div>
@@ -153,7 +171,7 @@
 
     <div class="grid two">
       <div class="result" id="spent_out">Ausgegebenes Geld: –</div>
-      <div class="result" id="rest_out">Restbudget (verfällt): –</div>
+      <div class="result" id="rest_out">Restbudget: –</div>
     </div>
 
     <div class="hr"></div>
@@ -217,14 +235,98 @@
 <script>
 
 let buyerActiveRun = 1;
+const SPENDING_RATIOS = { sparsam: 0.3, normal: 0.6, viel: 0.9 };
+
+function ensureBuyerRun2Model(){
+  const st = EisauktionState.readState();
+  st.roles = st.roles || {};
+  st.roles.buyer = st.roles.buyer || {};
+
+  const existing = st.roles.buyer.run2;
+  const profileId = existing?.profileId || '';
+  const profile = profileId ? EisauktionState.BUYER_PROFILES[profileId] : null;
+  const incomePerRound = Number(existing?.incomePerRound) || 10;
+  const budget = Number(existing?.budget);
+  const spendingDecision = existing?.spendingDecision || 'normal';
+  const spendingRatio = Number(existing?.spendingRatio) || (SPENDING_RATIOS[spendingDecision] || 0.6);
+
+  st.roles.buyer.run2 = {
+    run: 2,
+    role: 'buyer',
+    profileId,
+    profileLabel: profile?.label || existing?.profileLabel || '',
+    profileDescription: profile?.description || existing?.profileDescription || '',
+    preferences: profile?.preferences || existing?.preferences || null,
+    dynamicModifiers: existing?.dynamicModifiers || { season:0, budgetShift:0, trendInfluence:0 },
+    incomePerRound,
+    budget: Number.isFinite(budget) && budget > 0 ? Number(budget.toFixed(2)) : incomePerRound,
+    spendingDecision,
+    spendingRatio
+  };
+
+  EisauktionState.writeState(st);
+  return st.roles.buyer.run2;
+}
+
+function getLatestSavedRound(){
+  const key = 'eisauktion_kaeufer_rounds';
+  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  if(!arr.length) return null;
+  arr.sort((a,b)=>Number(a.round)-Number(b.round));
+  return arr[arr.length - 1];
+}
+
+function recalcBudgetFromHistory(){
+  const model = ensureBuyerRun2Model();
+  const st = EisauktionState.readState();
+  const latest = getLatestSavedRound();
+  const carryOver = latest ? Math.max(0, Number(latest.rest) || 0) : 0;
+
+  model.budget = Number((carryOver + Number(model.incomePerRound || 0)).toFixed(2));
+  st.roles.buyer.run2 = model;
+  EisauktionState.writeState(st);
+
+  return { model, carryOver };
+}
+
+function updateBudgetPlannerView(){
+  const incomeOut = document.getElementById('income_out');
+  const currentBudgetOut = document.getElementById('current_budget_out');
+  const spendingOut = document.getElementById('spending_out');
+  const decisionEl = document.getElementById('spendingDecision');
+  const budgetInput = document.getElementById('budget');
+  const budgetLabel = document.getElementById('budgetLabel');
+
+  if(buyerActiveRun !== 2){
+    budgetLabel.textContent = 'Mein Budget (€)';
+    spendingOut.textContent = 'Empfohlenes Ausgabenlimit: –';
+    return;
+  }
+
+  const { model } = recalcBudgetFromHistory();
+  decisionEl.value = model.spendingDecision || 'normal';
+
+  incomeOut.innerHTML = `Einkommen pro Runde: <strong>${Number(model.incomePerRound || 0)}</strong>`;
+  currentBudgetOut.innerHTML = `Aktuelles Budget: <strong>${eur(Number(model.budget || 0))}</strong>`;
+
+  budgetInput.value = Number(model.budget || 0).toFixed(2);
+  budgetLabel.textContent = 'Aktuelles Budget (€)';
+
+  const ratio = SPENDING_RATIOS[decisionEl.value] || 0.6;
+  const limit = Number(model.budget || 0) * ratio;
+  spendingOut.innerHTML = `Empfohlenes Ausgabenlimit (${Math.round(ratio*100)} %): <strong>${eur(limit)}</strong>`;
+}
+
 function setBuyerRun(run){
   buyerActiveRun = Number(run) || 1;
   document.querySelectorAll('#buyerTabs .run-tab').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.run) === buyerActiveRun));
   document.getElementById('buyerRun1Intro').classList.toggle('active', buyerActiveRun === 1);
   document.getElementById('buyerRun2Intro').classList.toggle('active', buyerActiveRun === 2);
+  document.getElementById('buyerBudgetPlanner').classList.toggle('active', buyerActiveRun === 2);
   const st = EisauktionState.readState();
   st.lastUsed.buyerRoleRun = buyerActiveRun;
   EisauktionState.writeState(st);
+  updateBudgetPlannerView();
 }
 
 function initBuyerProfiles(){
@@ -232,18 +334,33 @@ function initBuyerProfiles(){
   Object.entries(EisauktionState.BUYER_PROFILES).forEach(([id,p]) => {
     const opt = document.createElement('option'); opt.value = id; opt.textContent = p.label; sel.appendChild(opt);
   });
-  const st = EisauktionState.readState();
-  if(st.roles?.buyer?.run2?.profileId) sel.value = st.roles.buyer.run2.profileId;
+  const run2 = ensureBuyerRun2Model();
+  if(run2?.profileId) sel.value = run2.profileId;
   updateBuyerProfileView();
   sel.addEventListener('change', () => {
     const st2 = EisauktionState.readState();
     const profile = EisauktionState.BUYER_PROFILES[sel.value];
-    st2.roles.buyer.run2 = profile ? {
-      run:2, role:'buyer', profileId: sel.value, profileLabel: profile.label, profileDescription: profile.description,
-      preferences: profile.preferences, dynamicModifiers: { season:0, budgetShift:0, trendInfluence:0 }
-    } : null;
+    const current = st2.roles?.buyer?.run2 || ensureBuyerRun2Model();
+    st2.roles.buyer.run2 = {
+      ...current,
+      profileId: profile ? sel.value : '',
+      profileLabel: profile ? profile.label : '',
+      profileDescription: profile ? profile.description : '',
+      preferences: profile ? profile.preferences : null
+    };
     EisauktionState.writeState(st2);
     updateBuyerProfileView();
+  });
+
+  const spendingDecision = document.getElementById('spendingDecision');
+  spendingDecision.addEventListener('change', () => {
+    const st = EisauktionState.readState();
+    const model = ensureBuyerRun2Model();
+    model.spendingDecision = spendingDecision.value;
+    model.spendingRatio = SPENDING_RATIOS[spendingDecision.value] || 0.6;
+    st.roles.buyer.run2 = model;
+    EisauktionState.writeState(st);
+    updateBudgetPlannerView();
   });
 }
 
@@ -252,6 +369,7 @@ function updateBuyerProfileView(){
   const p = EisauktionState.BUYER_PROFILES[sel.value];
   buyerProfileDesc.textContent = p ? p.description : 'Bitte zuerst ein Profil auswählen.';
   buyerProfileHints.textContent = p ? `Entscheidungslogik: Preis ${p.preferences.priceFocus}/3, Qualität ${p.preferences.qualityFocus}/3, Marke/Image ${p.preferences.brandFocus}/3.` : 'Fokus in Runde 2: Preis, Qualität, Budget, Gewohnheit und Image.';
+  profileSpendingHint.textContent = p?.spendingHint || 'Wähle ein Käuferprofil, um eine Empfehlung zu sehen.';
 }
 
 function num(v){
@@ -417,7 +535,7 @@ function calc(){
   document.getElementById('spent_out').innerHTML =
     `Ausgegebenes Geld = <strong>${eur(spent)}</strong>`;
   document.getElementById('rest_out').innerHTML =
-    `Restbudget (verfällt) = <strong>${eur(rest)}</strong>`;
+    `Restbudget = <strong>${eur(rest)}</strong>`;
 
   const badge = document.getElementById('badge');
   if(rest < -0.001){
@@ -425,7 +543,7 @@ function calc(){
     badge.textContent = 'Budget überschritten → Kauf anpassen';
   }else if(rest > 0.001){
     badge.className = 'badge warn';
-    badge.textContent = 'Restbudget verfällt → ggf. mehr kaufen';
+    badge.textContent = 'Restbudget bleibt übrig → sparen oder mehr kaufen';
   }else{
     badge.className = 'badge ok';
     badge.textContent = 'Budget exakt genutzt';
@@ -442,6 +560,24 @@ function calc(){
 
   const sellerNote = document.getElementById('seller_note').value || "";
 
+  let spendingDecision = '';
+  let spendingRatio = null;
+  let recommendedSpendingLimit = null;
+
+  if(buyerActiveRun === 2){
+    const decision = document.getElementById('spendingDecision').value;
+    spendingDecision = decision;
+    spendingRatio = SPENDING_RATIOS[decision] || 0.6;
+    recommendedSpendingLimit = Number((budget * spendingRatio).toFixed(2));
+
+    const st = EisauktionState.readState();
+    const model = ensureBuyerRun2Model();
+    model.spendingDecision = spendingDecision;
+    model.spendingRatio = spendingRatio;
+    st.roles.buyer.run2 = model;
+    EisauktionState.writeState(st);
+  }
+
   saveRound({
     round: num(document.getElementById('round').value),
     budget,
@@ -454,7 +590,11 @@ function calc(){
     sellerNote,
     strategy: document.getElementById('strategy').value || "",
     reason: document.getElementById('reason').value || "",
-    purchasesSummary: purchasesSummary(purchases)
+    purchasesSummary: purchasesSummary(purchases),
+    buyerRun: buyerActiveRun,
+    spendingDecision,
+    spendingRatio,
+    recommendedSpendingLimit
   });
 
   loadSaved();
@@ -477,7 +617,7 @@ function nextRound(){
   document.getElementById('badge').className = 'badge';
   document.getElementById('badge').textContent = '–';
   document.getElementById('spent_out').textContent = 'Ausgegebenes Geld: –';
-  document.getElementById('rest_out').textContent = 'Restbudget (verfällt): –';
+  document.getElementById('rest_out').textContent = 'Restbudget: –';
 }
 
 function loadSaved(){
@@ -605,6 +745,7 @@ function renderPriceChart(arr){
 
 document.querySelectorAll('#buyerTabs .run-tab').forEach(btn => btn.addEventListener('click', () => setBuyerRun(btn.dataset.run)));
 const buyerState = EisauktionState.readState();
+ensureBuyerRun2Model();
 setBuyerRun(buyerState.lastUsed?.buyerRoleRun || 1);
 initBuyerProfiles();
 refreshSellerOptions();
