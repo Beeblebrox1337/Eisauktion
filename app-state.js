@@ -44,12 +44,32 @@
     'stammkunde': { label: 'Treuer Stammkunde', description: 'Du bleibst oft bei deinem Lieblingsanbieter, wenn die Qualität stimmt.', preferences: { priceFocus: 1, qualityFocus: 2, brandFocus: 3 } }
   };
 
+  function defaultRoundModifiers(){
+    return {
+      seasonEffect: 'neutral',
+      demandShock: 'none',
+      costChange: 'none',
+      imageEffect: 'neutral',
+      locationCost: 0
+    };
+  }
+
+  function defaultGameState(){
+    return {
+      currentRound: 1,
+      sellers: [],
+      buyers: [],
+      roundModifiers: defaultRoundModifiers()
+    };
+  }
+
   function baseState(){
     return {
       version: 2,
       lastUsed: { questionnaireRun: 1, sellerRoleRun: 1, buyerRoleRun: 1 },
       questionnaire: { run1: {}, run2: { sellerProfileId: '' } },
-      roles: { seller: { run2: null }, buyer: { run2: null } }
+      roles: { seller: { run2: null }, buyer: { run2: null } },
+      game: defaultGameState()
     };
   }
 
@@ -75,6 +95,10 @@
         state.questionnaire.run1 = Object.assign({}, state.questionnaire.run1 || {});
         state.questionnaire.run2 = Object.assign({ sellerProfileId: '' }, state.questionnaire.run2 || {});
         state.roles = Object.assign(baseState().roles, parsed.roles || {});
+        state.game = Object.assign(defaultGameState(), parsed.game || {});
+        state.game.roundModifiers = Object.assign(defaultRoundModifiers(), state.game.roundModifiers || {});
+        state.game.sellers = Array.isArray(state.game.sellers) ? state.game.sellers : [];
+        state.game.buyers = Array.isArray(state.game.buyers) ? state.game.buyers : [];
       }catch(_e){ }
     }
     return migrateLegacyQuestionnaire(state);
@@ -112,6 +136,8 @@
     LEGACY_Q_KEY,
     SELLER_PROFILES,
     BUYER_PROFILES,
+    defaultGameState,
+    defaultRoundModifiers,
     readState,
     writeState,
     makeSellerRun2Model
