@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Runde 2: Der komplexe Markt – Eisauktion</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<header class="sitebar"><div class="navwrap"><div class="brand"><span class="dot"></span>Eisauktion</div><nav>
+<a href="index.html">Übersicht</a><a href="spielerklaerung.html">Spielerklärung</a>
+<div class="navdrop"><a class="navdrop-toggle" href="#">Theorie ▾</a><div class="navdrop-menu"><a href="theorie-absolute-konkurrenz.html">Absolute Konkurrenz</a><a href="theorie-speiseeis-markt.html">Speiseeismarkt: Realität vs. Modell</a></div></div>
+<a href="fragebogen.html">Fragebogen</a>
+<div class="navdrop"><a class="navdrop-toggle" href="#">Rollenkarten ▾</a><div class="navdrop-menu"><a href="rolle-unternehmen.html">Rolle: Unternehmen</a><a href="rolle-kaeufer.html">Rolle: Käufer</a><a href="rolle-moderation.html">Rolle: Moderation / Lehrer</a></div></div>
+<div class="navdrop"><a class="navdrop-toggle active" href="#">Auswertung ▾</a><div class="navdrop-menu"><a href="auswertung.html">Daten versenden</a><a href="auswertung-runde1.html">Runde 1: Modellbildung</a><a class="active" href="auswertung-runde2.html">Runde 2: Der komplexe Markt</a></div></div>
+<a href="impressum.html">Impressum</a>
+</nav></div></header>
+
+<main class="container">
+  <h1>Runde 2: Der komplexe Markt</h1>
+  <p class="lead">Die zweite Spielphase wird über Reiter organisiert: kurz erklären, Kennzahlen prüfen, Diagramm anschauen.</p>
+
+  <div class="run-tabs" role="tablist" aria-label="Auswertung Runde 2">
+    <button class="run-tab active" data-tab="overview">Allgemeine Marktübersicht</button>
+    <button class="run-tab" data-tab="demand">Nachfrageschocks</button>
+    <button class="run-tab" data-tab="cost">Kostenveränderungen</button>
+    <button class="run-tab" data-tab="quality">Qualität / Image</button>
+    <button class="run-tab" data-tab="season">Saison-Effekte</button>
+  </div>
+
+  <section id="overview" class="run-panel active card">
+    <p class="small"><strong>Was lässt sich beobachten?</strong> Preis, Menge und Streuung zeigen, wie stabil oder unruhig der Markt ist.</p>
+    <p class="small"><strong>Wie erklärt das die Theorie?</strong> Bei heterogenen Anbietern entsteht mehr Preisstreuung als im reinen Modell.</p>
+    <div class="grid two"><div class="result" id="ov1">Ø Preis: –</div><div class="result" id="ov2">Gesamtmenge: –</div><div class="result" id="ov3">Preisstreuung: –</div><div class="result" id="ov4">Erfolgreiche Verkäufe: –</div></div>
+    <div class="hr"></div>
+    <canvas id="overviewChart" height="230" style="width:100%;"></canvas>
+  </section>
+
+  <section id="demand" class="run-panel card">
+    <p class="small"><strong>Was lässt sich beobachten?</strong> Bei Hitzewelle oder Tourismusboom steigt die Nachfrage, oft auch der Preis.</p>
+    <p class="small"><strong>Wie erklärt das die Theorie?</strong> Ein Nachfrageschock verschiebt die Nachfragekurve nach rechts.</p>
+    <table class="table"><thead><tr><th>Runde</th><th>Ø Preis</th><th>verkaufte Menge</th><th>Käuferausgaben</th></tr></thead><tbody id="demandRows"></tbody></table>
+    <div class="hr"></div><canvas id="demandChart" height="230" style="width:100%;"></canvas>
+  </section>
+
+  <section id="cost" class="run-panel card">
+    <p class="small"><strong>Was lässt sich beobachten?</strong> Steigende Kosten drücken Gewinne oder führen zu höheren Preisen.</p>
+    <p class="small"><strong>Wie erklärt das die Theorie?</strong> Ein Kostenschock verschiebt die Angebotskurve nach links.</p>
+    <table class="table"><thead><tr><th>Runde</th><th>Ø Preis</th><th>Gesamtgewinn Verkäufer</th><th>Preisänderung</th></tr></thead><tbody id="costRows"></tbody></table>
+    <div class="hr"></div><canvas id="costChart" height="230" style="width:100%;"></canvas>
+  </section>
+
+  <section id="quality" class="run-panel card">
+    <p class="small"><strong>Was lässt sich beobachten?</strong> Premium- und Imageanbieter können oft höhere Preise durchsetzen.</p>
+    <p class="small"><strong>Wie erklärt das die Theorie?</strong> Produktdifferenzierung reduziert die reine Preis-Konkurrenz.</p>
+    <table class="table"><thead><tr><th>Kennzahl</th><th>Wert</th></tr></thead><tbody id="qualityRows"></tbody></table>
+    <div class="hr"></div><canvas id="qualityChart" height="230" style="width:100%;"></canvas>
+  </section>
+
+  <section id="season" class="run-panel card">
+    <p class="small"><strong>Was lässt sich beobachten?</strong> Saisoneffekte erhöhen oft Menge und Ausgaben.</p>
+    <p class="small"><strong>Wie erklärt das die Theorie?</strong> Saisonale Präferenzen verändern Zahlungsbereitschaft und Nachfragehöhe.</p>
+    <table class="table"><thead><tr><th>Runde</th><th>Ausgaben Käufer</th><th>Absatzmenge</th><th>Ø Preis</th></tr></thead><tbody id="seasonRows"></tbody></table>
+    <div class="hr"></div><canvas id="seasonChart" height="230" style="width:100%;"></canvas>
+  </section>
+</main>
+
+<script src="auswertung-common.js"></script>
+<script>
+let data = [];
+
+function activateTab(id){
+  document.querySelectorAll('.run-tab').forEach((b)=>b.classList.toggle('active', b.dataset.tab === id));
+  document.querySelectorAll('.run-panel').forEach((p)=>p.classList.toggle('active', p.id === id));
+}
+
+document.querySelectorAll('.run-tab').forEach((btn)=>btn.addEventListener('click', ()=>activateTab(btn.dataset.tab)));
+
+function render(){
+  const all = EisAuswertung.getAllData();
+  const split = EisAuswertung.splitRounds(all);
+  data = EisAuswertung.aggregateByRound(split.round2U, split.round2K);
+  if(!data.length){ data = EisAuswertung.aggregateByRound(all.roundsU, all.roundsK).filter((r)=>r.round >= 2); }
+
+  const avg = data.length ? data.reduce((s,r)=>s+r.avgPrice,0)/data.length : 0;
+  const qty = data.reduce((s,r)=>s+r.sold,0);
+  const spread = data.length ? data.reduce((s,r)=>s+r.priceSpread,0)/data.length : 0;
+  const success = data.reduce((s,r)=>s+r.successfulSales,0);
+
+  document.getElementById('ov1').textContent = 'Ø Preis: ' + (avg ? avg.toFixed(2) + ' €' : '–');
+  document.getElementById('ov2').textContent = 'Gesamtmenge: ' + qty;
+  document.getElementById('ov3').textContent = 'Preisstreuung: ' + spread.toFixed(2) + ' €';
+  document.getElementById('ov4').textContent = 'Erfolgreiche Verkäufe: ' + success;
+
+  EisAuswertung.renderTable('demandRows', data, [
+    { render: (r)=>r.round }, { render: (r)=>r.avgPrice.toFixed(2) + ' €' }, { render: (r)=>r.sold }, { render: (r)=>r.buyerSpent.toFixed(2) + ' €' }
+  ]);
+
+  EisAuswertung.renderTable('costRows', data, [
+    { render: (r)=>r.round },
+    { render: (r)=>r.avgPrice.toFixed(2) + ' €' },
+    { render: (r)=>r.sellerProfit.toFixed(2) + ' €' },
+    { render: (r)=> {
+      const prev = data.find((x)=>x.round === r.round - 1);
+      return prev ? (r.avgPrice - prev.avgPrice).toFixed(2) + ' €' : '–';
+    } }
+  ]);
+
+  const state = all.stateV2?.game || {};
+  const sellers = Array.isArray(state.sellers) ? state.sellers : [];
+  const premium = sellers.filter((s)=>String(s.profileId||'').includes('premium')).length;
+  const discounter = sellers.filter((s)=>String(s.profileId||'').includes('discounter')).length;
+  EisAuswertung.renderTable('qualityRows', [
+    { name: 'Verkäuferprofile (gesamt)', value: sellers.length || '–' },
+    { name: 'Premium-Profile', value: premium },
+    { name: 'Discounter-Profile', value: discounter },
+    { name: 'Aktiver Image-Effekt', value: state.roundModifiers?.imageEffect || 'neutral' }
+  ], [
+    { render: (r)=>r.name }, { render: (r)=>r.value }
+  ]);
+
+  EisAuswertung.renderTable('seasonRows', data, [
+    { render: (r)=>r.round }, { render: (r)=>r.buyerSpent.toFixed(2) + ' €' }, { render: (r)=>r.sold }, { render: (r)=>r.avgPrice.toFixed(2) + ' €' }
+  ]);
+
+  EisAuswertung.drawLineChart('overviewChart', data.map((r)=>r.round), data.map((r)=>r.avgPrice), '#1f4e79');
+  EisAuswertung.drawLineChart('demandChart', data.map((r)=>r.round), data.map((r)=>r.demandQty), '#b45309');
+  EisAuswertung.drawLineChart('costChart', data.map((r)=>r.round), data.map((r)=>r.sellerProfit), '#0f766e');
+  EisAuswertung.drawLineChart('qualityChart', data.map((r)=>r.round), data.map((r)=>r.priceSpread), '#7c3aed');
+  EisAuswertung.drawLineChart('seasonChart', data.map((r)=>r.round), data.map((r)=>r.sold), '#ea580c');
+}
+window.addEventListener('resize', render);
+render();
+</script>
+</body>
+</html>

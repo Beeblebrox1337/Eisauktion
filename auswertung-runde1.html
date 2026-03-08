@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Runde 1: Modellbildung – Eisauktion</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<header class="sitebar"><div class="navwrap"><div class="brand"><span class="dot"></span>Eisauktion</div><nav>
+<a href="index.html">Übersicht</a><a href="spielerklaerung.html">Spielerklärung</a>
+<div class="navdrop"><a class="navdrop-toggle" href="#">Theorie ▾</a><div class="navdrop-menu"><a href="theorie-absolute-konkurrenz.html">Absolute Konkurrenz</a><a href="theorie-speiseeis-markt.html">Speiseeismarkt: Realität vs. Modell</a></div></div>
+<a href="fragebogen.html">Fragebogen</a>
+<div class="navdrop"><a class="navdrop-toggle" href="#">Rollenkarten ▾</a><div class="navdrop-menu"><a href="rolle-unternehmen.html">Rolle: Unternehmen</a><a href="rolle-kaeufer.html">Rolle: Käufer</a><a href="rolle-moderation.html">Rolle: Moderation / Lehrer</a></div></div>
+<div class="navdrop"><a class="navdrop-toggle active" href="#">Auswertung ▾</a><div class="navdrop-menu"><a href="auswertung.html">Daten versenden</a><a class="active" href="auswertung-runde1.html">Runde 1: Modellbildung</a><a href="auswertung-runde2.html">Runde 2: Der komplexe Markt</a></div></div>
+<a href="impressum.html">Impressum</a>
+</nav></div></header>
+
+<main class="container">
+  <h1>Runde 1: Modellbildung</h1>
+  <p class="lead">Fokus: Entsteht ein Gleichgewichtspreis? Wie passen Angebot und Nachfrage zusammen?</p>
+
+  <section class="card">
+    <div class="grid three">
+      <div class="result" id="avgPrice">Ø Preis: –</div>
+      <div class="result" id="qty">Verkaufte Menge: –</div>
+      <div class="result" id="excess">Überhang: –</div>
+    </div>
+    <p class="small" style="margin-top:10px;"><strong>Was lässt sich beobachten?</strong> Wenn die Nachfrage höher als das Angebot ist, steigen Preise oft. Bei zu viel Angebot sinken sie eher.</p>
+    <p class="small"><strong>Wie erklärt das die Theorie?</strong> Das passt zum Modell der vollständigen Konkurrenz: Der Marktpreis bewegt sich in Richtung Gleichgewicht.</p>
+  </section>
+
+  <section class="card">
+    <h2>Tabelle: Preise und Mengen</h2>
+    <table class="table"><thead><tr><th>Runde</th><th>Ø Preis</th><th>Angebot</th><th>Nachfrage</th><th>Verkauft</th></tr></thead><tbody id="round1Rows"></tbody></table>
+  </section>
+
+  <section class="card">
+    <h2>Einfache Diagramme</h2>
+    <label>Preisverlauf</label>
+    <canvas id="priceChart" height="240" style="width:100%;"></canvas>
+    <div class="hr"></div>
+    <label>Angebot vs. Nachfrage</label>
+    <canvas id="sdChart" height="240" style="width:100%;"></canvas>
+  </section>
+</main>
+
+<script src="auswertung-common.js"></script>
+<script>
+function render(){
+  const all = EisAuswertung.getAllData();
+  const split = EisAuswertung.splitRounds(all);
+  const agg = EisAuswertung.aggregateByRound(split.round1U, split.round1K);
+  const use = agg.length ? agg : EisAuswertung.aggregateByRound(all.roundsU, all.roundsK).filter((r)=>r.round <= 1);
+
+  EisAuswertung.renderTable('round1Rows', use, [
+    { render: (r)=>r.round },
+    { render: (r)=>r.avgPrice ? r.avgPrice.toFixed(2) + ' €' : '–' },
+    { render: (r)=>r.planned },
+    { render: (r)=>r.demandQty },
+    { render: (r)=>r.sold }
+  ]);
+
+  const totalSold = use.reduce((s,r)=>s+r.sold,0);
+  const totalPlanned = use.reduce((s,r)=>s+r.planned,0);
+  const totalDemand = use.reduce((s,r)=>s+r.demandQty,0);
+  const prices = use.map((r)=>r.avgPrice).filter((v)=>v>0);
+  const avg = prices.length ? prices.reduce((s,v)=>s+v,0)/prices.length : 0;
+
+  document.getElementById('avgPrice').textContent = 'Ø Preis: ' + (avg ? avg.toFixed(2) + ' €' : '–');
+  document.getElementById('qty').textContent = 'Verkaufte Menge: ' + totalSold;
+  document.getElementById('excess').textContent = 'Überhang: ' + (totalDemand-totalPlanned);
+
+  EisAuswertung.drawLineChart('priceChart', use.map((r)=>r.round), use.map((r)=>r.avgPrice), '#1f4e79');
+  EisAuswertung.drawLineChart('sdChart', use.map((r)=>r.round), use.map((r)=>r.demandQty-r.planned), '#b45309');
+}
+window.addEventListener('resize', render);
+render();
+</script>
+</body>
+</html>
