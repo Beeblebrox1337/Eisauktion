@@ -59,6 +59,8 @@
       currentRound: 1,
       sellers: [],
       buyers: [],
+      currentScenarioId: '',
+      scenarioNotes: '',
       roundModifiers: defaultRoundModifiers()
     };
   }
