@@ -50,8 +50,34 @@
   <h1>Rolle: Unternehmen (Anbieter)</h1>
   <p class="lead">Ihr seid Preisnehmer. Eure Kernentscheidung pro Runde: <strong>Produzieren – und wie viel?</strong></p>
 
+  <div class="run-tabs" id="sellerTabs">
+    <button class="run-tab" data-run="1" type="button">Runde 1</button>
+    <button class="run-tab" data-run="2" type="button">Runde 2</button>
+  </div>
+
+  <section class="card run-panel" id="sellerRun1Intro">
+    <h2>Runde 1: Standard-Situation</h2>
+    <p class="small">Hier arbeitet ihr mit euren üblichen Annahmen aus dem ersten Durchgang.</p>
+  </section>
+
+  <section class="card run-panel" id="sellerRun2Intro">
+    <h2>Runde 2: Profil aus Fragebogen</h2>
+    <div id="sellerRun2Missing" class="note" style="display:none;">Für Runde 2 ist noch kein Verkäuferprofil gespeichert. Bitte im <a href="fragebogen.html">Fragebogen (Durchgang 2)</a> ein Profil auswählen.</div>
+    <div id="sellerRun2Data" style="display:none;">
+      <div class="profile-box">
+        <div><strong id="sellerProfileLabel">–</strong></div>
+        <div class="small" id="sellerProfileDesc">–</div>
+      </div>
+      <div class="grid two" style="margin-top:10px;">
+        <div class="result" id="sellerProfileBudget">Startbudget: –</div>
+        <div class="result" id="sellerProfileVarCost">Variable Kosten: –</div>
+      </div>
+      <p class="small" id="sellerProfileHints" style="margin-top:8px;">–</p>
+    </div>
+  </section>
+
   <!-- NEU: Überblick aus Fragebogen -->
-  <section class="card">
+  <section class="card" id="legacyQuestionnaireSection">
     <div class="row" style="justify-content:space-between; align-items:flex-start;">
       <div>
         <h2 style="margin:0 0 6px;">Unternehmensdaten (aus Fragebogen)</h2>
@@ -239,6 +265,7 @@
   </section>
 </main>
 
+<script src="app-state.js"></script>
 <script>
 function num(v){
   const n = Number(String(v ?? '').replace(',', '.'));
@@ -288,8 +315,38 @@ function addSeller(){
   grid.appendChild(wrap);
 }
 
+
+let sellerActiveRun = 1;
+function setSellerRun(run){
+  sellerActiveRun = Number(run) || 1;
+  document.querySelectorAll('#sellerTabs .run-tab').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.run) === sellerActiveRun));
+  document.getElementById('sellerRun1Intro').classList.toggle('active', sellerActiveRun === 1);
+  document.getElementById('sellerRun2Intro').classList.toggle('active', sellerActiveRun === 2);
+  const st = EisauktionState.readState();
+  st.lastUsed.sellerRoleRun = sellerActiveRun;
+  EisauktionState.writeState(st);
+}
+
+function renderSellerRun2Profile(){
+  const st = EisauktionState.readState();
+  const model = st.roles?.seller?.run2 || EisauktionState.makeSellerRun2Model(st.questionnaire?.run2 || {});
+  const miss = document.getElementById('sellerRun2Missing');
+  const data = document.getElementById('sellerRun2Data');
+  if(!model){
+    miss.style.display = 'block'; data.style.display = 'none'; return;
+  }
+  miss.style.display = 'none'; data.style.display = 'block';
+  sellerProfileLabel.textContent = model.profileLabel;
+  sellerProfileDesc.textContent = model.profileDescription;
+  sellerProfileBudget.textContent = `Startbudget: ${eur(Number(model.baseValues.startBudget || 0))}`;
+  sellerProfileVarCost.textContent = `Variable Kosten: ${eur(Number(model.baseValues.variableCost || 0))} pro Einheit`;
+  sellerProfileHints.textContent = model.hints || '';
+}
+
 function loadQuestionnaire(){
-  const raw = localStorage.getItem("eisauktion_questionnaire");
+  const state = EisauktionState.readState();
+  const q2 = state.questionnaire?.run2 || {};
+  const raw = localStorage.getItem("eisauktion_questionnaire") || JSON.stringify(state.questionnaire?.run1 || {});
   const missingBox = document.getElementById("q_missing");
   const summaryBox = document.getElementById("q_summary");
 
@@ -598,6 +655,10 @@ window.addEventListener("resize", () => {
 });
 
 // Init
+document.querySelectorAll('#sellerTabs .run-tab').forEach(btn => btn.addEventListener('click', () => setSellerRun(btn.dataset.run)));
+const sellerState = EisauktionState.readState();
+setSellerRun(sellerState.lastUsed?.sellerRoleRun || 1);
+renderSellerRun2Profile();
 loadQuestionnaire();
 loadSaved();
 </script>
