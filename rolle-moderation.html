@@ -16,7 +16,24 @@
     .hidden{display:none;}
     .status-line{font-size:13px;color:var(--muted);margin-top:8px;}
     .inline-note{background:#eef6ff;border:1px solid #dbeafe;border-radius:10px;padding:10px;font-size:14px;color:#1e3a5f;}
-    @media (max-width:900px){.group-list,.stat-grid{grid-template-columns:1fr;}}
+    .scenario-accordion summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;font-weight:600;}
+    .scenario-accordion summary::-webkit-details-marker{display:none;}
+    .scenario-accordion summary::after{content:'▾';font-size:16px;color:var(--muted);transition:transform .2s ease;}
+    .scenario-accordion[open] summary::after{transform:rotate(180deg);}
+    .scenario-intro{margin:0 0 14px;font-size:14px;color:var(--muted);}
+    .scenario-status{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);font-size:14px;color:#1e3a5f;}
+    .scenario-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+    .scenario-card{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px;}
+    .scenario-card h3{margin-bottom:6px;}
+    .scenario-tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:#eef6ff;color:#1e3a5f;margin:4px 0 10px;}
+    .scenario-block{margin-top:8px;}
+    .scenario-block h4{margin-bottom:5px;font-size:14px;}
+    .scenario-list{margin:0;padding-left:18px;}
+    .scenario-list li{margin:3px 0;}
+    .round-list{display:grid;gap:8px;}
+    .round-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 10px;}
+    .round-item strong{display:block;margin-bottom:4px;}
+    @media (max-width:900px){.group-list,.stat-grid,.scenario-grid{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
@@ -186,6 +203,17 @@
     <h2>5) Spielparameter / dynamische Eingriffe</h2>
     <p class="inline-note">Die obenigen Werte werden als <strong>roundModifiers</strong> im zentralen Datenmodell gespeichert und sind vorbereitet für spätere automatische Marktberechnungen, Nachfragekurven und Auswertungsdiagramme.</p>
   </section>
+
+
+  <section class="card">
+    <h2>6) Marktszenarien</h2>
+    <details class="scenario-accordion" id="scenario-accordion">
+      <summary>Optionaler didaktischer Zusatzbereich für theoriegeleitete Marktimpulse</summary>
+      <p class="scenario-intro">Die Szenarien sind Moderationsleitfäden. Sie greifen die Theorie zu <strong>Absolute Konkurrenz</strong> und <strong>Speiseeismarkt: Realität vs. Modell</strong> auf, ohne automatische Marktberechnung.</p>
+      <p class="scenario-status" id="scenario-status">Aktuelles Szenario: keines ausgewählt.</p>
+      <div class="scenario-grid" id="scenario-list"></div>
+    </details>
+  </section>
 </main>
 
 <script src="app-state.js"></script>
@@ -200,6 +228,146 @@
 
   const sellerForm = document.getElementById('seller-form');
   const buyerForm = document.getElementById('buyer-form');
+
+  const MARKET_SCENARIOS = [
+    {
+      id: 'perfect-competition',
+      title: 'Perfekter Wettbewerb',
+      theoryTag: 'Modellbezug: Absolute Konkurrenz',
+      description: 'Viele Anbieter und Käufer treffen unter ähnlichen Bedingungen aufeinander.',
+      mechanism: 'Starke Konkurrenz bei vergleichbaren Angeboten; der Preis tendiert zum Marktgleichgewicht.',
+      sellerDistribution: [
+        '2 Discounter / Massenanbieter',
+        '1 Innenstadt-Eisdiele',
+        '1 Premium-Eisdiele',
+        '1 Mobiler Eiswagen'
+      ],
+      buyerDistribution: [
+        '3 preisorientierte Käufer',
+        '2 spontane Sommerkäufer',
+        '1 budgetknapper Käufer'
+      ],
+      rounds: [
+        { round: 1, title: 'Neutraler Marktstart', inputs: ['Saison: neutral', 'Nachfrage: normal', 'Keine zusätzlichen Effekte'] },
+        { round: 2, title: 'Leichte Preisunterbietung', inputs: ['Wettbewerb leicht erhöhen', 'Einzelne Anbieter unterbieten den Standardpreis', 'Preisbewegung sichtbar machen'] },
+        { round: 3, title: 'Stabilisierung im Wettbewerb', inputs: ['Marktgleichgewicht diskutieren', 'Preisniveau vergleichen', 'Gewinne/Verluste reflektieren'] }
+      ]
+    },
+    {
+      id: 'heatwave-demand-shock',
+      title: 'Nachfrageschock durch Hitzewelle',
+      theoryTag: 'Realitätsbezug: Speiseeismarkt',
+      description: 'Sehr warmes Wetter erhöht die Nachfrage nach Speiseeis deutlich.',
+      mechanism: 'Die Nachfrage steigt; Gleichgewichtspreis und spontane Käufe können zunehmen.',
+      sellerDistribution: [
+        '2 Discounter / Massenanbieter',
+        '1 Innenstadt-Eisdiele',
+        '1 Mobiler Eiswagen'
+      ],
+      buyerDistribution: [
+        '3 spontane Sommerkäufer',
+        '2 preisorientierte Käufer',
+        '1 treuer Stammkunde'
+      ],
+      rounds: [
+        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'] },
+        { round: 2, title: 'Hitzewelle setzt ein', inputs: ['Saison-Effekt: hohe Nachfrage', 'Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Verkäufer können Preiserhöhungen testen'] },
+        { round: 3, title: 'Markt passt sich an', inputs: ['Absatz und Wartezeiten vergleichen', 'Angebot ausweiten prüfen', 'Preisentwicklung beobachten'] }
+      ]
+    },
+    {
+      id: 'cost-crisis',
+      title: 'Kostenkrise / Preisschock durch externe Effekte',
+      theoryTag: 'Realitätsbezug: externe Störungen',
+      description: 'Externe Ereignisse wie Energiepreise, Lieferprobleme oder Politik erhöhen Kosten.',
+      mechanism: 'Die Angebotsseite gerät unter Druck; variable Kosten steigen, Preise steigen oder Gewinne sinken.',
+      sellerDistribution: [
+        '1 Discounter / Massenanbieter',
+        '1 Innenstadt-Eisdiele',
+        '1 Premium-Eisdiele',
+        '1 Kleiner Anbieter mit wenig Kapital'
+      ],
+      buyerDistribution: [
+        '2 preisorientierte Käufer',
+        '2 qualitätsorientierte Käufer',
+        '1 budgetknapper Käufer'
+      ],
+      rounds: [
+        { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Kostenänderung: keine'] },
+        { round: 2, title: 'Kostenanstieg', inputs: ['Kostenänderung: Energiepreisschock (+0,3)', 'Externe Ereignisse kurz ansagen', 'Kalkulationsdruck thematisieren'] },
+        { round: 3, title: 'Anpassungsphase', inputs: ['Preiserhöhungen oder Mengenreduktion zulassen', 'Risikogruppen vergleichen', 'Gewinnmargen diskutieren'] }
+      ]
+    },
+    {
+      id: 'premium-quality-boom',
+      title: 'Premium-Trend / Qualitätsboom',
+      theoryTag: 'Modell + Realität: Präferenzen und Differenzierung',
+      description: 'Käufer achten stärker auf Qualität, Image und besondere Angebote.',
+      mechanism: 'Qualitäts- und Imageeffekte werden wichtiger; Preis ist nicht das einzige Kriterium.',
+      sellerDistribution: [
+        '2 Premium-Eisdielen',
+        '1 Innenstadt-Eisdiele',
+        '1 Discounter / Massenanbieter'
+      ],
+      buyerDistribution: [
+        '2 qualitätsorientierte Käufer',
+        '2 imageorientierte Käufer',
+        '1 treuer Stammkunde'
+      ],
+      rounds: [
+        { round: 1, title: 'Neutraler Marktstart', inputs: ['Image-Effekt: neutral', 'Nachfrage: normal'] },
+        { round: 2, title: 'Qualitätsbewusstsein steigt', inputs: ['Image-Effekt: Qualitätsbewusstsein', 'Kommunikation zu Qualität und Markenwirkung fördern', 'Preisvergleich relativieren'] },
+        { round: 3, title: 'Premiumanbieter im Vorteil', inputs: ['Premiumabsatz prüfen', 'Käuferpräferenzen reflektieren', 'Modellgrenzen zur Realität diskutieren'] }
+      ]
+    },
+    {
+      id: 'market-saturation',
+      title: 'Marktsättigung / zu viele Anbieter',
+      theoryTag: 'Modellbezug: Wettbewerbsdruck',
+      description: 'Es gibt mehr Verkäufer, als der Markt kurzfristig aufnehmen kann.',
+      mechanism: 'Starker Wettbewerb senkt Preise; Anbieter mit wenig Kapital stehen unter Druck.',
+      sellerDistribution: [
+        '2 Discounter / Massenanbieter',
+        '1 Innenstadt-Eisdiele',
+        '1 Premium-Eisdiele',
+        '1 Mobiler Eiswagen',
+        '1 Kleiner Anbieter mit wenig Kapital'
+      ],
+      buyerDistribution: [
+        '2 preisorientierte Käufer',
+        '1 spontane Sommerkäufer',
+        '1 budgetknapper Käufer'
+      ],
+      rounds: [
+        { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Nachfrage: leicht zurückhaltend'] },
+        { round: 2, title: 'Intensiver Preiswettbewerb', inputs: ['Preisunterbietung aktiv anregen', 'Nachfrage-Schock: keine', 'Margendruck sichtbar machen'] },
+        { round: 3, title: 'Anbieter unter Druck', inputs: ['Kapitalschwache Anbieter fokussieren', 'Mengenanpassung diskutieren', 'Austrittsrisiko besprechen'] }
+      ]
+    },
+    {
+      id: 'tourism-boom',
+      title: 'Tourismusboom / externer Nachfrageanstieg',
+      theoryTag: 'Realitätsbezug: externer Nachfrageimpuls',
+      description: 'Zusätzliche Käufergruppen kommen vorübergehend von außen auf den Markt.',
+      mechanism: 'Zeitweise höhere Nachfrage erhöht Absatzchancen; Preise und Mengen können steigen.',
+      sellerDistribution: [
+        '2 Discounter / Massenanbieter',
+        '1 Innenstadt-Eisdiele',
+        '1 Mobiler Eiswagen',
+        '1 Premium-Eisdiele'
+      ],
+      buyerDistribution: [
+        '3 spontane Sommerkäufer',
+        '2 preisorientierte Käufer',
+        '1 zusätzliche externe Käufergruppe'
+      ],
+      rounds: [
+        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'] },
+        { round: 2, title: 'Tourismusboom', inputs: ['Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Zusätzliche Käufer ankündigen', 'Verkäufer: Kapazität testen'] },
+        { round: 3, title: 'Marktreaktion', inputs: ['Preis- und Mengenanpassungen vergleichen', 'Standortvorteile bewerten', 'Kurzfristige Boom-Effekte reflektieren'] }
+      ]
+    }
+  ];
 
   function makeId(prefix){
     return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
@@ -217,6 +385,7 @@
     app.writeState(state);
     document.getElementById('storage-status').textContent = 'Datenstand: ' + message;
     renderOverview();
+    renderScenarioStatus();
   }
 
   function renderOverview(){
@@ -363,6 +532,92 @@
     form.locationCost.value = mods.locationCost;
   }
 
+  function renderScenarioStatus(){
+    const activeScenario = MARKET_SCENARIOS.find((entry) => entry.id === game.currentScenarioId);
+    const status = document.getElementById('scenario-status');
+    if(!activeScenario){
+      status.textContent = 'Aktuelles Szenario: keines ausgewählt.';
+      return;
+    }
+    status.textContent = 'Aktuelles Szenario: ' + activeScenario.title + ' – Hinweise wurden als Leitfaden gespeichert.';
+  }
+
+  function applyRoundSuggestion(mods){
+    game.roundModifiers = Object.assign({}, game.roundModifiers, mods);
+    loadRoundModifiers();
+  }
+
+  function useScenario(scenario){
+    game.currentScenarioId = scenario.id;
+    game.scenarioNotes = scenario.rounds
+      .map((round) => 'Runde ' + round.round + ': ' + round.title + ' | ' + round.inputs.join(' · '))
+      .join(' || ');
+
+    const secondRound = scenario.rounds.find((round) => round.round === 2);
+    const roundHint = (secondRound?.inputs || []).join(' ').toLowerCase();
+    const suggestedMods = {
+      seasonEffect: roundHint.includes('hohe nachfrage') || roundHint.includes('hitzewelle') ? 'high-demand' : 'neutral',
+      demandShock: roundHint.includes('stadtfest') || roundHint.includes('tourismus') || roundHint.includes('nachfrageplus') ? 'event-boom' : 'none',
+      costChange: roundHint.includes('energiepreisschock') || roundHint.includes('kostenanstieg') ? 'energy+0.3' : 'none',
+      imageEffect: roundHint.includes('qualitätsbewusstsein') ? 'quality-focus' : 'neutral'
+    };
+
+    applyRoundSuggestion(suggestedMods);
+    save('Szenario „' + scenario.title + '“ als Leitfaden aktiviert.');
+    renderScenarioStatus();
+  }
+
+  function renderScenarios(){
+    const list = document.getElementById('scenario-list');
+    list.innerHTML = '';
+
+    MARKET_SCENARIOS.forEach((scenario) => {
+      const card = document.createElement('article');
+      card.className = 'scenario-card';
+      card.innerHTML = `
+        <h3>${scenario.title}</h3>
+        <div class="scenario-tag">Theoriebezug: ${scenario.theoryTag}</div>
+        <p>${scenario.description}</p>
+        <div class="scenario-block">
+          <h4>Ökonomischer Mechanismus</h4>
+          <p>${scenario.mechanism}</p>
+        </div>
+        <div class="scenario-block">
+          <h4>Empfohlene Startverteilung</h4>
+          <strong>Verkäuferprofile</strong>
+          <ul class="scenario-list">${scenario.sellerDistribution.map((item) => `<li>${item}</li>`).join('')}</ul>
+          <strong>Käuferprofile</strong>
+          <ul class="scenario-list">${scenario.buyerDistribution.map((item) => `<li>${item}</li>`).join('')}</ul>
+        </div>
+        <div class="scenario-block">
+          <h4>Vorschläge für rundenweise Inputs</h4>
+          <div class="round-list">
+            ${scenario.rounds.map((round) => `
+              <div class="round-item">
+                <strong>Runde ${round.round}: ${round.title}</strong>
+                <ul class="scenario-list">${round.inputs.map((item) => `<li>${item}</li>`).join('')}</ul>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const actionRow = document.createElement('div');
+      actionRow.className = 'group-actions';
+      const useButton = document.createElement('button');
+      useButton.type = 'button';
+      useButton.className = 'btn secondary';
+      useButton.textContent = 'Szenario verwenden';
+      useButton.addEventListener('click', () => useScenario(scenario));
+      actionRow.appendChild(useButton);
+      card.appendChild(actionRow);
+
+      list.appendChild(card);
+    });
+
+    renderScenarioStatus();
+  }
+
   document.getElementById('open-seller-form').addEventListener('click', () => {
     resetSellerForm();
     sellerForm.classList.toggle('hidden');
@@ -462,6 +717,8 @@
     game.sellers = state.game.sellers;
     game.buyers = state.game.buyers;
     game.roundModifiers = state.game.roundModifiers;
+    game.currentScenarioId = state.game.currentScenarioId || '';
+    game.scenarioNotes = state.game.scenarioNotes || '';
     renderSellerCards();
     renderBuyerCards();
     loadRoundModifiers();
@@ -477,6 +734,7 @@
   renderOverview();
   renderSellerCards();
   renderBuyerCards();
+  renderScenarios();
   save('Daten aus LocalStorage geladen.');
 })();
 </script>
