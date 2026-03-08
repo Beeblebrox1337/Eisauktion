@@ -541,3 +541,19 @@ textarea{
 .run-panel{display:none;}
 .run-panel.active{display:block;}
 .profile-box{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:10px;}
+
+.budget-meta .result{
+  margin-bottom:0;
+}
+
+#buyerBudgetPlanner .small{
+  font-size:14px;
+}
+
+#spending_out{
+  margin-top:10px;
+  background:#f8fafc;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+}

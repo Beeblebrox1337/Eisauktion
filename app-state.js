@@ -36,12 +36,42 @@
   };
 
   const BUYER_PROFILES = {
-    'preisorientiert': { label: 'Preisorientierter Käufer', description: 'Du achtest vor allem auf den günstigsten Preis und wechselst schnell den Anbieter.', preferences: { priceFocus: 3, qualityFocus: 1, brandFocus: 1 } },
-    'qualitaet': { label: 'Qualitätsorientierter Käufer', description: 'Du kaufst lieber gutes Eis, auch wenn es etwas teurer ist.', preferences: { priceFocus: 1, qualityFocus: 3, brandFocus: 1 } },
-    'image': { label: 'Imageorientierter Käufer', description: 'Dir ist wichtig, bei welchem Anbieter du kaufst und wie er wirkt.', preferences: { priceFocus: 1, qualityFocus: 2, brandFocus: 3 } },
-    'budgetknapp': { label: 'Budgetknapper Käufer', description: 'Du hast wenig Geld und musst sehr genau rechnen.', preferences: { priceFocus: 3, qualityFocus: 1, brandFocus: 1 } },
-    'sommer': { label: 'Spontaner Sommerkäufer', description: 'Bei Hitze kaufst du spontan, wenn Angebot und Preis gerade passen.', preferences: { priceFocus: 2, qualityFocus: 2, brandFocus: 1 } },
-    'stammkunde': { label: 'Treuer Stammkunde', description: 'Du bleibst oft bei deinem Lieblingsanbieter, wenn die Qualität stimmt.', preferences: { priceFocus: 1, qualityFocus: 2, brandFocus: 3 } }
+    'preisorientiert': {
+      label: 'Preisorientierter Käufer',
+      description: 'Du achtest vor allem auf den günstigsten Preis und wechselst schnell den Anbieter.',
+      preferences: { priceFocus: 3, qualityFocus: 1, brandFocus: 1 },
+      spendingHint: 'Du kaufst meist nur bei günstigen Preisen. Spare eher Geld für später.'
+    },
+    'qualitaet': {
+      label: 'Qualitätsorientierter Käufer',
+      description: 'Du kaufst lieber gutes Eis, auch wenn es etwas teurer ist.',
+      preferences: { priceFocus: 1, qualityFocus: 3, brandFocus: 1 },
+      spendingHint: 'Plane genug Budget für bessere Qualität ein und vergleiche trotzdem Preise.'
+    },
+    'image': {
+      label: 'Imageorientierter Käufer',
+      description: 'Dir ist wichtig, bei welchem Anbieter du kaufst und wie er wirkt.',
+      preferences: { priceFocus: 1, qualityFocus: 2, brandFocus: 3 },
+      spendingHint: 'Marke und Eindruck sind dir wichtig. Halte etwas Budget für passende Angebote frei.'
+    },
+    'budgetknapp': {
+      label: 'Budgetknapper Käufer',
+      description: 'Du hast wenig Geld und musst sehr genau rechnen.',
+      preferences: { priceFocus: 3, qualityFocus: 1, brandFocus: 1 },
+      spendingHint: 'Du musst besonders vorsichtig mit deinem Geld umgehen.'
+    },
+    'sommer': {
+      label: 'Spontaner Sommerkäufer',
+      description: 'Bei Hitze kaufst du spontan, wenn Angebot und Preis gerade passen.',
+      preferences: { priceFocus: 2, qualityFocus: 2, brandFocus: 1 },
+      spendingHint: 'Bei guten Marktbedingungen gibst du eher viel Geld aus.'
+    },
+    'stammkunde': {
+      label: 'Treuer Stammkunde',
+      description: 'Du bleibst oft bei deinem Lieblingsanbieter, wenn die Qualität stimmt.',
+      preferences: { priceFocus: 1, qualityFocus: 2, brandFocus: 3 },
+      spendingHint: 'Du bleibst oft loyal. Plane ein stabiles Budget für deinen Lieblingsanbieter.'
+    }
   };
 
   function defaultRoundModifiers(){
