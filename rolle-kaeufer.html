@@ -49,6 +49,24 @@
   <h1>Rolle: Käufer (Nachfrager)</h1>
   <p class="lead">Euer Ziel: <strong>möglichst viel Eis</strong> für euer <strong>begrenztes Budget</strong> bekommen.</p>
 
+  <div class="run-tabs" id="buyerTabs">
+    <button class="run-tab" data-run="1" type="button">Runde 1</button>
+    <button class="run-tab" data-run="2" type="button">Runde 2</button>
+  </div>
+
+  <section class="card run-panel" id="buyerRun1Intro">
+    <h2>Runde 1: Freie Käuferentscheidung</h2>
+    <p class="small">Ihr entscheidet vor allem über Preisvergleich und Budgeteinsatz.</p>
+  </section>
+
+  <section class="card run-panel" id="buyerRun2Intro">
+    <h2>Runde 2: Käuferprofil wählen</h2>
+    <label>Käuferprofil</label>
+    <select id="buyerProfileSelect"><option value="">Bitte Rollenprofil auswählen</option></select>
+    <div class="profile-box small" id="buyerProfileDesc">Bitte zuerst ein Profil auswählen.</div>
+    <p class="small" id="buyerProfileHints">Fokus in Runde 2: Preis, Qualität, Budget, Gewohnheit und Image.</p>
+  </section>
+
   <section class="card">
     <h2>Phasen je Runde</h2>
     <ol>
@@ -100,12 +118,12 @@
         <label>Anbieter A (€)</label>
         <input id="pa" data-seller-key="a" type="number" step="0.01" placeholder="z. B. 1.30"/>
       </div>
-    
+
       <div class="seller-item">
         <label>Anbieter B (€)</label>
         <input id="pb" data-seller-key="b" type="number" step="0.01" placeholder="z. B. 1.20"/>
       </div>
-    
+
       <div class="seller-item">
         <label>Anbieter C (€)</label>
         <input id="pc" data-seller-key="c" type="number" step="0.01" placeholder="z. B. 1.50"/>
@@ -195,7 +213,47 @@
   </section>
 </main>
 
+<script src="app-state.js"></script>
 <script>
+
+let buyerActiveRun = 1;
+function setBuyerRun(run){
+  buyerActiveRun = Number(run) || 1;
+  document.querySelectorAll('#buyerTabs .run-tab').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.run) === buyerActiveRun));
+  document.getElementById('buyerRun1Intro').classList.toggle('active', buyerActiveRun === 1);
+  document.getElementById('buyerRun2Intro').classList.toggle('active', buyerActiveRun === 2);
+  const st = EisauktionState.readState();
+  st.lastUsed.buyerRoleRun = buyerActiveRun;
+  EisauktionState.writeState(st);
+}
+
+function initBuyerProfiles(){
+  const sel = document.getElementById('buyerProfileSelect');
+  Object.entries(EisauktionState.BUYER_PROFILES).forEach(([id,p]) => {
+    const opt = document.createElement('option'); opt.value = id; opt.textContent = p.label; sel.appendChild(opt);
+  });
+  const st = EisauktionState.readState();
+  if(st.roles?.buyer?.run2?.profileId) sel.value = st.roles.buyer.run2.profileId;
+  updateBuyerProfileView();
+  sel.addEventListener('change', () => {
+    const st2 = EisauktionState.readState();
+    const profile = EisauktionState.BUYER_PROFILES[sel.value];
+    st2.roles.buyer.run2 = profile ? {
+      run:2, role:'buyer', profileId: sel.value, profileLabel: profile.label, profileDescription: profile.description,
+      preferences: profile.preferences, dynamicModifiers: { season:0, budgetShift:0, trendInfluence:0 }
+    } : null;
+    EisauktionState.writeState(st2);
+    updateBuyerProfileView();
+  });
+}
+
+function updateBuyerProfileView(){
+  const sel = document.getElementById('buyerProfileSelect');
+  const p = EisauktionState.BUYER_PROFILES[sel.value];
+  buyerProfileDesc.textContent = p ? p.description : 'Bitte zuerst ein Profil auswählen.';
+  buyerProfileHints.textContent = p ? `Entscheidungslogik: Preis ${p.preferences.priceFocus}/3, Qualität ${p.preferences.qualityFocus}/3, Marke/Image ${p.preferences.brandFocus}/3.` : 'Fokus in Runde 2: Preis, Qualität, Budget, Gewohnheit und Image.';
+}
+
 function num(v){
   const n = Number(String(v ?? '').replace(',', '.'));
   return Number.isFinite(n) ? n : 0;
@@ -545,6 +603,10 @@ function renderPriceChart(arr){
   ctx.restore();
 }
 
+document.querySelectorAll('#buyerTabs .run-tab').forEach(btn => btn.addEventListener('click', () => setBuyerRun(btn.dataset.run)));
+const buyerState = EisauktionState.readState();
+setBuyerRun(buyerState.lastUsed?.buyerRoleRun || 1);
+initBuyerProfiles();
 refreshSellerOptions();
 resetPurchasesToDefault();
 loadSaved();

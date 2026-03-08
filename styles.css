@@ -533,3 +533,11 @@ textarea{
   text-decoration: none;
 }
 
+
+/* Runde-/Durchgang-Tabs */
+.run-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px;}
+.run-tab{border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer;color:var(--muted);}
+.run-tab.active{background:var(--brand);color:#fff;border-color:var(--brand);}
+.run-panel{display:none;}
+.run-panel.active{display:block;}
+.profile-box{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:10px;}
