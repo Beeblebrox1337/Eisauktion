@@ -235,7 +235,7 @@
   const state = app.readState();
   const game = state.game || app.defaultGameState();
   const uiState = {
-    scenariosCollapsed: false
+    scenariosCollapsed: Boolean(state.moderation && state.moderation.scenariosCollapsed)
   };
 
   let editingSellerId = null;
@@ -602,6 +602,8 @@
 
   function save(message){
     state.game = game;
+    state.selectedScenario = game.currentScenarioId || '';
+    state.moderation = Object.assign({}, state.moderation || {}, { scenariosCollapsed: uiState.scenariosCollapsed });
     app.writeState(state);
     document.getElementById('storage-status').textContent = 'Datenstand: ' + message;
     renderOverview();

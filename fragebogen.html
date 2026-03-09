@@ -12,185 +12,57 @@
 <div class="navdrop"><a class="navdrop-toggle" href="#">Theorie ▾</a><div class="navdrop-menu"><a href="theorie-absolute-konkurrenz.html">Absolute Konkurrenz</a><a href="theorie-speiseeis-markt.html">Speiseeismarkt: Realität vs. Modell</a></div></div>
 <a class="active" href="fragebogen.html">Fragebogen</a>
 <div class="navdrop"><a class="navdrop-toggle" href="#">Rollenkarten ▾</a><div class="navdrop-menu"><a href="rolle-unternehmen.html">Rolle: Unternehmen</a><a href="rolle-kaeufer.html">Rolle: Käufer</a><a href="rolle-moderation.html">Rolle: Moderation / Lehrer</a></div></div>
-<div class="navdrop">
-        <a class="navdrop-toggle" href="#">Auswertung ▾</a>
-        <div class="navdrop-menu">
-          <a href="auswertung.html">Daten versenden</a>
-          <a href="auswertung-runde1.html">Runde 1: Modellbildung</a>
-          <a href="auswertung-runde2.html">Runde 2: Der komplexe Markt</a>
-        </div>
-      </div><a href="impressum.html">Impressum</a>
+<div class="navdrop"><a class="navdrop-toggle" href="#">Auswertung ▾</a><div class="navdrop-menu"><a href="auswertung.html">Daten versenden</a><a href="auswertung-runde1.html">Runde 1: Modellbildung</a><a href="auswertung-runde2.html">Runde 2: Der komplexe Markt</a></div></div><a href="impressum.html">Impressum</a>
 </nav></div></header>
-
 <main class="container">
   <h1>Fragebogen zur Unternehmensgründung</h1>
-  <p class="lead">Vorbereitung auf die Eisauktion – mit getrennten Durchgängen.</p>
-
-  <div class="run-tabs" id="questionnaireTabs">
-    <button class="run-tab" data-run="1" type="button">Durchgang 1</button>
-    <button class="run-tab" data-run="2" type="button">Durchgang 2</button>
-  </div>
-
+  <div class="run-tabs" id="questionnaireTabs"><button class="run-tab" data-run="1" type="button">Durchgang 1</button><button class="run-tab" data-run="2" type="button">Durchgang 2</button></div>
   <div id="runPanel1" class="run-panel">
     <section class="card"><h2>Unternehmensdaten</h2><div class="grid two"><div><label>Unternehmensname</label><input id="u_name" type="text"/></div><div><label>Mitglieder</label><input id="u_members" type="text"/></div></div></section>
-    <div class="grid two">
-      <section class="card"><h2>1. Unser Startkapital</h2><label>Eigenkapital zu Beginn (€)</label><input id="startkapital" type="number" step="0.01"/></section>
-      <section class="card"><h2>2. Produktionsplanung</h2><label>Maximal mögliche Produktion pro Runde</label><input id="max_prod" type="number" step="1"/>
-      <div class="grid three"><div><label class="small">5 Einheiten</label><input id="eins_5" type="text"/></div><div><label class="small">10 Einheiten</label><input id="eins_10" type="text"/></div><div><label class="small">15 Einheiten</label><input id="eins_15" type="text"/></div></div>
-      <label>Startwert – warum?</label><textarea id="startwert_warum"></textarea></section>
-    </div>
-
-    <section class="card"><h2>Unsere Ausgangsüberlegung</h2><label>Grundidee</label><textarea id="grundidee_1"></textarea><label>Risiko</label><textarea id="grundidee_2"></textarea><label>Erfolgsfaktor</label><textarea id="grundidee_3"></textarea></section>
-
-    <section class="card"><h2>3. Kostenstruktur</h2><label>Fixkosten pro Runde (€)</label><input id="fix" type="number" step="0.01"/>
-      <div class="grid three"><div><label>Zutaten</label><input id="v_zutaten" type="number" step="0.01"/></div><div><label>Herstellung</label><input id="v_herstellung" type="number" step="0.01"/></div><div><label>Material</label><input id="v_material" type="number" step="0.01"/></div></div>
-      <div class="row"><button class="btn secondary" type="button" onclick="calcVar()">Variable Kosten berechnen</button><span class="badge" id="var_badge">–</span></div>
-      <label>Variable Kosten pro Einheit</label><input id="var_sum" type="number" step="0.01" readonly/>
-      <div class="grid two"><div><label>Beispiel-Menge</label><input id="menge" type="number" step="1"/></div><div class="row"><button class="btn secondary" type="button" onclick="calcTotal()">Gesamtkosten berechnen</button><span class="badge" id="total_badge">–</span></div></div>
-      <div class="grid two"><div class="result" id="total_out">Gesamtkosten: –</div><div class="result" id="mc_out">Grenzkosten: –</div></div>
-      <div id="liq_note" class="note" style="display:none;margin-top:10px;"></div>
-    </section>
-
-    <section class="card"><h2>5. Entscheidungsregel</h2><div class="grid two"><div><label>Preis über … → produzieren</label><input id="rule_over" type="number" step="0.01"/></div><div><label>Preis unter … → reduzieren/stoppen</label><input id="rule_under" type="number" step="0.01"/></div></div><label>Warum?</label><textarea id="rule_why"></textarea></section>
-    <section class="card"><h2>6. Überproduktionsrisiko</h2><label>Folgen</label><textarea id="risk_1"></textarea><label>Strategie</label><textarea id="risk_2"></textarea></section>
-    <section class="card"><h2>7. Strategie zweite Runde</h2><label>Wann erhöhen?</label><textarea id="s2_1"></textarea><label>Wann senken?</label><textarea id="s2_2"></textarea><label>Woran erkennt ihr Marktentwicklung?</label><textarea id="s2_3"></textarea></section>
+    <section class="card"><div class="grid three"><div><label>Startkapital (€)</label><input id="startkapital" type="number" step="0.01"/></div><div><label>Fixkosten (€)</label><input id="fix" type="number" step="0.01"/></div><div><label>Kapazität</label><input id="max_prod" type="number" step="1"/></div></div><label>Variable Kosten pro Einheit (€)</label><input id="var_sum" type="number" step="0.01"/></section>
   </div>
 
   <div id="runPanel2" class="run-panel">
     <section class="card">
-      <h2>Durchgang 2: Verkäuferprofil festlegen</h2>
-      <label>Unternehmensname</label><input id="r2_u_name" type="text" placeholder="Teamname"/>
-      <label>Mitglieder</label><input id="r2_u_members" type="text" placeholder="Namen"/>
-      <label>Verkäuferprofil</label>
-      <select id="r2_seller_profile"><option value="">Bitte Rollenprofil auswählen</option></select>
+      <h2>Überblick Unternehmen – Anpassung für Runde 2</h2>
+      <p class="small">Werte aus Durchgang 1 laden, anpassen und für den Fragebogen übernehmen.</p>
+      <div class="row"><button class="btn" type="button" id="transferRound2">Daten für Runde 2 übernehmen</button></div>
+      <div class="grid two" style="margin-top:10px;">
+        <div><label>Unternehmensname</label><input id="ov_name" type="text"/></div>
+        <div><label>Verkäuferprofil</label><select id="r2_seller_profile"><option value="">Bitte Rollenprofil auswählen</option></select></div>
+      </div>
+      <div class="grid two"><div><label>Startkapital (€)</label><input id="ov_startCapital" type="number" step="0.01"/></div><div><label>Verbleibendes Kapital (€)</label><input id="ov_currentCapital" type="number" step="0.01"/></div></div>
+      <div class="grid three"><div><label>Fixkosten (€)</label><input id="ov_fixedCosts" type="number" step="0.01"/></div><div><label>Variable Kosten (€)</label><input id="ov_variableCosts" type="number" step="0.01"/></div><div><label>Kapazität</label><input id="ov_capacity" type="number" step="1"/></div></div>
+      <label>Besonderheiten / Profilbeschreibung</label><textarea id="ov_notes"></textarea>
       <div id="r2_profile_desc" class="profile-box small">Bitte zuerst ein Profil auswählen.</div>
-    </section>
-
-    <section class="card">
-      <h2>Welche Ausgangslage hat unser Unternehmen?</h2>
-      <div class="grid two">
-        <div class="result" id="r2_start_budget">Startbudget: –</div>
-        <div class="result" id="r2_variable_cost">Variable Kosten: –</div>
-      </div>
-      <div class="profile-box small" id="r2_hints">Hinweis: Diese Werte kommen aus eurem Profil.</div>
-    </section>
-
-    <section class="card">
-      <h2>Kurze Leitfragen (Runde 2)</h2>
-      <div class="grid two">
-        <div><label>Was bedeuten Startbudget & variable Kosten für eure Entscheidungen?</label><textarea id="r2_reflect_cost"></textarea></div>
-        <div><label>Welches Risiko ergibt sich für euer Team?</label><textarea id="r2_reflect_risk"></textarea></div>
-      </div>
-      <label>Welche Rolle könnten später Standort, Saison, Qualität und Image spielen?</label>
-      <textarea id="r2_reflect_market"></textarea>
-      <p class="small">Vorbereitung im Datenmodell: Kostenstruktur, Standort, Saison, Qualität/Image sind als spätere Modifikatoren bereits vorgesehen.</p>
+      <p class="small" id="r2_hints"></p>
     </section>
   </div>
 
-  <section class="card">
-    <h2>Daten speichern</h2>
-    <div class="row">
-      <button class="btn" type="button" onclick="saveQuestionnaire()">Speichern</button>
-      <button class="btn secondary" type="button" onclick="loadQuestionnaire()">Gespeicherte Daten laden</button>
-      <button class="btn secondary" type="button" onclick="clearQuestionnaire()">Gespeicherte Daten löschen</button>
-      <span class="badge" id="qBadge">–</span>
-    </div>
-    <p id="saveStatus" class="small" style="margin-top:10px;"></p>
-  </section>
+  <section class="card"><h2>Speichern</h2><div class="row"><button class="btn" type="button" onclick="saveQuestionnaire()">Fragebogen speichern</button><button class="btn secondary" type="button" onclick="loadQuestionnaire()">Gespeicherte Daten laden</button><button class="btn secondary" type="button" onclick="clearQuestionnaire()">Gespeicherte Daten löschen</button><span class="badge" id="qBadge">–</span></div><p id="saveStatus" class="small"></p></section>
 </main>
-
 <script src="app-state.js"></script>
 <script>
-function num(v){ const n = Number(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : 0; }
-function eur(n){ const x = Number.isFinite(n) ? n : 0; return x.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' €'; }
-
 let activeRun = 1;
-const run1Ids = ['u_name','u_members','startkapital','max_prod','grundidee_1','grundidee_2','grundidee_3','eins_5','eins_10','eins_15','startwert_warum','fix','v_zutaten','v_herstellung','v_material','var_sum','menge','rule_over','rule_under','rule_why','risk_1','risk_2','s2_1','s2_2','s2_3'];
-
-function setActiveRun(run){
-  activeRun = Number(run) || 1;
-  document.querySelectorAll('#questionnaireTabs .run-tab').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.run) === activeRun));
-  document.getElementById('runPanel1').classList.toggle('active', activeRun === 1);
-  document.getElementById('runPanel2').classList.toggle('active', activeRun === 2);
-  const state = EisauktionState.readState();
-  state.lastUsed.questionnaireRun = activeRun;
-  EisauktionState.writeState(state);
-}
-
-function populateSellerProfiles(){
-  const sel = document.getElementById('r2_seller_profile');
-  Object.entries(EisauktionState.SELLER_PROFILES).forEach(([id,p]) => {
-    const opt = document.createElement('option'); opt.value = id; opt.textContent = p.label; sel.appendChild(opt);
-  });
-}
-
-function updateRun2ProfileView(){
-  const id = document.getElementById('r2_seller_profile').value;
-  const p = EisauktionState.SELLER_PROFILES[id];
-  document.getElementById('r2_profile_desc').textContent = p ? p.description : 'Bitte zuerst ein Profil auswählen.';
-  document.getElementById('r2_start_budget').textContent = `Startbudget: ${p ? eur(p.baseValues.startBudget) : '–'}`;
-  document.getElementById('r2_variable_cost').textContent = `Variable Kosten: ${p ? eur(p.baseValues.variableCost) + ' pro Einheit' : '–'}`;
-  document.getElementById('r2_hints').textContent = p ? p.hints : 'Hinweis: Diese Werte kommen aus eurem Profil.';
-}
-
-function calcVar(){
-  const sum = num(v_zutaten.value) + num(v_herstellung.value) + num(v_material.value);
-  var_sum.value = sum.toFixed(2); var_badge.className = 'badge ok'; var_badge.textContent = 'berechnet';
-}
-function calcTotal(){
-  const fixN = num(fix.value), varc = num(var_sum.value), mengeN = num(menge.value), total = fixN + mengeN * varc;
-  total_badge.className = 'badge ok'; total_badge.textContent = 'berechnet';
-  total_out.innerHTML = `Gesamtkosten: <strong>${eur(total)}</strong>`;
-  mc_out.innerHTML = `Grenzkosten pro Einheit: <strong>${eur(varc)}</strong>`;
-  const cap = num(startkapital.value);
-  liq_note.style.display = cap > 0 ? 'block' : 'none';
-  if(cap > 0) liq_note.innerHTML = total > cap ? '<strong>Liquiditätscheck:</strong> Kosten sind höher als Kapital.' : '<strong>Liquiditätscheck:</strong> Kosten sind durch Kapital gedeckt.';
-}
-
+function num(v){ const n = Number(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : 0; }
 function setBadge(type, text){ qBadge.className = 'badge' + (type ? (' '+type) : ''); qBadge.textContent = text || '–'; }
 
-function collectRun1(){ const out = {}; run1Ids.forEach(id => out[id] = document.getElementById(id)?.value || ''); out.saved_at = new Date().toISOString(); return out; }
-function applyRun1(data){ run1Ids.forEach(id => { if(document.getElementById(id) && data[id] != null) document.getElementById(id).value = String(data[id]); }); try{calcVar();calcTotal();}catch(_e){} }
-function collectRun2(){ return { u_name:r2_u_name.value||'', u_members:r2_u_members.value||'', sellerProfileId:r2_seller_profile.value||'', reflect_cost:r2_reflect_cost.value||'', reflect_risk:r2_reflect_risk.value||'', reflect_market:r2_reflect_market.value||'', saved_at:new Date().toISOString() }; }
-function applyRun2(data){ r2_u_name.value=data.u_name||''; r2_u_members.value=data.u_members||''; r2_seller_profile.value=data.sellerProfileId||''; r2_reflect_cost.value=data.reflect_cost||''; r2_reflect_risk.value=data.reflect_risk||''; r2_reflect_market.value=data.reflect_market||''; updateRun2ProfileView(); }
+function setActiveRun(run){ activeRun = Number(run)||1; document.querySelectorAll('#questionnaireTabs .run-tab').forEach(btn=>btn.classList.toggle('active', Number(btn.dataset.run)===activeRun)); runPanel1.classList.toggle('active', activeRun===1); runPanel2.classList.toggle('active', activeRun===2); const st=EisauktionState.readState(); st.lastUsed.questionnaireRun=activeRun; EisauktionState.writeState(st); }
+function populateSellerProfiles(){ Object.entries(EisauktionState.SELLER_PROFILES).forEach(([id,p])=>{ const o=document.createElement('option'); o.value=id;o.textContent=p.label; r2_seller_profile.appendChild(o);}); }
 
-function saveQuestionnaire(){
-  const state = EisauktionState.readState();
-  state.questionnaire.run1 = collectRun1();
-  state.questionnaire.run2 = collectRun2();
-  state.roles.seller.run2 = EisauktionState.makeSellerRun2Model(state.questionnaire.run2);
-  state.lastUsed.questionnaireRun = activeRun;
-  EisauktionState.writeState(state);
-  localStorage.setItem(EisauktionState.LEGACY_Q_KEY, JSON.stringify(state.questionnaire.run1));
-  saveStatus.innerHTML = "✔ Gespeichert. Verkäuferprofil aus Durchgang 2 wird automatisch auf der Verkäufer-Rollenkarte genutzt.";
-  setBadge('ok','gespeichert');
-}
+function run1ToCompany(){ return EisauktionState.normalizeCompanyProfile({ name:u_name.value, sellerProfile:r2_seller_profile.value, startCapital:num(startkapital.value), currentCapital:num(startkapital.value), fixedCosts:num(fix.value), variableCosts:num(var_sum.value), capacity:num(max_prod.value) }); }
+function applyCompanyToRun2(c){ ov_name.value=c.name||''; r2_seller_profile.value=c.sellerProfile||''; ov_startCapital.value=c.startCapital||0; ov_currentCapital.value=c.currentCapital||0; ov_fixedCosts.value=c.fixedCosts||0; ov_variableCosts.value=c.variableCosts||0; ov_capacity.value=c.capacity||0; ov_notes.value=c.notes||''; updateProfileHint(); }
+function collectRun2Company(){ return EisauktionState.normalizeCompanyProfile({ name:ov_name.value, sellerProfile:r2_seller_profile.value, startCapital:num(ov_startCapital.value), currentCapital:num(ov_currentCapital.value), fixedCosts:num(ov_fixedCosts.value), variableCosts:num(ov_variableCosts.value), capacity:num(ov_capacity.value), notes:ov_notes.value }); }
 
-function loadQuestionnaire(){
-  const state = EisauktionState.readState();
-  applyRun1(state.questionnaire.run1 || {});
-  applyRun2(state.questionnaire.run2 || {});
-  setActiveRun(state.lastUsed?.questionnaireRun || 1);
-  saveStatus.textContent = '✔ Gespeicherte Daten geladen.';
-  setBadge('ok','geladen');
-}
+function updateProfileHint(){ const p = EisauktionState.SELLER_PROFILES[r2_seller_profile.value]; r2_profile_desc.textContent = p ? p.description : 'Bitte zuerst ein Profil auswählen.'; r2_hints.textContent = p ? p.hints : ''; }
+r2_seller_profile.addEventListener('change', ()=>{ const c = EisauktionState.applySellerProfileDefaults(r2_seller_profile.value, collectRun2Company()); applyCompanyToRun2(c); });
+transferRound2.addEventListener('click', ()=>{ const st=EisauktionState.readState(); const fromRun1 = run1ToCompany(); const merged = EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, ...fromRun1, sellerProfile:r2_seller_profile.value||st.companyProfile.sellerProfile }); applyCompanyToRun2(merged); setBadge('ok','übernommen'); saveStatus.textContent='Daten aus Durchgang 1 wurden für Runde 2 übernommen.'; });
 
-function clearQuestionnaire(){
-  const state = EisauktionState.readState();
-  state.questionnaire = { run1:{}, run2:{sellerProfileId:''} };
-  state.roles.seller.run2 = null;
-  EisauktionState.writeState(state);
-  localStorage.removeItem(EisauktionState.LEGACY_Q_KEY);
-  saveStatus.textContent = 'Gespeicherte Fragebogen-Daten gelöscht.';
-  setBadge('warn','gelöscht');
-}
+function saveQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire.run1={ u_name:u_name.value, u_members:u_members.value, startkapital:startkapital.value, fix:fix.value, var_sum:var_sum.value, max_prod:max_prod.value }; st.companyProfile = collectRun2Company(); st.questionnaire.run2 = { u_name: st.companyProfile.name, sellerProfileId: st.companyProfile.sellerProfile, startCapital: st.companyProfile.startCapital, currentCapital: st.companyProfile.currentCapital, fixedCosts: st.companyProfile.fixedCosts, variableCosts: st.companyProfile.variableCosts, capacity: st.companyProfile.capacity, notes: st.companyProfile.notes };
+  st.roles.seller.run2 = EisauktionState.makeSellerRun2Model(st.questionnaire.run2); EisauktionState.writeState(st); localStorage.setItem(EisauktionState.LEGACY_Q_KEY, JSON.stringify(st.questionnaire.run1)); saveStatus.textContent='✔ Gespeichert.'; setBadge('ok','gespeichert'); }
+function loadQuestionnaire(){ const st=EisauktionState.readState(); u_name.value=st.questionnaire.run1?.u_name||''; u_members.value=st.questionnaire.run1?.u_members||''; startkapital.value=st.questionnaire.run1?.startkapital||''; fix.value=st.questionnaire.run1?.fix||''; var_sum.value=st.questionnaire.run1?.var_sum||''; max_prod.value=st.questionnaire.run1?.max_prod||''; applyCompanyToRun2(EisauktionState.normalizeCompanyProfile(st.companyProfile || st.questionnaire.run2)); setActiveRun(st.lastUsed?.questionnaireRun || 1); saveStatus.textContent='✔ Gespeicherte Daten geladen.'; setBadge('ok','geladen'); }
+function clearQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire={run1:{},run2:{sellerProfileId:''}}; st.companyProfile=EisauktionState.defaultCompanyProfile(); st.roles.seller.run2=null; EisauktionState.writeState(st); localStorage.removeItem(EisauktionState.LEGACY_Q_KEY); saveStatus.textContent='Gespeicherte Fragebogen-Daten gelöscht.'; setBadge('warn','gelöscht'); }
 
-document.addEventListener('DOMContentLoaded', () => {
-  populateSellerProfiles();
-  document.querySelectorAll('#questionnaireTabs .run-tab').forEach(btn => btn.addEventListener('click', () => setActiveRun(btn.dataset.run)));
-  r2_seller_profile.addEventListener('change', updateRun2ProfileView);
-  loadQuestionnaire();
-});
+document.addEventListener('DOMContentLoaded', ()=>{ populateSellerProfiles(); document.querySelectorAll('#questionnaireTabs .run-tab').forEach(btn=>btn.addEventListener('click', ()=>setActiveRun(btn.dataset.run))); loadQuestionnaire(); });
 </script>
-</body>
-</html>
+</body></html>
