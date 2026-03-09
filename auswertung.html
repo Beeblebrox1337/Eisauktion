@@ -48,18 +48,6 @@
   <p class="lead">Hier sammelst, prüfst und exportierst du alle gespeicherten Spieldaten (LocalStorage).</p>
 
   <section class="card">
-    <div class="row">
-      <button class="btn secondary" type="button" onclick="loadAll()">Daten neu laden</button>
-      <button class="btn secondary" type="button" onclick="clearAll()">Daten löschen</button>
-      <button class="btn" type="button" onclick="downloadBundle()">JSON herunterladen</button>
-      <button class="btn secondary" type="button" onclick="copyJSON()">JSON kopieren</button>
-      <button class="btn" type="button" onclick="sendDirect()">Direkt senden</button>
-    </div>
-    <div class="hr"></div>
-    <div id="status" class="result">Noch nicht geladen.</div>
-  </section>
-
-  <section class="card">
     <h2>Identifikation (für den Versand)</h2>
     <div class="grid two">
       <div>
@@ -74,6 +62,21 @@
     <label>Notiz (optional)</label>
     <textarea id="note" placeholder="Besondere Beobachtungen"></textarea>
   </section>
+
+  <section class="card">
+    <h2>Datenversand</h2>
+    <div class="row">
+      <button class="btn" type="button" onclick="sendDirect()">Direkt senden</button>
+      <button class="btn secondary" type="button" onclick="loadAll()">Daten neu laden</button>
+      <button class="btn secondary" type="button" onclick="clearAll()">Daten löschen</button>
+      <button class="btn" type="button" onclick="downloadBundle()">JSON herunterladen</button>
+      <button class="btn secondary" type="button" onclick="copyJSON()">JSON kopieren</button>
+    </div>
+    <div class="hr"></div>
+    <div id="status" class="result">Noch nicht geladen.</div>
+  </section>
+
+  <form id="formspreeSubmit" action="https://formspree.io/f/xvzbjzge" method="POST" hidden></form>
 
   <section class="card">
     <h2>Datenansicht</h2>
@@ -191,10 +194,8 @@ function buildDirectPayload(){
 
 function sendDirect(){
   const payload = buildDirectPayload();
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = 'https://formspree.io/f/mrblqzyv';
-  form.style.display = 'none';
+  const form = document.getElementById('formspreeSubmit');
+  form.innerHTML = '';
   const fields = {
     rolle: payload.rolle,
     name: payload.name,
@@ -216,7 +217,6 @@ function sendDirect(){
     auswertung: JSON.stringify(payload.rawData)
   };
   Object.entries(fields).forEach(([k,v])=>{ const input=document.createElement('input'); input.type='hidden'; input.name=k; input.value=String(v ?? ''); form.appendChild(input); });
-  document.body.appendChild(form);
   form.submit();
 }
 
