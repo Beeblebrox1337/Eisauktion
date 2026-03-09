@@ -16,7 +16,7 @@ test('Testfall D: Moderationsseite Szenario-Collapse und Rundeneffekt', async ({
   await expect(page.locator('#scenario-current-info')).toContainText(fixtureData.moderation.roundFocusText);
   await expect(page.locator('#scenario-current-info')).not.toContainText(fixtureData.moderation.hiddenTextInCollapsedView);
 
-  await page.getByRole('button', { name: 'Szenario wechseln' }).click();
+  await page.getByRole('button', { name: /Szenario wechseln|Szenarien anzeigen/ }).click();
   await expect(page.locator('#scenario-list')).toBeVisible();
 
   await page.selectOption('#season-effect', 'high-demand');

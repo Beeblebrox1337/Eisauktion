@@ -7,9 +7,10 @@ test('Testfall E: Auswertung erzeugt vollständige Formspree-Payload', async ({ 
 
   await prepareBuyerRound1(page);
   await page.locator('#savings').fill('2');
-  await page.locator('#purchaseList .purchase-row').first().locator('.purchase-seller').fill('Anbieter A');
-  await page.locator('#purchaseList .purchase-row').first().locator('.purchase-qty').fill('1');
-  await page.locator('#purchaseList .purchase-row').first().locator('.purchase-price').fill('2');
+  const firstPurchase = page.locator('#purchaseList .purchase-row').first();
+  await firstPurchase.locator('[data-field="seller"]').fill('Anbieter A');
+  await firstPurchase.locator('[data-field="qty"]').fill('1');
+  await firstPurchase.locator('[data-field="price"]').fill('2');
   await page.getByRole('button', { name: 'Ausgaben berechnen & speichern' }).click();
 
   await page.goto('/auswertung.html');
