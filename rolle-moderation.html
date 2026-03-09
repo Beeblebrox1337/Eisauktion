@@ -34,6 +34,10 @@
     .scenario-current-info{margin-top:10px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:12px;}
     .scenario-current-info h3{margin-bottom:8px;}
     .scenario-toggle-row{margin-top:10px;}
+    .value-stack{display:grid;gap:4px;margin-top:8px;}
+    .value-base{font-size:13px;color:var(--muted);}
+    .value-current{font-size:14px;color:#0f172a;}
+    .value-current strong{color:#0b3f8a;}
   @media (max-width:900px){.group-list,.stat-grid,.scenario-grid{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -98,6 +102,7 @@
     </div>
     <div class="row">
       <button class="btn" id="switch-round">Runde wechseln</button>
+      <button class="btn" id="recalculate-groups">Gruppen neu berechnen</button>
       <button class="btn secondary" id="reset-game">Spiel zurücksetzen</button>
     </div>
     <div class="status-line" id="storage-status">Datenstand: noch nicht gespeichert.</div>
@@ -229,7 +234,9 @@
   const app = window.EisauktionState;
   const state = app.readState();
   const game = state.game || app.defaultGameState();
-  let scenariosCollapsed = false;
+  const uiState = {
+    scenariosCollapsed: false
+  };
 
   let editingSellerId = null;
   let editingBuyerId = null;
@@ -461,31 +468,103 @@
     };
   }
 
-  function applyRoundAdjustmentsToGroups(roundData){
-    if(!roundData || !roundData.roundModifiers) return;
+  function getCostShift(modifiers){
+    return modifiers.costChange === 'energy+0.3' ? 0.3 : modifiers.costChange === 'raw-0.2' ? -0.2 : 0;
+  }
+
+  function deriveSellerValues(seller, modifiers){
+    const baseCapacity = 40;
+    const baseStartPrice = Number((seller.baseValues.variableCost + 1.4).toFixed(2));
+    const costShift = getCostShift(modifiers);
+    const demandDelta = modifiers.seasonEffect === 'high-demand' ? 15 : modifiers.seasonEffect === 'low-demand' ? -8 : 0;
+    const productionCapacity = baseCapacity + demandDelta;
+    const fixedCost = Number(modifiers.locationCost || 0);
+    return {
+      base: { productionCapacity: baseCapacity, startPrice: baseStartPrice, fixedCost: 0 },
+      current: {
+        productionCapacity,
+        startPrice: Number((baseStartPrice + costShift + fixedCost).toFixed(2)),
+        fixedCost,
+        notes: [
+          demandDelta !== 0 ? 'Saison verändert Kapazität' : 'Saison neutral',
+          costShift !== 0 ? 'Kostenänderung aktiv (' + modifiers.costChange + ')' : 'Keine zusätzliche Kostenänderung',
+          fixedCost ? 'Standortkosten aktiv: +' + fixedCost : 'Keine Standortkosten'
+        ]
+      }
+    };
+  }
+
+  function deriveBuyerValues(buyer, modifiers){
+    const pref = buyer.preferences || { priceFocus: 2, qualityFocus: 2, brandFocus: 1 };
+    const baseBudget = Number((12 + pref.priceFocus + (pref.qualityFocus * 0.5)).toFixed(2));
+    const baseWtp = Number((2.4 + (pref.qualityFocus * 0.25) + ((pref.brandFocus || 1) * 0.15)).toFixed(2));
+    const baseDemand = pref.priceFocus >= 3 ? 2 : 3;
+    const isDemandBoom = modifiers.seasonEffect === 'high-demand' || modifiers.demandShock === 'event-boom';
+    const isDemandSlump = modifiers.seasonEffect === 'low-demand' || modifiers.demandShock === 'rain-slump';
+    const imageBoost = modifiers.imageEffect === 'brand-boom' ? 0.5 : modifiers.imageEffect === 'quality-focus' ? 0.35 : 0;
+
+    let budget = baseBudget;
+    let willingnessToPay = baseWtp + imageBoost;
+    let quantityDemand = baseDemand;
+    let demandBehavior = 'stabil';
+    if(isDemandBoom){
+      budget += 3;
+      willingnessToPay += 0.35;
+      quantityDemand += 1;
+      demandBehavior = 'spontan erhöht';
+    }
+    if(isDemandSlump){
+      budget -= 2;
+      willingnessToPay -= 0.2;
+      quantityDemand = Math.max(1, quantityDemand - 1);
+      demandBehavior = 'zurückhaltend';
+    }
+
+    return {
+      base: { budget: baseBudget, willingnessToPay: baseWtp, quantityDemand: baseDemand, demandBehavior: 'stabil' },
+      current: {
+        budget: Number(budget.toFixed(2)),
+        willingnessToPay: Number(willingnessToPay.toFixed(2)),
+        quantityDemand,
+        demandBehavior,
+        notes: [
+          isDemandBoom ? 'Nachfrageboom erhöht Kaufbereitschaft' : isDemandSlump ? 'Nachfragerückgang senkt Kaufbereitschaft' : 'Normale Nachfragebedingungen',
+          imageBoost ? 'Image-/Qualitätseffekt aktiv (' + modifiers.imageEffect + ')' : 'Kein Imageeffekt aktiv'
+        ]
+      }
+    };
+  }
+
+  function applyRoundAdjustmentsToGroups(roundModifiers){
+    if(!roundModifiers) return;
     game.sellers = game.sellers.map((seller) => {
-      const costShift = roundData.roundModifiers.costChange === 'energy+0.3' ? 0.3 : roundData.roundModifiers.costChange === 'raw-0.2' ? -0.2 : 0;
+      const values = deriveSellerValues(seller, roundModifiers);
       return Object.assign({}, seller, {
         roundValues: Object.assign({}, seller.roundValues || {}, {
-          productionCapacity: roundData.roundModifiers.seasonEffect === 'high-demand' ? 55 : roundData.roundModifiers.seasonEffect === 'low-demand' ? 32 : 40,
-          startPrice: Number((seller.baseValues.variableCost + 1.4 + costShift).toFixed(2))
+          productionCapacity: values.current.productionCapacity,
+          startPrice: values.current.startPrice,
+          fixedCost: values.current.fixedCost,
+          notes: values.current.notes
         }),
+        baseRoundValues: values.base,
         dynamicModifiers: Object.assign({}, seller.dynamicModifiers || {}, {
-          energyShock: costShift,
-          locationCost: Number(roundData.roundModifiers.locationCost || 0)
+          energyShock: getCostShift(roundModifiers),
+          locationCost: Number(roundModifiers.locationCost || 0)
         })
       });
     });
 
     game.buyers = game.buyers.map((buyer) => {
-      const isDemandBoom = roundData.roundModifiers.seasonEffect === 'high-demand' || roundData.roundModifiers.demandShock === 'event-boom';
-      const willingnessBoost = roundData.roundModifiers.imageEffect === 'brand-boom' ? 0.5 : roundData.roundModifiers.imageEffect === 'quality-focus' ? 0.35 : 0;
+      const values = deriveBuyerValues(buyer, roundModifiers);
       return Object.assign({}, buyer, {
         roundValues: Object.assign({}, buyer.roundValues || {}, {
-          budget: isDemandBoom ? 18 : 14,
-          willingnessToPay: Number((2.8 + willingnessBoost + (isDemandBoom ? 0.35 : 0)).toFixed(2)),
-          demandBehavior: isDemandBoom ? 'spontan erhöht' : 'stabil'
-        })
+          budget: values.current.budget,
+          willingnessToPay: values.current.willingnessToPay,
+          quantityDemand: values.current.quantityDemand,
+          demandBehavior: values.current.demandBehavior,
+          notes: values.current.notes
+        }),
+        baseRoundValues: values.base
       });
     });
   }
@@ -515,8 +594,10 @@
   function renderScenarioToggle(){
     const button = document.getElementById('toggle-scenarios');
     const list = document.getElementById('scenario-list');
-    list.classList.toggle('hidden', scenariosCollapsed);
-    button.textContent = scenariosCollapsed ? 'Szenarien anzeigen' : 'Szenarien einklappen';
+    list.classList.toggle('hidden', uiState.scenariosCollapsed);
+    const hasScenario = Boolean(game.currentScenarioId);
+    button.textContent = uiState.scenariosCollapsed ? 'Szenarien anzeigen' : hasScenario ? 'Szenario wechseln' : 'Szenarien einklappen';
+    button.setAttribute('aria-expanded', String(!uiState.scenariosCollapsed));
   }
 
   function save(message){
@@ -576,9 +657,11 @@
         <div class="group-meta"><strong>Mitglieder:</strong> ${(seller.members || []).join(', ') || '—'}</div>
         <div class="group-meta"><strong>Profil:</strong> ${profile ? profile.label : seller.profileId}</div>
         <div class="group-meta"><strong>Startbudget:</strong> ${seller.baseValues.startBudget}</div>
-        <div class="group-meta"><strong>Variable Kosten:</strong> ${seller.baseValues.variableCost}</div>
-        <div class="group-meta"><strong>Kapazität:</strong> ${(seller.roundValues && seller.roundValues.productionCapacity) || '—'}</div>
-        <div class="group-meta"><strong>Ausgangspreis:</strong> ${(seller.roundValues && seller.roundValues.startPrice) || '—'}</div>
+        <div class="value-stack">
+          <div class="value-base"><strong>Basiswerte:</strong> var. Kosten ${seller.baseValues.variableCost} · fixe Kosten ${(seller.baseRoundValues && seller.baseRoundValues.fixedCost) || 0} · Kapazität ${(seller.baseRoundValues && seller.baseRoundValues.productionCapacity) || 40} · Startpreis ${(seller.baseRoundValues && seller.baseRoundValues.startPrice) || '—'}</div>
+          <div class="value-current"><strong>Aktuelle Rundenwerte:</strong> var. Kosten ${(Number(seller.baseValues.variableCost) + Number((seller.dynamicModifiers && seller.dynamicModifiers.energyShock) || 0)).toFixed(2)} · fixe Kosten ${(seller.roundValues && seller.roundValues.fixedCost) || 0} · Kapazität ${(seller.roundValues && seller.roundValues.productionCapacity) || '—'} · Startpreis ${(seller.roundValues && seller.roundValues.startPrice) || '—'}</div>
+          <div class="group-meta"><strong>Sonstige Änderungen:</strong> ${((seller.roundValues && seller.roundValues.notes) || []).join(' · ') || '—'}</div>
+        </div>
       `;
       const actions = document.createElement('div');
       actions.className = 'group-actions';
@@ -605,8 +688,11 @@
         <div class="group-meta"><strong>Mitglieder:</strong> ${(buyer.members || []).join(', ') || '—'}</div>
         <div class="group-meta"><strong>Profil:</strong> ${profile ? profile.label : buyer.profileId}</div>
         <div class="group-meta"><strong>Nachfrageparameter:</strong> Preisfokus ${buyer.preferences.priceFocus}, Qualitätsfokus ${buyer.preferences.qualityFocus}</div>
-        <div class="group-meta"><strong>Budget/Zahlungsbereitschaft:</strong> ${(buyer.roundValues && buyer.roundValues.budget) || '—'} / ${(buyer.roundValues && buyer.roundValues.willingnessToPay) || '—'}</div>
-        <div class="group-meta"><strong>Nachfrageverhalten:</strong> ${(buyer.roundValues && buyer.roundValues.demandBehavior) || '—'}</div>
+        <div class="value-stack">
+          <div class="value-base"><strong>Basiswerte:</strong> Budget ${(buyer.baseRoundValues && buyer.baseRoundValues.budget) || '—'} · Zahlungsbereitschaft ${(buyer.baseRoundValues && buyer.baseRoundValues.willingnessToPay) || '—'} · Mengenbedarf ${(buyer.baseRoundValues && buyer.baseRoundValues.quantityDemand) || '—'} · Verhalten ${(buyer.baseRoundValues && buyer.baseRoundValues.demandBehavior) || 'stabil'}</div>
+          <div class="value-current"><strong>Aktuelle Rundenwerte:</strong> Budget ${(buyer.roundValues && buyer.roundValues.budget) || '—'} · Zahlungsbereitschaft ${(buyer.roundValues && buyer.roundValues.willingnessToPay) || '—'} · Mengenbedarf ${(buyer.roundValues && buyer.roundValues.quantityDemand) || '—'} · Verhalten ${(buyer.roundValues && buyer.roundValues.demandBehavior) || '—'}</div>
+          <div class="group-meta"><strong>Sonstige Änderungen:</strong> ${((buyer.roundValues && buyer.roundValues.notes) || []).join(' · ') || '—'}</div>
+        </div>
       `;
       const actions = document.createElement('div');
       actions.className = 'group-actions';
@@ -689,7 +775,7 @@
     const roundData = getScenarioRoundData(scenario, game.currentRound);
     if(!roundData || !roundData.roundModifiers) return false;
     game.roundModifiers = Object.assign({}, game.roundModifiers, roundData.roundModifiers);
-    applyRoundAdjustmentsToGroups(roundData);
+    applyRoundAdjustmentsToGroups(game.roundModifiers);
     loadRoundModifiers();
     renderSellerCards();
     renderBuyerCards();
@@ -733,7 +819,7 @@
 
     autoCreateGroupsForScenario(scenario);
     applyScenarioToCurrentRound();
-    scenariosCollapsed = true;
+    uiState.scenariosCollapsed = true;
     renderScenarioToggle();
     renderScenarios();
     save('Szenario „' + scenario.title + '“ aktiviert, Gruppen erstellt und Werte für Runde ' + game.currentRound + ' übernommen.');
@@ -813,8 +899,15 @@
 
   document.getElementById('seller-profile').addEventListener('change', applySellerProfileDefaults);
   document.getElementById('toggle-scenarios').addEventListener('click', () => {
-    scenariosCollapsed = !scenariosCollapsed;
+    uiState.scenariosCollapsed = !uiState.scenariosCollapsed;
     renderScenarioToggle();
+  });
+
+  document.getElementById('recalculate-groups').addEventListener('click', () => {
+    applyRoundAdjustmentsToGroups(game.roundModifiers);
+    renderSellerCards();
+    renderBuyerCards();
+    save('Gruppenwerte für aktuelles Szenario und Runde neu berechnet.');
   });
 
   sellerForm.addEventListener('submit', (event) => {
@@ -880,6 +973,9 @@
       imageEffect: form.imageEffect.value,
       locationCost: Number(form.locationCost.value || 0)
     };
+    applyRoundAdjustmentsToGroups(game.roundModifiers);
+    renderSellerCards();
+    renderBuyerCards();
     save('Rundeneinstellungen gespeichert.');
   });
 
