@@ -83,6 +83,19 @@
     </div>
   </section>
 
+  <section class="card" id="sellerMarketUpdate">
+    <h2>📊 Marktupdate – Runde <span id="sellerMarketRound">1</span></h2>
+    <p class="small" id="sellerMarketDescription">Keine rundenspezifischen Effekte aktiv.</p>
+    <div id="sellerEffectsList" class="market-effects-list"></div>
+    <h3>Aktuelle Werte in dieser Runde</h3>
+    <div class="grid three">
+      <div class="result" id="sellerCurrentCost">Produktionskosten: –</div>
+      <div class="result" id="sellerCurrentCapacity">Kapazität: –</div>
+      <div class="result" id="sellerCurrentPrice">Empfohlener Startpreis: –</div>
+    </div>
+  </section>
+
+
   <!-- NEU: Überblick aus Fragebogen -->
   <section class="card" id="legacyQuestionnaireSection">
     <div class="row" style="justify-content:space-between; align-items:flex-start;">
@@ -283,6 +296,43 @@ function eur(n){
   return x.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
 }
 
+
+
+function getSellerRoundViewModel(){
+  const st = EisauktionState.readState();
+  const game = st.game || EisauktionState.defaultGameState();
+  const role = st.roles?.seller?.run2 || EisauktionState.makeSellerRun2Model(st.questionnaire?.run2 || {});
+  const baseCost = Number(role?.baseValues?.variableCost || 1.5);
+  const mods = game.roundModifiers || EisauktionState.defaultRoundModifiers();
+  const costShift = mods.costChange === 'energy+0.3' ? 0.3 : mods.costChange === 'raw-0.2' ? -0.2 : 0;
+  const demandDelta = mods.seasonEffect === 'high-demand' ? 15 : mods.seasonEffect === 'low-demand' ? -8 : 0;
+  const locationCost = Number(mods.locationCost || 0);
+  const capacity = Math.max(5, 40 + demandDelta);
+  const productionCost = Number((baseCost + costShift + locationCost).toFixed(2));
+  const startPrice = Number((productionCost + 1.4).toFixed(2));
+  const effects = game.roleRoundEffects?.sellerEffects || [];
+  const description = game.roleRoundEffects?.sellerDescription || 'Keine rundenspezifischen Effekte aktiv.';
+  return { round: game.currentRound || 1, productionCost, capacity, startPrice, effects, description };
+}
+
+function renderSellerMarketUpdate(){
+  const vm = getSellerRoundViewModel();
+  document.getElementById('sellerMarketRound').textContent = String(vm.round);
+  document.getElementById('sellerMarketDescription').textContent = vm.description;
+  const list = document.getElementById('sellerEffectsList');
+  if(!vm.effects.length){
+    list.innerHTML = '<div class="market-effect-item neutral">🟡 Keine zusätzlichen Rollen-Effekte in dieser Runde.</div>';
+  }else{
+    list.innerHTML = vm.effects.map((effect) => {
+      const impact = effect.impact === 'positive' ? 'positive' : effect.impact === 'negative' ? 'negative' : 'neutral';
+      const icon = impact === 'positive' ? '🟢' : impact === 'negative' ? '🔴' : '🟡';
+      return `<div class="market-effect-item ${impact}">${icon} ${effect.label}</div>`;
+    }).join('');
+  }
+  document.getElementById('sellerCurrentCost').textContent = `Produktionskosten: ${eur(vm.productionCost)} pro Portion`;
+  document.getElementById('sellerCurrentCapacity').textContent = `Kapazität: ${vm.capacity} Portionen`;
+  document.getElementById('sellerCurrentPrice').textContent = `Empfohlener Startpreis: ${eur(vm.startPrice)}`;
+}
 
 function addSeller(){
   const grid = document.getElementById("sellerObsGrid");
@@ -666,6 +716,8 @@ document.querySelectorAll('#sellerTabs .run-tab').forEach(btn => btn.addEventLis
 const sellerState = EisauktionState.readState();
 setSellerRun(sellerState.lastUsed?.sellerRoleRun || 1);
 renderSellerRun2Profile();
+renderSellerMarketUpdate();
+window.addEventListener("storage", renderSellerMarketUpdate);
 loadQuestionnaire();
 loadSaved();
 </script>

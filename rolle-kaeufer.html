@@ -92,6 +92,19 @@
     <div class="small" id="spending_out">Empfohlenes Ausgabenlimit: –</div>
   </section>
 
+  <section class="card" id="buyerMarketUpdate">
+    <h2>📊 Marktupdate – Runde <span id="buyerMarketRound">1</span></h2>
+    <p class="small" id="buyerMarketDescription">Keine rundenspezifischen Effekte aktiv.</p>
+    <div id="buyerEffectsList" class="market-effects-list"></div>
+    <h3>Aktuelle Werte in dieser Runde</h3>
+    <div class="grid three">
+      <div class="result" id="buyerCurrentBudget">Budget: –</div>
+      <div class="result" id="buyerCurrentWtp">Maximale Zahlungsbereitschaft: –</div>
+      <div class="result" id="buyerCurrentDemand">Gewünschte Menge: –</div>
+    </div>
+  </section>
+
+
   <section class="card">
     <h2>Phasen je Runde</h2>
     <ol>
@@ -241,6 +254,53 @@
 <script src="app-state.js"></script>
 <script>
 
+
+function getBuyerRoundViewModel(){
+  const st = EisauktionState.readState();
+  const game = st.game || EisauktionState.defaultGameState();
+  const run2 = st.roles?.buyer?.run2 || {};
+  const prefs = run2.preferences || { priceFocus:2, qualityFocus:2, brandFocus:1 };
+  const mods = game.roundModifiers || EisauktionState.defaultRoundModifiers();
+  const baseBudget = Number((12 + (prefs.priceFocus || 2) + ((prefs.qualityFocus || 2) * 0.5)).toFixed(2));
+  const baseWtp = Number((2.4 + ((prefs.qualityFocus || 2) * 0.25) + ((prefs.brandFocus || 1) * 0.15)).toFixed(2));
+  let budget = baseBudget;
+  let wtp = baseWtp + (mods.imageEffect === 'brand-boom' ? 0.5 : mods.imageEffect === 'quality-focus' ? 0.35 : 0);
+  let demandMin = 1;
+  let demandMax = (prefs.priceFocus || 2) >= 3 ? 2 : 3;
+  if(mods.seasonEffect === 'high-demand' || mods.demandShock === 'event-boom'){
+    budget += 3;
+    wtp += 0.35;
+    demandMax += 1;
+  }
+  if(mods.seasonEffect === 'low-demand' || mods.demandShock === 'rain-slump'){
+    budget -= 2;
+    wtp -= 0.2;
+    demandMax = Math.max(1, demandMax - 1);
+  }
+  const effects = game.roleRoundEffects?.buyerEffects || [];
+  const description = game.roleRoundEffects?.buyerDescription || 'Keine rundenspezifischen Effekte aktiv.';
+  return { round: game.currentRound || 1, budget:Number(budget.toFixed(2)), wtp:Number(wtp.toFixed(2)), demandMin, demandMax, effects, description };
+}
+
+function renderBuyerMarketUpdate(){
+  const vm = getBuyerRoundViewModel();
+  document.getElementById('buyerMarketRound').textContent = String(vm.round);
+  document.getElementById('buyerMarketDescription').textContent = vm.description;
+  const list = document.getElementById('buyerEffectsList');
+  if(!vm.effects.length){
+    list.innerHTML = '<div class="market-effect-item neutral">🟡 Keine zusätzlichen Rollen-Effekte in dieser Runde.</div>';
+  }else{
+    list.innerHTML = vm.effects.map((effect) => {
+      const impact = effect.impact === 'positive' ? 'positive' : effect.impact === 'negative' ? 'negative' : 'neutral';
+      const icon = impact === 'positive' ? '🟢' : impact === 'negative' ? '🔴' : '🟡';
+      return `<div class="market-effect-item ${impact}">${icon} ${effect.label}</div>`;
+    }).join('');
+  }
+  document.getElementById('buyerCurrentBudget').textContent = `Budget: ${eur(vm.budget)}`;
+  document.getElementById('buyerCurrentWtp').textContent = `Maximale Zahlungsbereitschaft: ${eur(vm.wtp)}`;
+  document.getElementById('buyerCurrentDemand').textContent = `Gewünschte Menge: ${vm.demandMin}–${vm.demandMax} Portionen`;
+}
+
 let buyerActiveRun = 1;
 const SPENDING_RATIOS = { sparsam: 0.3, normal: 0.6, viel: 0.9 };
 
@@ -334,6 +394,7 @@ function setBuyerRun(run){
   st.lastUsed.buyerRoleRun = buyerActiveRun;
   EisauktionState.writeState(st);
   updateBudgetPlannerView();
+  renderBuyerMarketUpdate();
 }
 
 function initBuyerProfiles(){
@@ -605,6 +666,8 @@ function calc(){
   });
 
   loadSaved();
+renderBuyerMarketUpdate();
+window.addEventListener("storage", renderBuyerMarketUpdate);
 }
 
 function nextRound(){
@@ -660,6 +723,8 @@ function loadSaved(){
 function clearSaved(){
   localStorage.removeItem("eisauktion_kaeufer_rounds");
   loadSaved();
+renderBuyerMarketUpdate();
+window.addEventListener("storage", renderBuyerMarketUpdate);
 }
 
 /* ========== Simple Chart (Canvas) ========== */
@@ -758,6 +823,8 @@ initBuyerProfiles();
 refreshSellerOptions();
 resetPurchasesToDefault();
 loadSaved();
+renderBuyerMarketUpdate();
+window.addEventListener("storage", renderBuyerMarketUpdate);
 </script>
 
 </body>
