@@ -38,10 +38,16 @@
     .scenario-details[open] summary::after{content:'▴';}
     .scenario-details-content{padding:0 12px 12px;}
     .scenario-planning{display:grid;gap:10px;}
-    .scenario-planning-round{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:10px;}
-    .scenario-planning-round h3{margin:0 0 8px;font-size:16px;}
-    .scenario-planning-round textarea{width:100%;min-height:120px;resize:vertical;}
-    .planning-label{display:block;margin:10px 0 6px;font-weight:600;color:#1e3a5f;font-size:14px;}
+    .scenario-planning-round{background:#f8fafc;border:1px solid var(--border);border-radius:10px;}
+    .scenario-planning-round summary{cursor:pointer;list-style:none;padding:10px 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+    .scenario-planning-round summary::-webkit-details-marker{display:none;}
+    .scenario-planning-round summary::after{content:'▾';color:var(--muted);font-size:14px;line-height:1.4;}
+    .scenario-planning-round[open] summary::after{content:'▴';}
+    .round-summary-title{margin:0;font-size:16px;color:#0f172a;}
+    .round-summary-meta{margin:2px 0 0;font-size:13px;color:var(--muted);}
+    .scenario-planning-content{padding:0 12px 12px;}
+    .scenario-planning-round textarea{width:100%;min-height:3em;resize:vertical;}
+    .planning-label{display:block;margin:8px 0 6px;font-weight:600;color:#1e3a5f;font-size:14px;}
     .parameter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
     .parameter-field{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px;}
     .parameter-field label{display:block;font-size:13px;margin-bottom:4px;color:#334155;}
@@ -901,14 +907,30 @@
 
     planning.innerHTML = '';
     activeScenario.rounds.forEach((round) => {
-      const card = document.createElement('article');
+      const card = document.createElement('details');
       card.className = 'scenario-planning-round';
 
-      const heading = document.createElement('h3');
-      heading.textContent = 'Runde ' + round.round + ': ' + round.title;
+      const heading = document.createElement('summary');
+      const titleWrap = document.createElement('div');
+      const title = document.createElement('p');
+      title.className = 'round-summary-title';
+      title.textContent = 'Runde ' + round.round + ': ' + round.title;
+      titleWrap.appendChild(title);
+
+      const parameterPlan = getRoundParameterPlan(activeScenario, round);
+      const demandShift = demandShiftFromModifiers(parameterPlan);
+      const summaryMeta = document.createElement('p');
+      summaryMeta.className = 'round-summary-meta';
+      summaryMeta.textContent = 'Saison: ' + parameterPlan.seasonEffect + ' · Nachfrage-Impuls: ' + (demandShift >= 0 ? '+' : '') + demandShift;
+      titleWrap.appendChild(summaryMeta);
+      heading.appendChild(titleWrap);
+
+      const content = document.createElement('div');
+      content.className = 'scenario-planning-content';
 
       const textbox = document.createElement('textarea');
       textbox.value = getRoundPlanValue(activeScenario, round);
+      textbox.rows = 3;
       textbox.setAttribute('aria-label', 'Rundenplanung für Runde ' + round.round);
       textbox.addEventListener('input', () => {
         scenarioRoundPlans[activeScenario.id] = Object.assign({}, scenarioRoundPlans[activeScenario.id] || {}, {
@@ -917,19 +939,17 @@
         updateScenarioNotes(activeScenario);
       });
 
-      card.appendChild(heading);
       const descriptionLabel = document.createElement('label');
       descriptionLabel.className = 'planning-label';
       descriptionLabel.textContent = 'Beschreibung / Moderationshinweis';
-      card.appendChild(descriptionLabel);
-      card.appendChild(textbox);
+      content.appendChild(descriptionLabel);
+      content.appendChild(textbox);
 
       const impactLabel = document.createElement('div');
       impactLabel.className = 'planning-label';
       impactLabel.textContent = 'Auswirkungen auf Spielparameter';
-      card.appendChild(impactLabel);
+      content.appendChild(impactLabel);
 
-      const parameterPlan = getRoundParameterPlan(activeScenario, round);
       const grid = document.createElement('div');
       grid.className = 'parameter-grid';
 
@@ -983,7 +1003,9 @@
         grid.appendChild(wrapper);
       });
 
-      card.appendChild(grid);
+      content.appendChild(grid);
+      card.appendChild(heading);
+      card.appendChild(content);
       planning.appendChild(card);
     });
   }
