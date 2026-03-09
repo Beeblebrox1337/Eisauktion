@@ -18,24 +18,116 @@
   <h1>Fragebogen zur Unternehmensgründung</h1>
   <div class="run-tabs" id="questionnaireTabs"><button class="run-tab" data-run="1" type="button">Durchgang 1</button><button class="run-tab" data-run="2" type="button">Durchgang 2</button></div>
   <div id="runPanel1" class="run-panel">
-    <section class="card"><h2>Unternehmensdaten</h2><div class="grid two"><div><label>Unternehmensname</label><input id="u_name" type="text"/></div><div><label>Mitglieder</label><input id="u_members" type="text"/></div></div></section>
-    <section class="card"><div class="grid three"><div><label>Startkapital (€)</label><input id="startkapital" type="number" step="0.01"/></div><div><label>Fixkosten (€)</label><input id="fix" type="number" step="0.01"/></div><div><label>Kapazität</label><input id="max_prod" type="number" step="1"/></div></div><label>Variable Kosten pro Einheit (€)</label><input id="var_sum" type="number" step="0.01"/></section>
+    <section class="card">
+      <h2>Unternehmen gründen: Idee und Positionierung</h2>
+      <p class="small">Entwickelt euer Unternehmen schrittweise: erst die Idee, dann Planung und abschließend die strategische Selbstreflexion.</p>
+      <div class="grid two">
+        <div><label>Unternehmensname</label><input id="u_name" type="text"/></div>
+        <div><label>Mitglieder</label><input id="u_members" type="text"/></div>
+      </div>
+      <label>Leitfrage: Was ist eure Geschäftsidee?</label>
+      <textarea id="r1_businessIdea" placeholder="Beschreibt euer Angebot, eure Zielgruppe und was euer Unternehmen besonders macht."></textarea>
+      <div class="grid two">
+        <div>
+          <label>Leitfrage: Welches Marktproblem löst ihr?</label>
+          <textarea id="r1_marketProblem" placeholder="Welches Bedürfnis der Käufer wollt ihr besonders gut erfüllen?"></textarea>
+        </div>
+        <div>
+          <label>Leitfrage: Wie wollt ihr euch vom Wettbewerb abheben?</label>
+          <textarea id="r1_differentiation" placeholder="Preis, Qualität, Service, Standort, Kommunikation …"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Planungsfelder für den ersten Durchgang</h2>
+      <p class="small">Legt hier eure wirtschaftlichen Eckdaten für Runde 1 fest.</p>
+      <div class="grid three">
+        <div><label>Startkapital (€)</label><input id="startkapital" type="number" step="0.01"/></div>
+        <div><label>Fixkosten (€)</label><input id="fix" type="number" step="0.01"/></div>
+        <div><label>Kapazität</label><input id="max_prod" type="number" step="1"/></div>
+      </div>
+      <label>Variable Kosten pro Einheit (€)</label><input id="var_sum" type="number" step="0.01"/>
+      <label>Wie wollt ihr Produktion, Preis und Absatz in Runde 1 abstimmen?</label>
+      <textarea id="r1_operationalPlan" placeholder="Beschreibt euren Plan für Menge, Preis und erwartete Nachfrage."></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Reflexion und strategische Überlegungen vor Runde 1</h2>
+      <div class="grid two">
+        <div>
+          <label>Welche Risiken seht ihr für euren Markteinstieg?</label>
+          <textarea id="r1_risks" placeholder="z. B. geringe Nachfrage, hoher Wettbewerb, falsche Preissetzung"></textarea>
+        </div>
+        <div>
+          <label>Welche Stärken bringt euer Team mit?</label>
+          <textarea id="r1_strengths" placeholder="Rollenverteilung, Erfahrung, Kommunikationsstrategie …"></textarea>
+        </div>
+      </div>
+      <label>Welche strategische Entscheidung ist für euren Erfolg in Runde 1 am wichtigsten?</label>
+      <textarea id="r1_keyDecision" placeholder="Formuliert eure zentrale Priorität für den ersten Durchgang."></textarea>
+    </section>
   </div>
 
   <div id="runPanel2" class="run-panel">
     <section class="card">
-      <h2>Überblick Unternehmen – Anpassung für Runde 2</h2>
-      <p class="small">Werte aus Durchgang 1 laden, anpassen und für den Fragebogen übernehmen.</p>
+      <h2>Überblick Unternehmen</h2>
+      <p class="small">Werte aus Durchgang 1 laden, prüfen und als Ausgangspunkt für Runde 2 verwenden.</p>
       <div class="row"><button class="btn" type="button" id="transferRound2">Daten für Runde 2 übernehmen</button></div>
       <div class="grid two" style="margin-top:10px;">
         <div><label>Unternehmensname</label><input id="ov_name" type="text"/></div>
-        <div><label>Verkäuferprofil</label><select id="r2_seller_profile"><option value="">Bitte Rollenprofil auswählen</option></select></div>
+        <div><label>Mitglieder</label><input id="ov_members" type="text"/></div>
       </div>
-      <div class="grid two"><div><label>Startkapital (€)</label><input id="ov_startCapital" type="number" step="0.01"/></div><div><label>Verbleibendes Kapital (€)</label><input id="ov_currentCapital" type="number" step="0.01"/></div></div>
-      <div class="grid three"><div><label>Fixkosten (€)</label><input id="ov_fixedCosts" type="number" step="0.01"/></div><div><label>Variable Kosten (€)</label><input id="ov_variableCosts" type="number" step="0.01"/></div><div><label>Kapazität</label><input id="ov_capacity" type="number" step="1"/></div></div>
+      <div class="grid two">
+        <div><label>Verkäuferprofil</label><select id="r2_seller_profile"><option value="">Bitte Rollenprofil auswählen</option></select></div>
+        <div><label>Verbleibendes Kapital (€)</label><input id="ov_currentCapital" type="number" step="0.01"/></div>
+      </div>
       <label>Besonderheiten / Profilbeschreibung</label><textarea id="ov_notes"></textarea>
       <div id="r2_profile_desc" class="profile-box small">Bitte zuerst ein Profil auswählen.</div>
       <p class="small" id="r2_hints"></p>
+    </section>
+
+    <section class="card">
+      <h2>Rückblick auf den ersten Durchgang</h2>
+      <label>Wie erfolgreich war euer Unternehmen im ersten Durchgang?</label>
+      <textarea id="r2_reflection_success"></textarea>
+      <label>Welche Entscheidungen haben besonders gut funktioniert?</label>
+      <textarea id="r2_reflection_goodDecisions"></textarea>
+      <label>Welche Probleme oder Herausforderungen gab es?</label>
+      <textarea id="r2_reflection_challenges"></textarea>
+      <label>Was würdet ihr im Nachhinein anders machen?</label>
+      <textarea id="r2_reflection_improvements"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Analyse des Marktes</h2>
+      <label>Wie haben sich die Preise im Markt entwickelt?</label>
+      <textarea id="r2_market_prices"></textarea>
+      <label>Welche Anbieter waren besonders erfolgreich?</label>
+      <textarea id="r2_market_successfulSellers"></textarea>
+      <label>Wie haben die Käufer reagiert?</label>
+      <textarea id="r2_market_buyerReaction"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Strategie für den nächsten Durchgang</h2>
+      <label>Wollt ihr eure Preisstrategie verändern?</label>
+      <textarea id="r2_strategy_price"></textarea>
+      <label>Wollt ihr eure Produktionsmenge anpassen?</label>
+      <textarea id="r2_strategy_production"></textarea>
+      <label>Wie wollt ihr auf mögliche Marktveränderungen reagieren?</label>
+      <textarea id="r2_strategy_marketResponse"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Anpassung Unternehmensparameter</h2>
+      <p class="small">Nach eurer Reflexion könnt ihr die wirtschaftlichen Parameter für Runde 2 gezielt anpassen.</p>
+      <div class="grid three">
+        <div><label>Startkapital (€)</label><input id="ov_startCapital" type="number" step="0.01"/></div>
+        <div><label>Fixkosten (€)</label><input id="ov_fixedCosts" type="number" step="0.01"/></div>
+        <div><label>Kapazität</label><input id="ov_capacity" type="number" step="1"/></div>
+      </div>
+      <label>Variable Kosten (€)</label><input id="ov_variableCosts" type="number" step="0.01"/>
     </section>
   </div>
 
@@ -51,16 +143,16 @@ function setActiveRun(run){ activeRun = Number(run)||1; document.querySelectorAl
 function populateSellerProfiles(){ Object.entries(EisauktionState.SELLER_PROFILES).forEach(([id,p])=>{ const o=document.createElement('option'); o.value=id;o.textContent=p.label; r2_seller_profile.appendChild(o);}); }
 
 function run1ToCompany(){ return EisauktionState.normalizeCompanyProfile({ name:u_name.value, sellerProfile:r2_seller_profile.value, startCapital:num(startkapital.value), currentCapital:num(startkapital.value), fixedCosts:num(fix.value), variableCosts:num(var_sum.value), capacity:num(max_prod.value) }); }
-function applyCompanyToRun2(c){ ov_name.value=c.name||''; r2_seller_profile.value=c.sellerProfile||''; ov_startCapital.value=c.startCapital||0; ov_currentCapital.value=c.currentCapital||0; ov_fixedCosts.value=c.fixedCosts||0; ov_variableCosts.value=c.variableCosts||0; ov_capacity.value=c.capacity||0; ov_notes.value=c.notes||''; updateProfileHint(); }
+function applyCompanyToRun2(c, members=''){ ov_name.value=c.name||''; ov_members.value=members||''; r2_seller_profile.value=c.sellerProfile||''; ov_startCapital.value=c.startCapital||0; ov_currentCapital.value=c.currentCapital||0; ov_fixedCosts.value=c.fixedCosts||0; ov_variableCosts.value=c.variableCosts||0; ov_capacity.value=c.capacity||0; ov_notes.value=c.notes||''; updateProfileHint(); }
 function collectRun2Company(){ return EisauktionState.normalizeCompanyProfile({ name:ov_name.value, sellerProfile:r2_seller_profile.value, startCapital:num(ov_startCapital.value), currentCapital:num(ov_currentCapital.value), fixedCosts:num(ov_fixedCosts.value), variableCosts:num(ov_variableCosts.value), capacity:num(ov_capacity.value), notes:ov_notes.value }); }
 
 function updateProfileHint(){ const p = EisauktionState.SELLER_PROFILES[r2_seller_profile.value]; r2_profile_desc.textContent = p ? p.description : 'Bitte zuerst ein Profil auswählen.'; r2_hints.textContent = p ? p.hints : ''; }
 r2_seller_profile.addEventListener('change', ()=>{ const c = EisauktionState.applySellerProfileDefaults(r2_seller_profile.value, collectRun2Company()); applyCompanyToRun2(c); });
-transferRound2.addEventListener('click', ()=>{ const st=EisauktionState.readState(); const fromRun1 = run1ToCompany(); const merged = EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, ...fromRun1, sellerProfile:r2_seller_profile.value||st.companyProfile.sellerProfile }); applyCompanyToRun2(merged); setBadge('ok','übernommen'); saveStatus.textContent='Daten aus Durchgang 1 wurden für Runde 2 übernommen.'; });
+transferRound2.addEventListener('click', ()=>{ const st=EisauktionState.readState(); const fromRun1 = run1ToCompany(); const merged = EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, ...fromRun1, sellerProfile:r2_seller_profile.value||st.companyProfile.sellerProfile }); applyCompanyToRun2(merged, u_members.value || st.questionnaire.run1?.u_members || ''); setBadge('ok','übernommen'); saveStatus.textContent='Daten aus Durchgang 1 wurden für Runde 2 übernommen.'; });
 
-function saveQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire.run1={ u_name:u_name.value, u_members:u_members.value, startkapital:startkapital.value, fix:fix.value, var_sum:var_sum.value, max_prod:max_prod.value }; st.companyProfile = collectRun2Company(); st.questionnaire.run2 = { u_name: st.companyProfile.name, sellerProfileId: st.companyProfile.sellerProfile, startCapital: st.companyProfile.startCapital, currentCapital: st.companyProfile.currentCapital, fixedCosts: st.companyProfile.fixedCosts, variableCosts: st.companyProfile.variableCosts, capacity: st.companyProfile.capacity, notes: st.companyProfile.notes };
+function saveQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire.run1={ u_name:u_name.value, u_members:u_members.value, startkapital:startkapital.value, fix:fix.value, var_sum:var_sum.value, max_prod:max_prod.value, businessIdea:r1_businessIdea.value, marketProblem:r1_marketProblem.value, differentiation:r1_differentiation.value, operationalPlan:r1_operationalPlan.value, risks:r1_risks.value, strengths:r1_strengths.value, keyDecision:r1_keyDecision.value }; st.companyProfile = collectRun2Company(); st.questionnaire.run2 = { u_name: st.companyProfile.name, u_members: ov_members.value, sellerProfileId: st.companyProfile.sellerProfile, startCapital: st.companyProfile.startCapital, currentCapital: st.companyProfile.currentCapital, fixedCosts: st.companyProfile.fixedCosts, variableCosts: st.companyProfile.variableCosts, capacity: st.companyProfile.capacity, notes: st.companyProfile.notes, reflectionSuccess:r2_reflection_success.value, reflectionGoodDecisions:r2_reflection_goodDecisions.value, reflectionChallenges:r2_reflection_challenges.value, reflectionImprovements:r2_reflection_improvements.value, marketPrices:r2_market_prices.value, marketSuccessfulSellers:r2_market_successfulSellers.value, marketBuyerReaction:r2_market_buyerReaction.value, strategyPrice:r2_strategy_price.value, strategyProduction:r2_strategy_production.value, strategyMarketResponse:r2_strategy_marketResponse.value };
   st.roles.seller.run2 = EisauktionState.makeSellerRun2Model(st.questionnaire.run2); EisauktionState.writeState(st); localStorage.setItem(EisauktionState.LEGACY_Q_KEY, JSON.stringify(st.questionnaire.run1)); saveStatus.textContent='✔ Gespeichert.'; setBadge('ok','gespeichert'); }
-function loadQuestionnaire(){ const st=EisauktionState.readState(); u_name.value=st.questionnaire.run1?.u_name||''; u_members.value=st.questionnaire.run1?.u_members||''; startkapital.value=st.questionnaire.run1?.startkapital||''; fix.value=st.questionnaire.run1?.fix||''; var_sum.value=st.questionnaire.run1?.var_sum||''; max_prod.value=st.questionnaire.run1?.max_prod||''; applyCompanyToRun2(EisauktionState.normalizeCompanyProfile(st.companyProfile || st.questionnaire.run2)); setActiveRun(st.lastUsed?.questionnaireRun || 1); saveStatus.textContent='✔ Gespeicherte Daten geladen.'; setBadge('ok','geladen'); }
+function loadQuestionnaire(){ const st=EisauktionState.readState(); u_name.value=st.questionnaire.run1?.u_name||''; u_members.value=st.questionnaire.run1?.u_members||''; startkapital.value=st.questionnaire.run1?.startkapital||''; fix.value=st.questionnaire.run1?.fix||''; var_sum.value=st.questionnaire.run1?.var_sum||''; max_prod.value=st.questionnaire.run1?.max_prod||''; r1_businessIdea.value=st.questionnaire.run1?.businessIdea||''; r1_marketProblem.value=st.questionnaire.run1?.marketProblem||''; r1_differentiation.value=st.questionnaire.run1?.differentiation||''; r1_operationalPlan.value=st.questionnaire.run1?.operationalPlan||''; r1_risks.value=st.questionnaire.run1?.risks||''; r1_strengths.value=st.questionnaire.run1?.strengths||''; r1_keyDecision.value=st.questionnaire.run1?.keyDecision||''; applyCompanyToRun2(EisauktionState.normalizeCompanyProfile(st.companyProfile || st.questionnaire.run2), st.questionnaire.run2?.u_members || st.questionnaire.run1?.u_members || ''); r2_reflection_success.value=st.questionnaire.run2?.reflectionSuccess||''; r2_reflection_goodDecisions.value=st.questionnaire.run2?.reflectionGoodDecisions||''; r2_reflection_challenges.value=st.questionnaire.run2?.reflectionChallenges||''; r2_reflection_improvements.value=st.questionnaire.run2?.reflectionImprovements||''; r2_market_prices.value=st.questionnaire.run2?.marketPrices||''; r2_market_successfulSellers.value=st.questionnaire.run2?.marketSuccessfulSellers||''; r2_market_buyerReaction.value=st.questionnaire.run2?.marketBuyerReaction||''; r2_strategy_price.value=st.questionnaire.run2?.strategyPrice||''; r2_strategy_production.value=st.questionnaire.run2?.strategyProduction||''; r2_strategy_marketResponse.value=st.questionnaire.run2?.strategyMarketResponse||''; setActiveRun(st.lastUsed?.questionnaireRun || 1); saveStatus.textContent='✔ Gespeicherte Daten geladen.'; setBadge('ok','geladen'); }
 function clearQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire={run1:{},run2:{sellerProfileId:''}}; st.companyProfile=EisauktionState.defaultCompanyProfile(); st.roles.seller.run2=null; EisauktionState.writeState(st); localStorage.removeItem(EisauktionState.LEGACY_Q_KEY); saveStatus.textContent='Gespeicherte Fragebogen-Daten gelöscht.'; setBadge('warn','gelöscht'); }
 
 document.addEventListener('DOMContentLoaded', ()=>{ populateSellerProfiles(); document.querySelectorAll('#questionnaireTabs .run-tab').forEach(btn=>btn.addEventListener('click', ()=>setActiveRun(btn.dataset.run))); loadQuestionnaire(); });
