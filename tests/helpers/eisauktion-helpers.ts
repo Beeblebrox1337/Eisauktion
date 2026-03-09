@@ -25,11 +25,16 @@ export async function fillCompanyRun1(page: Page) {
   await page.selectOption('#r2_seller_profile', run1.sellerProfile);
   await expect(page.locator('#ov_startCapital')).toHaveValue(String(run1.startCapital));
   await expect(page.locator('#ov_fixedCosts')).toHaveValue(String(run1.fixedCosts));
-  await expect(page.locator('#ov_variableCosts')).toHaveValue(run1.variableCosts.toFixed(2));
+  await expectNumericValue(page, '#ov_variableCosts', run1.variableCosts);
   await expect(page.locator('#ov_capacity')).toHaveValue(String(run1.capacity));
 
   await page.getByRole('button', { name: 'Fragebogen speichern' }).click();
   await expect(page.locator('#saveStatus')).toContainText('Gespeichert');
+}
+
+async function expectNumericValue(page: Page, selector: string, expected: number, precision = 6) {
+  const actual = Number(await page.locator(selector).inputValue());
+  expect(actual).toBeCloseTo(expected, precision);
 }
 
 export async function prepareBuyerRound1(page: Page) {
