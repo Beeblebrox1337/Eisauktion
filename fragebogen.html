@@ -19,23 +19,11 @@
   <div class="run-tabs" id="questionnaireTabs"><button class="run-tab" data-run="1" type="button">Durchgang 1</button><button class="run-tab" data-run="2" type="button">Durchgang 2</button></div>
   <div id="runPanel1" class="run-panel">
     <section class="card">
-      <h2>Unternehmen gründen: Idee und Positionierung</h2>
-      <p class="small">Entwickelt euer Unternehmen schrittweise: erst die Idee, dann Planung und abschließend die strategische Selbstreflexion.</p>
+      <h2>Unternehmen gründen: Basisdaten</h2>
+      <p class="small">Erfasst hier die Unternehmensdaten als Grundlage für die erste Marktrunde.</p>
       <div class="grid two">
         <div><label>Unternehmensname</label><input id="u_name" type="text"/></div>
         <div><label>Mitglieder</label><input id="u_members" type="text"/></div>
-      </div>
-      <label>Leitfrage: Was ist eure Geschäftsidee?</label>
-      <textarea id="r1_businessIdea" placeholder="Beschreibt euer Angebot, eure Zielgruppe und was euer Unternehmen besonders macht."></textarea>
-      <div class="grid two">
-        <div>
-          <label>Leitfrage: Welches Marktproblem löst ihr?</label>
-          <textarea id="r1_marketProblem" placeholder="Welches Bedürfnis der Käufer wollt ihr besonders gut erfüllen?"></textarea>
-        </div>
-        <div>
-          <label>Leitfrage: Wie wollt ihr euch vom Wettbewerb abheben?</label>
-          <textarea id="r1_differentiation" placeholder="Preis, Qualität, Service, Standort, Kommunikation …"></textarea>
-        </div>
       </div>
     </section>
 
@@ -100,17 +88,19 @@
     </section>
 
     <section class="card">
-      <h2>Analyse des Marktes</h2>
-      <label>Wie haben sich die Preise im Markt entwickelt?</label>
-      <textarea id="r2_market_prices"></textarea>
-      <label>Welche Anbieter waren besonders erfolgreich?</label>
-      <textarea id="r2_market_successfulSellers"></textarea>
-      <label>Wie haben die Käufer reagiert?</label>
-      <textarea id="r2_market_buyerReaction"></textarea>
-    </section>
-
-    <section class="card">
-      <h2>Strategie für den nächsten Durchgang</h2>
+      <h2>Strategie</h2>
+      <label>Leitfrage: Was ist eure Geschäftsidee?</label>
+      <textarea id="r2_businessIdea" placeholder="Beschreibt euer Angebot, eure Zielgruppe und was euer Unternehmen besonders macht."></textarea>
+      <div class="grid two">
+        <div>
+          <label>Leitfrage: Welches Marktproblem löst ihr?</label>
+          <textarea id="r2_marketProblem" placeholder="Welches Bedürfnis der Käufer wollt ihr besonders gut erfüllen?"></textarea>
+        </div>
+        <div>
+          <label>Leitfrage: Wie wollt ihr euch vom Wettbewerb abheben?</label>
+          <textarea id="r2_differentiation" placeholder="Preis, Qualität, Service, Standort, Kommunikation …"></textarea>
+        </div>
+      </div>
       <label>Wollt ihr eure Preisstrategie verändern?</label>
       <textarea id="r2_strategy_price"></textarea>
       <label>Wollt ihr eure Produktionsmenge anpassen?</label>
@@ -150,9 +140,9 @@ function updateProfileHint(){ const p = EisauktionState.SELLER_PROFILES[r2_selle
 r2_seller_profile.addEventListener('change', ()=>{ const c = EisauktionState.applySellerProfileDefaults(r2_seller_profile.value, collectRun2Company()); applyCompanyToRun2(c); });
 transferRound2.addEventListener('click', ()=>{ const st=EisauktionState.readState(); const fromRun1 = run1ToCompany(); const merged = EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, ...fromRun1, sellerProfile:r2_seller_profile.value||st.companyProfile.sellerProfile }); applyCompanyToRun2(merged, u_members.value || st.questionnaire.run1?.u_members || ''); setBadge('ok','übernommen'); saveStatus.textContent='Daten aus Durchgang 1 wurden für Runde 2 übernommen.'; });
 
-function saveQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire.run1={ u_name:u_name.value, u_members:u_members.value, startkapital:startkapital.value, fix:fix.value, var_sum:var_sum.value, max_prod:max_prod.value, businessIdea:r1_businessIdea.value, marketProblem:r1_marketProblem.value, differentiation:r1_differentiation.value, operationalPlan:r1_operationalPlan.value, risks:r1_risks.value, strengths:r1_strengths.value, keyDecision:r1_keyDecision.value }; st.companyProfile = collectRun2Company(); st.questionnaire.run2 = { u_name: st.companyProfile.name, u_members: ov_members.value, sellerProfileId: st.companyProfile.sellerProfile, startCapital: st.companyProfile.startCapital, currentCapital: st.companyProfile.currentCapital, fixedCosts: st.companyProfile.fixedCosts, variableCosts: st.companyProfile.variableCosts, capacity: st.companyProfile.capacity, notes: st.companyProfile.notes, reflectionSuccess:r2_reflection_success.value, reflectionGoodDecisions:r2_reflection_goodDecisions.value, reflectionChallenges:r2_reflection_challenges.value, reflectionImprovements:r2_reflection_improvements.value, marketPrices:r2_market_prices.value, marketSuccessfulSellers:r2_market_successfulSellers.value, marketBuyerReaction:r2_market_buyerReaction.value, strategyPrice:r2_strategy_price.value, strategyProduction:r2_strategy_production.value, strategyMarketResponse:r2_strategy_marketResponse.value };
+function saveQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire.run1={ u_name:u_name.value, u_members:u_members.value, startkapital:startkapital.value, fix:fix.value, var_sum:var_sum.value, max_prod:max_prod.value, operationalPlan:r1_operationalPlan.value, risks:r1_risks.value, strengths:r1_strengths.value, keyDecision:r1_keyDecision.value }; st.companyProfile = collectRun2Company(); st.questionnaire.run2 = { u_name: st.companyProfile.name, u_members: ov_members.value, sellerProfileId: st.companyProfile.sellerProfile, startCapital: st.companyProfile.startCapital, currentCapital: st.companyProfile.currentCapital, fixedCosts: st.companyProfile.fixedCosts, variableCosts: st.companyProfile.variableCosts, capacity: st.companyProfile.capacity, notes: st.companyProfile.notes, reflectionSuccess:r2_reflection_success.value, reflectionGoodDecisions:r2_reflection_goodDecisions.value, reflectionChallenges:r2_reflection_challenges.value, reflectionImprovements:r2_reflection_improvements.value, businessIdea:r2_businessIdea.value, marketProblem:r2_marketProblem.value, differentiation:r2_differentiation.value, strategyPrice:r2_strategy_price.value, strategyProduction:r2_strategy_production.value, strategyMarketResponse:r2_strategy_marketResponse.value };
   st.roles.seller.run2 = EisauktionState.makeSellerRun2Model(st.questionnaire.run2); EisauktionState.writeState(st); localStorage.setItem(EisauktionState.LEGACY_Q_KEY, JSON.stringify(st.questionnaire.run1)); saveStatus.textContent='✔ Gespeichert.'; setBadge('ok','gespeichert'); }
-function loadQuestionnaire(){ const st=EisauktionState.readState(); u_name.value=st.questionnaire.run1?.u_name||''; u_members.value=st.questionnaire.run1?.u_members||''; startkapital.value=st.questionnaire.run1?.startkapital||''; fix.value=st.questionnaire.run1?.fix||''; var_sum.value=st.questionnaire.run1?.var_sum||''; max_prod.value=st.questionnaire.run1?.max_prod||''; r1_businessIdea.value=st.questionnaire.run1?.businessIdea||''; r1_marketProblem.value=st.questionnaire.run1?.marketProblem||''; r1_differentiation.value=st.questionnaire.run1?.differentiation||''; r1_operationalPlan.value=st.questionnaire.run1?.operationalPlan||''; r1_risks.value=st.questionnaire.run1?.risks||''; r1_strengths.value=st.questionnaire.run1?.strengths||''; r1_keyDecision.value=st.questionnaire.run1?.keyDecision||''; applyCompanyToRun2(EisauktionState.normalizeCompanyProfile(st.companyProfile || st.questionnaire.run2), st.questionnaire.run2?.u_members || st.questionnaire.run1?.u_members || ''); r2_reflection_success.value=st.questionnaire.run2?.reflectionSuccess||''; r2_reflection_goodDecisions.value=st.questionnaire.run2?.reflectionGoodDecisions||''; r2_reflection_challenges.value=st.questionnaire.run2?.reflectionChallenges||''; r2_reflection_improvements.value=st.questionnaire.run2?.reflectionImprovements||''; r2_market_prices.value=st.questionnaire.run2?.marketPrices||''; r2_market_successfulSellers.value=st.questionnaire.run2?.marketSuccessfulSellers||''; r2_market_buyerReaction.value=st.questionnaire.run2?.marketBuyerReaction||''; r2_strategy_price.value=st.questionnaire.run2?.strategyPrice||''; r2_strategy_production.value=st.questionnaire.run2?.strategyProduction||''; r2_strategy_marketResponse.value=st.questionnaire.run2?.strategyMarketResponse||''; setActiveRun(st.lastUsed?.questionnaireRun || 1); saveStatus.textContent='✔ Gespeicherte Daten geladen.'; setBadge('ok','geladen'); }
+function loadQuestionnaire(){ const st=EisauktionState.readState(); u_name.value=st.questionnaire.run1?.u_name||''; u_members.value=st.questionnaire.run1?.u_members||''; startkapital.value=st.questionnaire.run1?.startkapital||''; fix.value=st.questionnaire.run1?.fix||''; var_sum.value=st.questionnaire.run1?.var_sum||''; max_prod.value=st.questionnaire.run1?.max_prod||''; r1_operationalPlan.value=st.questionnaire.run1?.operationalPlan||''; r1_risks.value=st.questionnaire.run1?.risks||''; r1_strengths.value=st.questionnaire.run1?.strengths||''; r1_keyDecision.value=st.questionnaire.run1?.keyDecision||''; applyCompanyToRun2(EisauktionState.normalizeCompanyProfile(st.companyProfile || st.questionnaire.run2), st.questionnaire.run2?.u_members || st.questionnaire.run1?.u_members || ''); r2_reflection_success.value=st.questionnaire.run2?.reflectionSuccess||''; r2_reflection_goodDecisions.value=st.questionnaire.run2?.reflectionGoodDecisions||''; r2_reflection_challenges.value=st.questionnaire.run2?.reflectionChallenges||''; r2_reflection_improvements.value=st.questionnaire.run2?.reflectionImprovements||''; r2_businessIdea.value=st.questionnaire.run2?.businessIdea||st.questionnaire.run1?.businessIdea||''; r2_marketProblem.value=st.questionnaire.run2?.marketProblem||st.questionnaire.run1?.marketProblem||''; r2_differentiation.value=st.questionnaire.run2?.differentiation||st.questionnaire.run1?.differentiation||''; r2_strategy_price.value=st.questionnaire.run2?.strategyPrice||''; r2_strategy_production.value=st.questionnaire.run2?.strategyProduction||''; r2_strategy_marketResponse.value=st.questionnaire.run2?.strategyMarketResponse||''; setActiveRun(st.lastUsed?.questionnaireRun || 1); saveStatus.textContent='✔ Gespeicherte Daten geladen.'; setBadge('ok','geladen'); }
 function clearQuestionnaire(){ const st=EisauktionState.readState(); st.questionnaire={run1:{},run2:{sellerProfileId:''}}; st.companyProfile=EisauktionState.defaultCompanyProfile(); st.roles.seller.run2=null; EisauktionState.writeState(st); localStorage.removeItem(EisauktionState.LEGACY_Q_KEY); saveStatus.textContent='Gespeicherte Fragebogen-Daten gelöscht.'; setBadge('warn','gelöscht'); }
 
 document.addEventListener('DOMContentLoaded', ()=>{ populateSellerProfiles(); document.querySelectorAll('#questionnaireTabs .run-tab').forEach(btn=>btn.addEventListener('click', ()=>setActiveRun(btn.dataset.run))); loadQuestionnaire(); });
