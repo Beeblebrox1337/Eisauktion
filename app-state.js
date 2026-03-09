@@ -32,7 +32,7 @@
 
   function defaultRoundModifiers(){ return { seasonEffect:'neutral', demandShock:'none', variableCostDelta:0, fixedCostDelta:0, imageEffect:'neutral', locationCost:0 }; }
   function defaultGameState(){ return { currentRound:1, sellers:[], buyers:[], currentScenarioId:'', scenarioNotes:'', roundModifiers:defaultRoundModifiers(), roleRoundEffects:{ sellerDescription:'', buyerDescription:'', sellerEffects:[], buyerEffects:[] } }; }
-  function defaultCompanyProfile(){ return { name:'', sellerProfile:'', sellerProfileLabel:'', profileDescription:'', startCapital:0, currentCapital:0, fixedCosts:0, variableCosts:0, capacity:0, notes:'' }; }
+  function defaultCompanyProfile(){ return { name:'', members:'', sellerProfile:'', sellerProfileLabel:'', profileDescription:'', startCapital:0, currentCapital:0, fixedCosts:0, variableCosts:0, capacity:0, notes:'' }; }
   function defaultBuyerProfile(){ return { name:'', buyerProfile:'', currentBalance:0, savingsAmount:0, spending:0, transferHistory:[] }; }
 
   function baseState(){ return { version:3, currentPhase:1, currentRound:1, selectedScenario:'', moderation:{ scenariosCollapsed:false }, appStateMeta:{}, lastUsed:{ questionnaireRun:1, sellerRoleRun:1, buyerRoleRun:1 }, questionnaire:{ run1:{}, run2:{ sellerProfileId:'' } }, roles:{ seller:{ run2:null }, buyer:{ run2:null } }, companyProfile:defaultCompanyProfile(), buyerProfile:defaultBuyerProfile(), results:{}, game:defaultGameState() }; }
@@ -55,7 +55,8 @@
     const currentCapital = num(first(data, ['currentCapital', 'capital', 'remainingCapital'], startCapital));
     return {
       ...defaultCompanyProfile(),
-      name: String(first(data, ['name', 'u_name', 'teamName'], '')),
+      name: String(first(data, ['name', 'companyName', 'unternehmenName', 'u_name', 'teamName'], '')),
+      members: String(first(data, ['members', 'u_members', 'teamMembers'], '')),
       sellerProfile: profileId,
       sellerProfileLabel: profile?.label || String(first(data, ['sellerProfileLabel', 'profileLabel'], '')),
       profileDescription: profile?.description || String(first(data, ['profileDescription'], '')),
@@ -66,6 +67,47 @@
       capacity,
       notes: String(first(data, ['notes', 'specialFeatures'], ''))
     };
+  }
+
+  function loadCompanyProfile(stateInput){
+    const state = stateInput || readState();
+    const company = normalizeCompanyProfile({
+      ...(state.questionnaire?.run1 || {}),
+      ...(state.questionnaire?.run2 || {}),
+      ...(state.companyProfile || {})
+    });
+    if(!stateInput){
+      state.companyProfile = company;
+      writeState(state);
+    }
+    return company;
+  }
+
+  function saveCompanyProfile(profile, extras = {}){
+    const state = readState();
+    const normalized = normalizeCompanyProfile({
+      ...(state.questionnaire?.run1 || {}),
+      ...(state.questionnaire?.run2 || {}),
+      ...(state.companyProfile || {}),
+      ...(profile || {})
+    });
+    state.companyProfile = normalized;
+    state.questionnaire.run2 = {
+      ...(state.questionnaire.run2 || {}),
+      u_name: normalized.name,
+      u_members: normalized.members,
+      sellerProfileId: normalized.sellerProfile,
+      startCapital: normalized.startCapital,
+      currentCapital: normalized.currentCapital,
+      fixedCosts: normalized.fixedCosts,
+      variableCosts: normalized.variableCosts,
+      capacity: normalized.capacity,
+      notes: normalized.notes,
+      ...(extras || {})
+    };
+    state.roles.seller.run2 = makeSellerRun2Model(state.questionnaire.run2);
+    writeState(state);
+    return normalized;
   }
 
   function normalizeBuyerProfile(input){
@@ -151,6 +193,7 @@
     KEY, LEGACY_Q_KEY, SELLER_PROFILES, BUYER_PROFILES, synonyms,
     defaultGameState, defaultRoundModifiers, defaultCompanyProfile, defaultBuyerProfile,
     normalizeCompanyProfile, normalizeBuyerProfile, applySellerProfileDefaults,
+    loadCompanyProfile, saveCompanyProfile,
     readState, writeState, makeSellerRun2Model
   };
 })();
