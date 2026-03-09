@@ -33,6 +33,7 @@
     .round-item strong{display:block;margin-bottom:4px;}
     .scenario-current-info{margin-top:10px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:12px;}
     .scenario-current-info h3{margin-bottom:8px;}
+    .scenario-toggle-row{margin-top:10px;}
   @media (max-width:900px){.group-list,.stat-grid,.scenario-grid{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -84,6 +85,7 @@
     <p class="scenario-intro">Bitte zu Beginn ein Szenario auswählen. Die Werte werden automatisch für die aktuelle Runde ins Formular übernommen und können danach weiterhin manuell angepasst werden.</p>
     <p class="scenario-status" id="scenario-status">Aktuelles Szenario: keines ausgewählt.</p>
     <div class="scenario-current-info" id="scenario-current-info">Noch kein Szenario aktiv.</div>
+    <div class="scenario-toggle-row"><button class="btn secondary" id="toggle-scenarios" type="button">Szenarien einklappen</button></div>
     <div class="scenario-grid" id="scenario-list"></div>
   </section>
 
@@ -227,6 +229,7 @@
   const app = window.EisauktionState;
   const state = app.readState();
   const game = state.game || app.defaultGameState();
+  let scenariosCollapsed = false;
 
   let editingSellerId = null;
   let editingBuyerId = null;
@@ -252,6 +255,10 @@
         '2 spontane Sommerkäufer',
         '1 budgetknapper Käufer'
       ],
+      autoSetup: {
+        sellerProfiles: ['discounter', 'discounter', 'innenstadt', 'premium', 'eiswagen'],
+        buyerProfiles: ['preisorientiert', 'preisorientiert', 'preisorientiert', 'sommer', 'sommer', 'budgetknapp']
+      },
       rounds: [
         { round: 1, title: 'Neutraler Marktstart', inputs: ['Saison: neutral', 'Nachfrage: normal', 'Keine zusätzlichen Effekte'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
         { round: 2, title: 'Leichte Preisunterbietung', inputs: ['Wettbewerb leicht erhöhen', 'Einzelne Anbieter unterbieten den Standardpreis', 'Preisbewegung sichtbar machen'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
@@ -274,6 +281,10 @@
         '2 preisorientierte Käufer',
         '1 treuer Stammkunde'
       ],
+      autoSetup: {
+        sellerProfiles: ['discounter', 'discounter', 'innenstadt', 'eiswagen'],
+        buyerProfiles: ['sommer', 'sommer', 'sommer', 'preisorientiert', 'preisorientiert', 'stammkunde']
+      },
       rounds: [
         { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
         { round: 2, title: 'Hitzewelle setzt ein', inputs: ['Saison-Effekt: hohe Nachfrage', 'Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Verkäufer können Preiserhöhungen testen'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'event-boom', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
@@ -297,6 +308,10 @@
         '2 qualitätsorientierte Käufer',
         '1 budgetknapper Käufer'
       ],
+      autoSetup: {
+        sellerProfiles: ['discounter', 'innenstadt', 'premium', 'klein'],
+        buyerProfiles: ['preisorientiert', 'preisorientiert', 'qualitaet', 'qualitaet', 'budgetknapp']
+      },
       rounds: [
         { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Kostenänderung: keine'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
         { round: 2, title: 'Kostenanstieg', inputs: ['Kostenänderung: Energiepreisschock (+0,3)', 'Externe Ereignisse kurz ansagen', 'Kalkulationsdruck thematisieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'energy+0.3', imageEffect: 'neutral', locationCost: 0.2 } },
@@ -319,6 +334,10 @@
         '2 imageorientierte Käufer',
         '1 treuer Stammkunde'
       ],
+      autoSetup: {
+        sellerProfiles: ['premium', 'premium', 'innenstadt', 'discounter'],
+        buyerProfiles: ['qualitaet', 'qualitaet', 'image', 'image', 'stammkunde']
+      },
       rounds: [
         { round: 1, title: 'Neutraler Marktstart', inputs: ['Image-Effekt: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
         { round: 2, title: 'Qualitätsbewusstsein steigt', inputs: ['Image-Effekt: Qualitätsbewusstsein', 'Kommunikation zu Qualität und Markenwirkung fördern', 'Preisvergleich relativieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'quality-focus', locationCost: 0 } },
@@ -343,6 +362,10 @@
         '1 spontane Sommerkäufer',
         '1 budgetknapper Käufer'
       ],
+      autoSetup: {
+        sellerProfiles: ['discounter', 'discounter', 'innenstadt', 'premium', 'eiswagen', 'klein'],
+        buyerProfiles: ['preisorientiert', 'preisorientiert', 'sommer', 'budgetknapp']
+      },
       rounds: [
         { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Nachfrage: leicht zurückhaltend'], roundModifiers: { seasonEffect: 'low-demand', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
         { round: 2, title: 'Intensiver Preiswettbewerb', inputs: ['Preisunterbietung aktiv anregen', 'Nachfrage-Schock: keine', 'Margendruck sichtbar machen'], roundModifiers: { seasonEffect: 'low-demand', demandShock: 'rain-slump', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
@@ -366,6 +389,10 @@
         '2 preisorientierte Käufer',
         '1 zusätzliche externe Käufergruppe'
       ],
+      autoSetup: {
+        sellerProfiles: ['discounter', 'innenstadt', 'eiswagen', 'premium'],
+        buyerProfiles: ['sommer', 'sommer', 'sommer', 'preisorientiert', 'preisorientiert', 'stammkunde']
+      },
       rounds: [
         { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
         { round: 2, title: 'Tourismusboom', inputs: ['Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Zusätzliche Käufer ankündigen', 'Verkäufer: Kapazität testen'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'event-boom', costChange: 'none', imageEffect: 'brand-boom', locationCost: 0 } },
@@ -383,6 +410,113 @@
       .split(',')
       .map(item => item.trim())
       .filter(Boolean);
+  }
+
+
+  function makeTeamName(baseLabel, index){
+    return baseLabel + ' ' + (index + 1);
+  }
+
+  function createSellerGroup(profileId, index){
+    const profile = app.SELLER_PROFILES[profileId];
+    if(!profile) return null;
+    return {
+      id: makeId('seller'),
+      teamName: makeTeamName(profile.label, index),
+      members: [],
+      profileId,
+      baseValues: {
+        startBudget: Number(profile.baseValues.startBudget),
+        variableCost: Number(profile.baseValues.variableCost)
+      },
+      roundValues: {
+        productionCapacity: 40,
+        startPrice: Number((profile.baseValues.variableCost + 1.4).toFixed(2))
+      },
+      dynamicModifiers: {
+        season: 0,
+        energyShock: 0,
+        locationCost: Number(game.roundModifiers.locationCost || 0)
+      }
+    };
+  }
+
+  function createBuyerGroup(profileId, index){
+    const profile = app.BUYER_PROFILES[profileId];
+    if(!profile) return null;
+    return {
+      id: makeId('buyer'),
+      teamName: makeTeamName(profile.label, index),
+      members: [],
+      profileId,
+      roundValues: {
+        budget: 14,
+        willingnessToPay: Number((profile.preferences.qualityFocus + 2.5).toFixed(2)),
+        demandBehavior: profile.description
+      },
+      preferences: {
+        priceFocus: profile.preferences.priceFocus,
+        qualityFocus: profile.preferences.qualityFocus
+      }
+    };
+  }
+
+  function applyRoundAdjustmentsToGroups(roundData){
+    if(!roundData || !roundData.roundModifiers) return;
+    game.sellers = game.sellers.map((seller) => {
+      const costShift = roundData.roundModifiers.costChange === 'energy+0.3' ? 0.3 : roundData.roundModifiers.costChange === 'raw-0.2' ? -0.2 : 0;
+      return Object.assign({}, seller, {
+        roundValues: Object.assign({}, seller.roundValues || {}, {
+          productionCapacity: roundData.roundModifiers.seasonEffect === 'high-demand' ? 55 : roundData.roundModifiers.seasonEffect === 'low-demand' ? 32 : 40,
+          startPrice: Number((seller.baseValues.variableCost + 1.4 + costShift).toFixed(2))
+        }),
+        dynamicModifiers: Object.assign({}, seller.dynamicModifiers || {}, {
+          energyShock: costShift,
+          locationCost: Number(roundData.roundModifiers.locationCost || 0)
+        })
+      });
+    });
+
+    game.buyers = game.buyers.map((buyer) => {
+      const isDemandBoom = roundData.roundModifiers.seasonEffect === 'high-demand' || roundData.roundModifiers.demandShock === 'event-boom';
+      const willingnessBoost = roundData.roundModifiers.imageEffect === 'brand-boom' ? 0.5 : roundData.roundModifiers.imageEffect === 'quality-focus' ? 0.35 : 0;
+      return Object.assign({}, buyer, {
+        roundValues: Object.assign({}, buyer.roundValues || {}, {
+          budget: isDemandBoom ? 18 : 14,
+          willingnessToPay: Number((2.8 + willingnessBoost + (isDemandBoom ? 0.35 : 0)).toFixed(2)),
+          demandBehavior: isDemandBoom ? 'spontan erhöht' : 'stabil'
+        })
+      });
+    });
+  }
+
+  function autoCreateGroupsForScenario(scenario){
+    if(!scenario || !scenario.autoSetup) return;
+    const sellerCounter = {};
+    const buyerCounter = {};
+
+    game.sellers = scenario.autoSetup.sellerProfiles
+      .map((profileId) => {
+        const index = sellerCounter[profileId] || 0;
+        sellerCounter[profileId] = index + 1;
+        return createSellerGroup(profileId, index);
+      })
+      .filter(Boolean);
+
+    game.buyers = scenario.autoSetup.buyerProfiles
+      .map((profileId) => {
+        const index = buyerCounter[profileId] || 0;
+        buyerCounter[profileId] = index + 1;
+        return createBuyerGroup(profileId, index);
+      })
+      .filter(Boolean);
+  }
+
+  function renderScenarioToggle(){
+    const button = document.getElementById('toggle-scenarios');
+    const list = document.getElementById('scenario-list');
+    list.classList.toggle('hidden', scenariosCollapsed);
+    button.textContent = scenariosCollapsed ? 'Szenarien anzeigen' : 'Szenarien einklappen';
   }
 
   function save(message){
@@ -443,6 +577,8 @@
         <div class="group-meta"><strong>Profil:</strong> ${profile ? profile.label : seller.profileId}</div>
         <div class="group-meta"><strong>Startbudget:</strong> ${seller.baseValues.startBudget}</div>
         <div class="group-meta"><strong>Variable Kosten:</strong> ${seller.baseValues.variableCost}</div>
+        <div class="group-meta"><strong>Kapazität:</strong> ${(seller.roundValues && seller.roundValues.productionCapacity) || '—'}</div>
+        <div class="group-meta"><strong>Ausgangspreis:</strong> ${(seller.roundValues && seller.roundValues.startPrice) || '—'}</div>
       `;
       const actions = document.createElement('div');
       actions.className = 'group-actions';
@@ -469,6 +605,8 @@
         <div class="group-meta"><strong>Mitglieder:</strong> ${(buyer.members || []).join(', ') || '—'}</div>
         <div class="group-meta"><strong>Profil:</strong> ${profile ? profile.label : buyer.profileId}</div>
         <div class="group-meta"><strong>Nachfrageparameter:</strong> Preisfokus ${buyer.preferences.priceFocus}, Qualitätsfokus ${buyer.preferences.qualityFocus}</div>
+        <div class="group-meta"><strong>Budget/Zahlungsbereitschaft:</strong> ${(buyer.roundValues && buyer.roundValues.budget) || '—'} / ${(buyer.roundValues && buyer.roundValues.willingnessToPay) || '—'}</div>
+        <div class="group-meta"><strong>Nachfrageverhalten:</strong> ${(buyer.roundValues && buyer.roundValues.demandBehavior) || '—'}</div>
       `;
       const actions = document.createElement('div');
       actions.className = 'group-actions';
@@ -551,7 +689,10 @@
     const roundData = getScenarioRoundData(scenario, game.currentRound);
     if(!roundData || !roundData.roundModifiers) return false;
     game.roundModifiers = Object.assign({}, game.roundModifiers, roundData.roundModifiers);
+    applyRoundAdjustmentsToGroups(roundData);
     loadRoundModifiers();
+    renderSellerCards();
+    renderBuyerCards();
     return true;
   }
 
@@ -590,9 +731,12 @@
       .map((round) => 'Runde ' + round.round + ': ' + round.title + ' | ' + round.inputs.join(' · '))
       .join(' || ');
 
+    autoCreateGroupsForScenario(scenario);
     applyScenarioToCurrentRound();
+    scenariosCollapsed = true;
+    renderScenarioToggle();
     renderScenarios();
-    save('Szenario „' + scenario.title + '“ aktiviert und Werte für Runde ' + game.currentRound + ' übernommen.');
+    save('Szenario „' + scenario.title + '“ aktiviert, Gruppen erstellt und Werte für Runde ' + game.currentRound + ' übernommen.');
   }
 
   function renderScenarios(){
@@ -668,6 +812,10 @@
   });
 
   document.getElementById('seller-profile').addEventListener('change', applySellerProfileDefaults);
+  document.getElementById('toggle-scenarios').addEventListener('click', () => {
+    scenariosCollapsed = !scenariosCollapsed;
+    renderScenarioToggle();
+  });
 
   sellerForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -769,6 +917,7 @@
   renderSellerCards();
   renderBuyerCards();
   renderScenarios();
+  renderScenarioToggle();
   save('Daten aus LocalStorage geladen.');
 })();
 </script>
