@@ -16,14 +16,12 @@
     .hidden{display:none;}
     .status-line{font-size:13px;color:var(--muted);margin-top:8px;}
     .inline-note{background:#eef6ff;border:1px solid #dbeafe;border-radius:10px;padding:10px;font-size:14px;color:#1e3a5f;}
-    .scenario-accordion summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;font-weight:600;}
-    .scenario-accordion summary::-webkit-details-marker{display:none;}
-    .scenario-accordion summary::after{content:'▾';font-size:16px;color:var(--muted);transition:transform .2s ease;}
-    .scenario-accordion[open] summary::after{transform:rotate(180deg);}
     .scenario-intro{margin:0 0 14px;font-size:14px;color:var(--muted);}
     .scenario-status{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);font-size:14px;color:#1e3a5f;}
+    .scenario-status strong{font-size:15px;}
     .scenario-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
     .scenario-card{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px;}
+    .scenario-card.active{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.15);}
     .scenario-card h3{margin-bottom:6px;}
     .scenario-tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:#eef6ff;color:#1e3a5f;margin:4px 0 10px;}
     .scenario-block{margin-top:8px;}
@@ -33,7 +31,9 @@
     .round-list{display:grid;gap:8px;}
     .round-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 10px;}
     .round-item strong{display:block;margin-bottom:4px;}
-    @media (max-width:900px){.group-list,.stat-grid,.scenario-grid{grid-template-columns:1fr;}}
+    .scenario-current-info{margin-top:10px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:12px;}
+    .scenario-current-info h3{margin-bottom:8px;}
+  @media (max-width:900px){.group-list,.stat-grid,.scenario-grid{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
@@ -80,7 +80,15 @@
   <p class="lead">Verwaltung von Gruppen, Runde und Eingriffen für das Rollenspiel.</p>
 
   <section class="card">
-    <h2>1) Spielübersicht</h2>
+    <h2>1) Marktszenarien</h2>
+    <p class="scenario-intro">Bitte zu Beginn ein Szenario auswählen. Die Werte werden automatisch für die aktuelle Runde ins Formular übernommen und können danach weiterhin manuell angepasst werden.</p>
+    <p class="scenario-status" id="scenario-status">Aktuelles Szenario: keines ausgewählt.</p>
+    <div class="scenario-current-info" id="scenario-current-info">Noch kein Szenario aktiv.</div>
+    <div class="scenario-grid" id="scenario-list"></div>
+  </section>
+
+  <section class="card">
+    <h2>2) Spielübersicht</h2>
     <div class="stat-grid">
       <div class="result" id="current-round">Aktuelle Runde: 1</div>
       <div class="result" id="seller-count">Verkäufergruppen: 0</div>
@@ -95,7 +103,7 @@
 
   <section class="card">
     <div class="section-head">
-      <h2>2) Verkäufergruppen</h2>
+      <h2>3) Verkäufergruppen</h2>
       <button class="btn" id="open-seller-form">Neue Verkäufergruppe hinzufügen</button>
     </div>
 
@@ -134,7 +142,7 @@
 
   <section class="card">
     <div class="section-head">
-      <h2>3) Käufergruppen</h2>
+      <h2>4) Käufergruppen</h2>
       <button class="btn" id="open-buyer-form">Neue Käufergruppe hinzufügen</button>
     </div>
 
@@ -162,7 +170,7 @@
   </section>
 
   <section class="card">
-    <h2>4) Rundeneinstellungen</h2>
+    <h2>5) Rundeneinstellungen</h2>
     <form id="round-form">
       <div class="grid two">
         <div>
@@ -207,20 +215,10 @@
   </section>
 
   <section class="card">
-    <h2>5) Spielparameter / dynamische Eingriffe</h2>
+    <h2>6) Spielparameter / dynamische Eingriffe</h2>
     <p class="inline-note">Die obenigen Werte werden als <strong>roundModifiers</strong> im zentralen Datenmodell gespeichert und sind vorbereitet für spätere automatische Marktberechnungen, Nachfragekurven und Auswertungsdiagramme.</p>
   </section>
 
-
-  <section class="card">
-    <h2>6) Marktszenarien</h2>
-    <details class="scenario-accordion" id="scenario-accordion">
-      <summary>Optionaler didaktischer Zusatzbereich für theoriegeleitete Marktimpulse</summary>
-      <p class="scenario-intro">Die Szenarien sind Moderationsleitfäden. Sie greifen die Theorie zu <strong>Absolute Konkurrenz</strong> und <strong>Speiseeismarkt: Realität vs. Modell</strong> auf, ohne automatische Marktberechnung.</p>
-      <p class="scenario-status" id="scenario-status">Aktuelles Szenario: keines ausgewählt.</p>
-      <div class="scenario-grid" id="scenario-list"></div>
-    </details>
-  </section>
 </main>
 
 <script src="app-state.js"></script>
@@ -255,9 +253,9 @@
         '1 budgetknapper Käufer'
       ],
       rounds: [
-        { round: 1, title: 'Neutraler Marktstart', inputs: ['Saison: neutral', 'Nachfrage: normal', 'Keine zusätzlichen Effekte'] },
-        { round: 2, title: 'Leichte Preisunterbietung', inputs: ['Wettbewerb leicht erhöhen', 'Einzelne Anbieter unterbieten den Standardpreis', 'Preisbewegung sichtbar machen'] },
-        { round: 3, title: 'Stabilisierung im Wettbewerb', inputs: ['Marktgleichgewicht diskutieren', 'Preisniveau vergleichen', 'Gewinne/Verluste reflektieren'] }
+        { round: 1, title: 'Neutraler Marktstart', inputs: ['Saison: neutral', 'Nachfrage: normal', 'Keine zusätzlichen Effekte'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 2, title: 'Leichte Preisunterbietung', inputs: ['Wettbewerb leicht erhöhen', 'Einzelne Anbieter unterbieten den Standardpreis', 'Preisbewegung sichtbar machen'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 3, title: 'Stabilisierung im Wettbewerb', inputs: ['Marktgleichgewicht diskutieren', 'Preisniveau vergleichen', 'Gewinne/Verluste reflektieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } }
       ]
     },
     {
@@ -277,9 +275,9 @@
         '1 treuer Stammkunde'
       ],
       rounds: [
-        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'] },
-        { round: 2, title: 'Hitzewelle setzt ein', inputs: ['Saison-Effekt: hohe Nachfrage', 'Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Verkäufer können Preiserhöhungen testen'] },
-        { round: 3, title: 'Markt passt sich an', inputs: ['Absatz und Wartezeiten vergleichen', 'Angebot ausweiten prüfen', 'Preisentwicklung beobachten'] }
+        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 2, title: 'Hitzewelle setzt ein', inputs: ['Saison-Effekt: hohe Nachfrage', 'Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Verkäufer können Preiserhöhungen testen'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'event-boom', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 3, title: 'Markt passt sich an', inputs: ['Absatz und Wartezeiten vergleichen', 'Angebot ausweiten prüfen', 'Preisentwicklung beobachten'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } }
       ]
     },
     {
@@ -300,9 +298,9 @@
         '1 budgetknapper Käufer'
       ],
       rounds: [
-        { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Kostenänderung: keine'] },
-        { round: 2, title: 'Kostenanstieg', inputs: ['Kostenänderung: Energiepreisschock (+0,3)', 'Externe Ereignisse kurz ansagen', 'Kalkulationsdruck thematisieren'] },
-        { round: 3, title: 'Anpassungsphase', inputs: ['Preiserhöhungen oder Mengenreduktion zulassen', 'Risikogruppen vergleichen', 'Gewinnmargen diskutieren'] }
+        { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Kostenänderung: keine'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 2, title: 'Kostenanstieg', inputs: ['Kostenänderung: Energiepreisschock (+0,3)', 'Externe Ereignisse kurz ansagen', 'Kalkulationsdruck thematisieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'energy+0.3', imageEffect: 'neutral', locationCost: 0.2 } },
+        { round: 3, title: 'Anpassungsphase', inputs: ['Preiserhöhungen oder Mengenreduktion zulassen', 'Risikogruppen vergleichen', 'Gewinnmargen diskutieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'energy+0.3', imageEffect: 'neutral', locationCost: 0.1 } }
       ]
     },
     {
@@ -322,9 +320,9 @@
         '1 treuer Stammkunde'
       ],
       rounds: [
-        { round: 1, title: 'Neutraler Marktstart', inputs: ['Image-Effekt: neutral', 'Nachfrage: normal'] },
-        { round: 2, title: 'Qualitätsbewusstsein steigt', inputs: ['Image-Effekt: Qualitätsbewusstsein', 'Kommunikation zu Qualität und Markenwirkung fördern', 'Preisvergleich relativieren'] },
-        { round: 3, title: 'Premiumanbieter im Vorteil', inputs: ['Premiumabsatz prüfen', 'Käuferpräferenzen reflektieren', 'Modellgrenzen zur Realität diskutieren'] }
+        { round: 1, title: 'Neutraler Marktstart', inputs: ['Image-Effekt: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 2, title: 'Qualitätsbewusstsein steigt', inputs: ['Image-Effekt: Qualitätsbewusstsein', 'Kommunikation zu Qualität und Markenwirkung fördern', 'Preisvergleich relativieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'quality-focus', locationCost: 0 } },
+        { round: 3, title: 'Premiumanbieter im Vorteil', inputs: ['Premiumabsatz prüfen', 'Käuferpräferenzen reflektieren', 'Modellgrenzen zur Realität diskutieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'brand-boom', locationCost: 0 } }
       ]
     },
     {
@@ -346,9 +344,9 @@
         '1 budgetknapper Käufer'
       ],
       rounds: [
-        { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Nachfrage: leicht zurückhaltend'] },
-        { round: 2, title: 'Intensiver Preiswettbewerb', inputs: ['Preisunterbietung aktiv anregen', 'Nachfrage-Schock: keine', 'Margendruck sichtbar machen'] },
-        { round: 3, title: 'Anbieter unter Druck', inputs: ['Kapitalschwache Anbieter fokussieren', 'Mengenanpassung diskutieren', 'Austrittsrisiko besprechen'] }
+        { round: 1, title: 'Normaler Start', inputs: ['Saison: neutral', 'Nachfrage: leicht zurückhaltend'], roundModifiers: { seasonEffect: 'low-demand', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 2, title: 'Intensiver Preiswettbewerb', inputs: ['Preisunterbietung aktiv anregen', 'Nachfrage-Schock: keine', 'Margendruck sichtbar machen'], roundModifiers: { seasonEffect: 'low-demand', demandShock: 'rain-slump', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 3, title: 'Anbieter unter Druck', inputs: ['Kapitalschwache Anbieter fokussieren', 'Mengenanpassung diskutieren', 'Austrittsrisiko besprechen'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } }
       ]
     },
     {
@@ -369,9 +367,9 @@
         '1 zusätzliche externe Käufergruppe'
       ],
       rounds: [
-        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'] },
-        { round: 2, title: 'Tourismusboom', inputs: ['Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Zusätzliche Käufer ankündigen', 'Verkäufer: Kapazität testen'] },
-        { round: 3, title: 'Marktreaktion', inputs: ['Preis- und Mengenanpassungen vergleichen', 'Standortvorteile bewerten', 'Kurzfristige Boom-Effekte reflektieren'] }
+        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 2, title: 'Tourismusboom', inputs: ['Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Zusätzliche Käufer ankündigen', 'Verkäufer: Kapazität testen'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'event-boom', costChange: 'none', imageEffect: 'brand-boom', locationCost: 0 } },
+        { round: 3, title: 'Marktreaktion', inputs: ['Preis- und Mengenanpassungen vergleichen', 'Standortvorteile bewerten', 'Kurzfristige Boom-Effekte reflektieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } }
       ]
     }
   ];
@@ -539,19 +537,51 @@
     form.locationCost.value = mods.locationCost;
   }
 
-  function renderScenarioStatus(){
-    const activeScenario = MARKET_SCENARIOS.find((entry) => entry.id === game.currentScenarioId);
-    const status = document.getElementById('scenario-status');
-    if(!activeScenario){
-      status.textContent = 'Aktuelles Szenario: keines ausgewählt.';
-      return;
-    }
-    status.textContent = 'Aktuelles Szenario: ' + activeScenario.title + ' – Hinweise wurden als Leitfaden gespeichert.';
+  function getScenarioById(id){
+    return MARKET_SCENARIOS.find((entry) => entry.id === id);
   }
 
-  function applyRoundSuggestion(mods){
-    game.roundModifiers = Object.assign({}, game.roundModifiers, mods);
+  function getScenarioRoundData(scenario, roundNumber){
+    if(!scenario) return null;
+    return scenario.rounds.find((entry) => entry.round === roundNumber) || null;
+  }
+
+  function applyScenarioToCurrentRound(){
+    const scenario = getScenarioById(game.currentScenarioId);
+    const roundData = getScenarioRoundData(scenario, game.currentRound);
+    if(!roundData || !roundData.roundModifiers) return false;
+    game.roundModifiers = Object.assign({}, game.roundModifiers, roundData.roundModifiers);
     loadRoundModifiers();
+    return true;
+  }
+
+  function renderScenarioStatus(){
+    const activeScenario = getScenarioById(game.currentScenarioId);
+    const status = document.getElementById('scenario-status');
+    const infoBox = document.getElementById('scenario-current-info');
+
+    if(!activeScenario){
+      status.innerHTML = '<strong>Aktuelles Szenario:</strong> keines ausgewählt.';
+      infoBox.textContent = 'Noch kein Szenario aktiv.';
+      return;
+    }
+
+    const roundData = getScenarioRoundData(activeScenario, game.currentRound);
+    status.innerHTML = '<strong>Aktuelles Szenario:</strong> ' + activeScenario.title + ' · Runde ' + game.currentRound;
+
+    if(!roundData){
+      infoBox.innerHTML = '<h3>' + activeScenario.title + '</h3><p>Für die aktuelle Runde sind keine Details hinterlegt.</p>';
+      return;
+    }
+
+    infoBox.innerHTML = `
+      <h3>${activeScenario.title}</h3>
+      <div class="scenario-tag">${activeScenario.theoryTag}</div>
+      <p><strong>Rahmenbedingungen:</strong> ${activeScenario.description}</p>
+      <p><strong>Marktmechanismus:</strong> ${activeScenario.mechanism}</p>
+      <p><strong>Rundenschwerpunkt ${roundData.round}:</strong> ${roundData.title}</p>
+      <ul class="scenario-list">${roundData.inputs.map((item) => `<li>${item}</li>`).join('')}</ul>
+    `;
   }
 
   function useScenario(scenario){
@@ -560,18 +590,9 @@
       .map((round) => 'Runde ' + round.round + ': ' + round.title + ' | ' + round.inputs.join(' · '))
       .join(' || ');
 
-    const secondRound = scenario.rounds.find((round) => round.round === 2);
-    const roundHint = (secondRound?.inputs || []).join(' ').toLowerCase();
-    const suggestedMods = {
-      seasonEffect: roundHint.includes('hohe nachfrage') || roundHint.includes('hitzewelle') ? 'high-demand' : 'neutral',
-      demandShock: roundHint.includes('stadtfest') || roundHint.includes('tourismus') || roundHint.includes('nachfrageplus') ? 'event-boom' : 'none',
-      costChange: roundHint.includes('energiepreisschock') || roundHint.includes('kostenanstieg') ? 'energy+0.3' : 'none',
-      imageEffect: roundHint.includes('qualitätsbewusstsein') ? 'quality-focus' : 'neutral'
-    };
-
-    applyRoundSuggestion(suggestedMods);
-    save('Szenario „' + scenario.title + '“ als Leitfaden aktiviert.');
-    renderScenarioStatus();
+    applyScenarioToCurrentRound();
+    renderScenarios();
+    save('Szenario „' + scenario.title + '“ aktiviert und Werte für Runde ' + game.currentRound + ' übernommen.');
   }
 
   function renderScenarios(){
@@ -580,7 +601,7 @@
 
     MARKET_SCENARIOS.forEach((scenario) => {
       const card = document.createElement('article');
-      card.className = 'scenario-card';
+      card.className = 'scenario-card' + (scenario.id === game.currentScenarioId ? ' active' : '');
       card.innerHTML = `
         <h3>${scenario.title}</h3>
         <div class="scenario-tag">Theoriebezug: ${scenario.theoryTag}</div>
@@ -614,7 +635,8 @@
       const useButton = document.createElement('button');
       useButton.type = 'button';
       useButton.className = 'btn secondary';
-      useButton.textContent = 'Szenario verwenden';
+      useButton.textContent = scenario.id === game.currentScenarioId ? 'Aktiv' : 'Szenario verwenden';
+      useButton.disabled = scenario.id === game.currentScenarioId;
       useButton.addEventListener('click', () => useScenario(scenario));
       actionRow.appendChild(useButton);
       card.appendChild(actionRow);
@@ -714,8 +736,10 @@
   });
 
   document.getElementById('switch-round').addEventListener('click', () => {
-    game.currentRound = game.currentRound === 1 ? 2 : 1;
-    save('Runde gewechselt.');
+    game.currentRound = game.currentRound >= 3 ? 1 : game.currentRound + 1;
+    const hasScenarioValues = applyScenarioToCurrentRound();
+    renderScenarios();
+    save(hasScenarioValues ? 'Runde gewechselt und Szenariowerte aktualisiert.' : 'Runde gewechselt.');
   });
 
   document.getElementById('reset-game').addEventListener('click', () => {
@@ -729,6 +753,8 @@
     renderSellerCards();
     renderBuyerCards();
     loadRoundModifiers();
+    applyScenarioToCurrentRound();
+    renderScenarios();
     resetSellerForm();
     resetBuyerForm();
     save('Spiel wurde zurückgesetzt.');
@@ -738,6 +764,7 @@
   renderBuyerProfiles();
   applySellerProfileDefaults();
   loadRoundModifiers();
+  applyScenarioToCurrentRound();
   renderOverview();
   renderSellerCards();
   renderBuyerCards();
