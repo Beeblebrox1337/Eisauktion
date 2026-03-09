@@ -53,6 +53,7 @@
       <button class="btn secondary" type="button" onclick="clearAll()">Daten löschen</button>
       <button class="btn" type="button" onclick="downloadBundle()">JSON herunterladen</button>
       <button class="btn secondary" type="button" onclick="copyJSON()">JSON kopieren</button>
+      <button class="btn" type="button" onclick="sendDirect()">Direkt senden</button>
     </div>
     <div class="hr"></div>
     <div id="status" class="result">Noch nicht geladen.</div>
@@ -133,8 +134,8 @@ function loadAll(){
 
   EisAuswertung.renderTable('buyerBody', ALL.roundsK, [
     { render: (r) => r.round ?? '-' },
-    { render: (r) => r.qty ?? '-' },
-    { render: (r) => r.payPrice ?? '-' },
+    { render: (r) => r.qty ?? r.totalQty ?? '-' },
+    { render: (r) => r.payPrice ?? (r.purchases && r.purchases[0] ? r.purchases[0].price : '-') },
     { render: (r) => r.spent ?? '-' },
     { render: (r) => r.rest ?? '-' }
   ]);
@@ -159,6 +160,64 @@ function downloadBundle(){
 
 async function copyJSON(){
   await navigator.clipboard.writeText(document.getElementById('jsonPreview').value || '{}');
+}
+
+function buildDirectPayload(){
+  const all = ALL || EisAuswertung.getAllData();
+  const st = all.stateV2 || {};
+  const company = st.companyProfile || {};
+  const buyer = st.buyerProfile || {};
+  return {
+    rolle: document.getElementById('role').value || 'unbekannt',
+    name: document.getElementById('who').value || company.name || buyer.name || '',
+    durchgang: st.currentPhase || st.lastUsed?.questionnaireRun || '',
+    runde: st.currentRound || st.game?.currentRound || '',
+    verkaeuferprofil: company.sellerProfileLabel || company.sellerProfile || '',
+    kaeuferprofil: buyer.buyerProfile || '',
+    unternehmensdaten: company,
+    kaeuferdaten: buyer,
+    ergebnisse: st.results || {},
+    kapital: company.currentCapital || '',
+    kontostand: buyer.currentBalance || '',
+    sparbetrag: buyer.savingsAmount || '',
+    fixkosten: company.fixedCosts || '',
+    variableKosten: company.variableCosts || '',
+    kapazitaet: company.capacity || '',
+    rundeneffekte: st.game?.roundModifiers || {},
+    szenario: st.selectedScenario || st.game?.currentScenarioId || '',
+    rawData: all
+  };
+}
+
+function sendDirect(){
+  const payload = buildDirectPayload();
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://formspree.io/f/mrblqzyv';
+  form.style.display = 'none';
+  const fields = {
+    rolle: payload.rolle,
+    name: payload.name,
+    durchgang: payload.durchgang,
+    runde: payload.runde,
+    verkaeuferprofil: payload.verkaeuferprofil,
+    kaeuferprofil: payload.kaeuferprofil,
+    kapital: payload.kapital,
+    kontostand: payload.kontostand,
+    sparbetrag: payload.sparbetrag,
+    fixkosten: payload.fixkosten,
+    variable_kosten: payload.variableKosten,
+    kapazitaet: payload.kapazitaet,
+    szenario: payload.szenario,
+    rundeneffekte: JSON.stringify(payload.rundeneffekte),
+    unternehmensdaten: JSON.stringify(payload.unternehmensdaten),
+    kaeuferdaten: JSON.stringify(payload.kaeuferdaten),
+    ergebnisse: JSON.stringify(payload.ergebnisse),
+    auswertung: JSON.stringify(payload.rawData)
+  };
+  Object.entries(fields).forEach(([k,v])=>{ const input=document.createElement('input'); input.type='hidden'; input.name=k; input.value=String(v ?? ''); form.appendChild(input); });
+  document.body.appendChild(form);
+  form.submit();
 }
 
 loadAll();

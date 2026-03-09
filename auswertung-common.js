@@ -71,9 +71,9 @@
 
     roundsK.forEach((r)=>{
       const a = ensure(r.round);
-      a.demandQty += num(r.qty);
+      a.demandQty += num(r.qty != null ? r.qty : r.totalQty);
       a.buyerSpent += num(r.spent);
-      const p = num(r.payPrice);
+      const p = num(r.payPrice != null ? r.payPrice : (Array.isArray(r.purchases)&&r.purchases.length ? r.purchases[0].price : 0));
       if(p > 0) a.buyerPrices.push(p);
     });
 
