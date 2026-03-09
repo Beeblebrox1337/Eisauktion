@@ -91,7 +91,13 @@
       buyers: [],
       currentScenarioId: '',
       scenarioNotes: '',
-      roundModifiers: defaultRoundModifiers()
+      roundModifiers: defaultRoundModifiers(),
+      roleRoundEffects: {
+        sellerDescription: '',
+        buyerDescription: '',
+        sellerEffects: [],
+        buyerEffects: []
+      }
     };
   }
 
@@ -129,6 +135,7 @@
         state.roles = Object.assign(baseState().roles, parsed.roles || {});
         state.game = Object.assign(defaultGameState(), parsed.game || {});
         state.game.roundModifiers = Object.assign(defaultRoundModifiers(), state.game.roundModifiers || {});
+        state.game.roleRoundEffects = Object.assign(defaultGameState().roleRoundEffects, state.game.roleRoundEffects || {});
         state.game.sellers = Array.isArray(state.game.sellers) ? state.game.sellers : [];
         state.game.buyers = Array.isArray(state.game.buyers) ? state.game.buyers : [];
       }catch(_e){ }

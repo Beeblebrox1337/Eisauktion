@@ -267,9 +267,9 @@
         buyerProfiles: ['preisorientiert', 'preisorientiert', 'preisorientiert', 'sommer', 'sommer', 'budgetknapp']
       },
       rounds: [
-        { round: 1, title: 'Neutraler Marktstart', inputs: ['Saison: neutral', 'Nachfrage: normal', 'Keine zusätzlichen Effekte'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
-        { round: 2, title: 'Leichte Preisunterbietung', inputs: ['Wettbewerb leicht erhöhen', 'Einzelne Anbieter unterbieten den Standardpreis', 'Preisbewegung sichtbar machen'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
-        { round: 3, title: 'Stabilisierung im Wettbewerb', inputs: ['Marktgleichgewicht diskutieren', 'Preisniveau vergleichen', 'Gewinne/Verluste reflektieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } }
+        { round: 1, title: 'Neutraler Marktstart', inputs: ['Saison: neutral', 'Nachfrage: normal', 'Keine zusätzlichen Effekte'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 }, sellerDescription: 'Ausgeglichene Marktlage ohne zusätzliche Belastungen oder Sondereffekte.', buyerDescription: 'Normale Nachfragebedingungen ohne besondere Kaufanreize.', sellerEffects: [{ label: 'Nachfrage normal', impact: 'neutral' }, { label: 'Kosten unverändert', impact: 'neutral' }], buyerEffects: [{ label: 'Budget unverändert', impact: 'neutral' }, { label: 'Kaufwahrscheinlichkeit normal', impact: 'neutral' }] },
+        { round: 2, title: 'Leichte Preisunterbietung', inputs: ['Wettbewerb leicht erhöhen', 'Einzelne Anbieter unterbieten den Standardpreis', 'Preisbewegung sichtbar machen'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 }, sellerDescription: 'Der Wettbewerb wird intensiver: niedrige Preise setzen Margen unter Druck.', buyerDescription: 'Du profitierst von leicht fallenden Preisen und besseren Vergleichsmöglichkeiten.', sellerEffects: [{ label: 'Gewinnmöglichkeiten sinken', impact: 'negative' }, { label: 'Nachfrage bleibt stabil', impact: 'neutral' }], buyerEffects: [{ label: 'Preise leicht günstiger', impact: 'positive' }, { label: 'Zahlungsbereitschaft unverändert', impact: 'neutral' }] },
+        { round: 3, title: 'Stabilisierung im Wettbewerb', inputs: ['Marktgleichgewicht diskutieren', 'Preisniveau vergleichen', 'Gewinne/Verluste reflektieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 }, sellerDescription: 'Der Markt stabilisiert sich, planbare Entscheidungen werden wichtiger.', buyerDescription: 'Das Preisniveau ist stabiler, Vergleiche sind einfacher.', sellerEffects: [{ label: 'Planbarkeit steigt', impact: 'positive' }, { label: 'Kosten unverändert', impact: 'neutral' }], buyerEffects: [{ label: 'Kaufentscheidungen planbarer', impact: 'positive' }, { label: 'Budget unverändert', impact: 'neutral' }] }
       ]
     },
     {
@@ -293,9 +293,9 @@
         buyerProfiles: ['sommer', 'sommer', 'sommer', 'preisorientiert', 'preisorientiert', 'stammkunde']
       },
       rounds: [
-        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
-        { round: 2, title: 'Hitzewelle setzt ein', inputs: ['Saison-Effekt: hohe Nachfrage', 'Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Verkäufer können Preiserhöhungen testen'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'event-boom', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
-        { round: 3, title: 'Markt passt sich an', inputs: ['Absatz und Wartezeiten vergleichen', 'Angebot ausweiten prüfen', 'Preisentwicklung beobachten'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } }
+        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 }, sellerDescription: 'Normaler Start ohne zusätzliche Marktimpulse.', buyerDescription: 'Du kaufst unter gewohnten Bedingungen ein.', sellerEffects: [{ label: 'Nachfrage normal', impact: 'neutral' }], buyerEffects: [{ label: 'Konsumbedarf normal', impact: 'neutral' }] },
+        { round: 2, title: 'Hitzewelle setzt ein', inputs: ['Saison-Effekt: hohe Nachfrage', 'Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Verkäufer können Preiserhöhungen testen'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'event-boom', costChange: 'none', imageEffect: 'neutral', locationCost: 0 }, sellerDescription: 'Hitzewelle und Event treiben die Nachfrage stark nach oben.', buyerDescription: 'Sehr warmes Wetter erhöht deinen Eisbedarf deutlich.', sellerEffects: [{ label: 'Nachfrage steigt', impact: 'positive' }, { label: 'Höhere Preise werden eher akzeptiert', impact: 'positive' }, { label: 'Kapazitätsdruck steigt', impact: 'negative' }], buyerEffects: [{ label: 'Konsumbedarf steigt', impact: 'positive' }, { label: 'Zahlungsbereitschaft steigt leicht', impact: 'neutral' }, { label: 'Preise steigen', impact: 'negative' }] },
+        { round: 3, title: 'Markt passt sich an', inputs: ['Absatz und Wartezeiten vergleichen', 'Angebot ausweiten prüfen', 'Preisentwicklung beobachten'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 }, sellerDescription: 'Die Nachfrage bleibt hoch, aber der Markt reagiert mit mehr Angebot.', buyerDescription: 'Du kaufst weiterhin viel, triffst aber bewusster Entscheidungen.', sellerEffects: [{ label: 'Absatzchance hoch', impact: 'positive' }, { label: 'Kapazität bleibt Engpass', impact: 'negative' }], buyerEffects: [{ label: 'Kaufwahrscheinlichkeit hoch', impact: 'positive' }, { label: 'Budgetdruck bei häufigem Kauf', impact: 'negative' }] }
       ]
     },
     {
@@ -401,7 +401,7 @@
         buyerProfiles: ['sommer', 'sommer', 'sommer', 'preisorientiert', 'preisorientiert', 'stammkunde']
       },
       rounds: [
-        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } },
+        { round: 1, title: 'Neutraler Start', inputs: ['Saison: neutral', 'Nachfrage: normal'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 }, sellerDescription: 'Normaler Start ohne zusätzliche Marktimpulse.', buyerDescription: 'Du kaufst unter gewohnten Bedingungen ein.', sellerEffects: [{ label: 'Nachfrage normal', impact: 'neutral' }], buyerEffects: [{ label: 'Konsumbedarf normal', impact: 'neutral' }] },
         { round: 2, title: 'Tourismusboom', inputs: ['Nachfrage-Schock: Stadtfest (+Nachfrage)', 'Zusätzliche Käufer ankündigen', 'Verkäufer: Kapazität testen'], roundModifiers: { seasonEffect: 'high-demand', demandShock: 'event-boom', costChange: 'none', imageEffect: 'brand-boom', locationCost: 0 } },
         { round: 3, title: 'Marktreaktion', inputs: ['Preis- und Mengenanpassungen vergleichen', 'Standortvorteile bewerten', 'Kurzfristige Boom-Effekte reflektieren'], roundModifiers: { seasonEffect: 'neutral', demandShock: 'none', costChange: 'none', imageEffect: 'neutral', locationCost: 0 } }
       ]
@@ -770,11 +770,28 @@
     return scenario.rounds.find((entry) => entry.round === roundNumber) || null;
   }
 
+
+  function getRoleRoundEffects(roundData){
+    if(!roundData) return {
+      sellerDescription: '',
+      buyerDescription: '',
+      sellerEffects: [],
+      buyerEffects: []
+    };
+    return {
+      sellerDescription: roundData.sellerDescription || '',
+      buyerDescription: roundData.buyerDescription || '',
+      sellerEffects: Array.isArray(roundData.sellerEffects) ? roundData.sellerEffects : [],
+      buyerEffects: Array.isArray(roundData.buyerEffects) ? roundData.buyerEffects : []
+    };
+  }
+
   function applyScenarioToCurrentRound(){
     const scenario = getScenarioById(game.currentScenarioId);
     const roundData = getScenarioRoundData(scenario, game.currentRound);
     if(!roundData || !roundData.roundModifiers) return false;
     game.roundModifiers = Object.assign({}, game.roundModifiers, roundData.roundModifiers);
+    game.roleRoundEffects = getRoleRoundEffects(roundData);
     applyRoundAdjustmentsToGroups(game.roundModifiers);
     loadRoundModifiers();
     renderSellerCards();
@@ -973,6 +990,12 @@
       imageEffect: form.imageEffect.value,
       locationCost: Number(form.locationCost.value || 0)
     };
+    game.roleRoundEffects = {
+      sellerDescription: 'Moderation hat individuelle Rundeneffekte gesetzt.',
+      buyerDescription: 'Moderation hat individuelle Rundeneffekte gesetzt.',
+      sellerEffects: [],
+      buyerEffects: []
+    };
     applyRoundAdjustmentsToGroups(game.roundModifiers);
     renderSellerCards();
     renderBuyerCards();
@@ -992,6 +1015,7 @@
     game.sellers = state.game.sellers;
     game.buyers = state.game.buyers;
     game.roundModifiers = state.game.roundModifiers;
+    game.roleRoundEffects = state.game.roleRoundEffects || app.defaultGameState().roleRoundEffects;
     game.currentScenarioId = state.game.currentScenarioId || '';
     game.scenarioNotes = state.game.scenarioNotes || '';
     renderSellerCards();
