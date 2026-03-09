@@ -41,6 +41,12 @@
     .scenario-planning-round{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:10px;}
     .scenario-planning-round h3{margin:0 0 8px;font-size:16px;}
     .scenario-planning-round textarea{width:100%;min-height:120px;resize:vertical;}
+    .planning-label{display:block;margin:10px 0 6px;font-weight:600;color:#1e3a5f;font-size:14px;}
+    .parameter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .parameter-field{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px;}
+    .parameter-field label{display:block;font-size:13px;margin-bottom:4px;color:#334155;}
+    .parameter-field input,.parameter-field select{width:100%;}
+    .impact-box{margin-top:10px;background:#eef6ff;border:1px solid #dbeafe;border-radius:10px;padding:10px;font-size:14px;color:#1e3a5f;}
     .value-stack{display:grid;gap:4px;margin-top:8px;}
     .value-base{font-size:13px;color:var(--muted);}
     .value-current{font-size:14px;color:#0f172a;}
@@ -92,7 +98,7 @@
   <p class="lead">Verwaltung von Gruppen, Runde und Eingriffen für das Rollenspiel.</p>
 
   <section class="card">
-    <h2>1) Marktszenarien</h2>
+    <h2>1) Szenario-Übersicht</h2>
     <p class="scenario-intro">Bitte zu Beginn ein Szenario auswählen. Die Werte werden automatisch für die aktuelle Runde ins Formular übernommen und können danach weiterhin manuell angepasst werden.</p>
     <p class="scenario-status" id="scenario-status">Aktuelles Szenario: keines ausgewählt.</p>
     <div class="scenario-grid" id="scenario-list"></div>
@@ -119,8 +125,60 @@
   </section>
 
   <section class="card">
+    <h2>4) Rundeneinstellungen</h2>
+    <p class="small">Steuerung der konkreten Spielparameter für die aktuelle Runde. Die Felder sind mit den Parameterwerten in der Rundenplanung abgestimmt.</p>
+    <form id="round-form">
+      <div class="grid two">
+        <div>
+          <label for="season-effect">Saison-Effekt</label>
+          <select id="season-effect" name="seasonEffect">
+            <option value="neutral">neutral (Nachfrage ±0)</option>
+            <option value="warm">warm (Nachfrage +1)</option>
+            <option value="very-warm">sehr warm (Nachfrage +2)</option>
+            <option value="cold">kalt (Nachfrage -1)</option>
+          </select>
+        </div>
+        <div>
+          <label for="demand-shock">Nachfrage-Schock</label>
+          <select id="demand-shock" name="demandShock">
+            <option value="none">keine (Nachfrage +0)</option>
+            <option value="city-festival">Stadtfest (Nachfrage +2)</option>
+            <option value="holiday-start">Ferienbeginn (Nachfrage +1)</option>
+            <option value="rain-week">Regenwoche (Nachfrage -1)</option>
+            <option value="heatwave">Hitzewelle (Nachfrage +2)</option>
+          </select>
+        </div>
+        <div>
+          <label for="variable-cost-delta">Variable Kosten-Zuschlag (€)</label>
+          <input id="variable-cost-delta" name="variableCostDelta" type="number" step="0.1" value="0">
+        </div>
+        <div>
+          <label for="fixed-cost-delta">Fixkosten-Zuschlag (€)</label>
+          <input id="fixed-cost-delta" name="fixedCostDelta" type="number" step="0.1" value="0">
+        </div>
+        <div>
+          <label for="image-effect">Image-Effekt</label>
+          <select id="image-effect" name="imageEffect">
+            <option value="negative">negativ (Kaufneigung -1)</option>
+            <option value="neutral">neutral (Kaufneigung ±0)</option>
+            <option value="positive">positiv (Kaufneigung +1)</option>
+          </select>
+        </div>
+        <div>
+          <label for="location-cost">Standortkosten-Zuschlag (€)</label>
+          <input id="location-cost" type="number" name="locationCost" step="0.1" value="0">
+        </div>
+      </div>
+      <div class="impact-box" id="round-impact-summary"></div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" type="submit">Rundeneinstellungen speichern</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
     <div class="section-head">
-      <h2>4) Verkäufergruppen</h2>
+      <h2>5) Verkäufergruppen</h2>
       <button class="btn" id="open-seller-form">Neue Verkäufergruppe hinzufügen</button>
     </div>
 
@@ -159,7 +217,7 @@
 
   <section class="card">
     <div class="section-head">
-      <h2>5) Käufergruppen</h2>
+      <h2>6) Käufergruppen</h2>
       <button class="btn" id="open-buyer-form">Neue Käufergruppe hinzufügen</button>
     </div>
 
@@ -187,51 +245,6 @@
   </section>
 
   <section class="card">
-    <h2>6) Rundeneinstellungen</h2>
-    <form id="round-form">
-      <div class="grid two">
-        <div>
-          <label for="season-effect">Saison-Effekt</label>
-          <select id="season-effect" name="seasonEffect">
-            <option value="neutral">neutral</option>
-            <option value="high-demand">hohe Nachfrage</option>
-            <option value="low-demand">geringe Nachfrage</option>
-          </select>
-        </div>
-        <div>
-          <label for="demand-shock">Nachfrage-Schock</label>
-          <select id="demand-shock" name="demandShock">
-            <option value="none">keine</option>
-            <option value="event-boom">Stadtfest (+Nachfrage)</option>
-            <option value="rain-slump">Schlechtes Wetter (-Nachfrage)</option>
-          </select>
-        </div>
-        <div>
-          <label for="cost-change">Kostenänderung</label>
-          <select id="cost-change" name="costChange">
-            <option value="none">keine</option>
-            <option value="energy+0.3">Energiepreisschock (+0,3)</option>
-            <option value="raw-0.2">günstige Rohstoffe (-0,2)</option>
-          </select>
-        </div>
-        <div>
-          <label for="image-effect">Image-Effekt</label>
-          <select id="image-effect" name="imageEffect">
-            <option value="neutral">neutral</option>
-            <option value="brand-boom">Markenboom</option>
-            <option value="quality-focus">Qualitätsbewusstsein</option>
-          </select>
-        </div>
-      </div>
-      <label for="location-cost">Standortkosten (numerisch)</label>
-      <input id="location-cost" type="number" name="locationCost" step="0.1" value="0">
-      <div class="row" style="margin-top:10px;">
-        <button class="btn" type="submit">Rundeneinstellungen speichern</button>
-      </div>
-    </form>
-  </section>
-
-  <section class="card">
     <h2>7) Spielparameter / dynamische Eingriffe</h2>
     <p class="inline-note">Die obenigen Werte werden als <strong>roundModifiers</strong> im zentralen Datenmodell gespeichert und sind vorbereitet für spätere automatische Marktberechnungen, Nachfragekurven und Auswertungsdiagramme.</p>
   </section>
@@ -245,6 +258,11 @@
   const state = app.readState();
   const game = state.game || app.defaultGameState();
   const scenarioRoundPlans = {};
+  const scenarioRoundParameterPlans = {};
+
+  const SEASON_DEMAND_DELTA = { neutral: 0, warm: 1, 'very-warm': 2, cold: -1, 'high-demand': 2, 'low-demand': -1 };
+  const SHOCK_DEMAND_DELTA = { none: 0, 'city-festival': 2, 'holiday-start': 1, 'rain-week': -1, heatwave: 2, 'event-boom': 2, 'rain-slump': -1 };
+  const IMAGE_EFFECT_DELTA = { negative: -1, neutral: 0, positive: 1, 'brand-boom': 1, 'quality-focus': 1 };
 
   let editingSellerId = null;
   let editingBuyerId = null;
@@ -476,17 +494,49 @@
     };
   }
 
-  function getCostShift(modifiers){
-    return modifiers.costChange === 'energy+0.3' ? 0.3 : modifiers.costChange === 'raw-0.2' ? -0.2 : 0;
+  function normalizeRoundModifiers(modifiers){
+    const source = modifiers || {};
+    const costChange = source.costChange || 'none';
+    const legacyVariableCostDelta = costChange === 'energy+0.3' ? 0.3 : costChange === 'raw-0.2' ? -0.2 : 0;
+    return {
+      seasonEffect: source.seasonEffect || 'neutral',
+      demandShock: source.demandShock || 'none',
+      variableCostDelta: Number(source.variableCostDelta != null ? source.variableCostDelta : legacyVariableCostDelta),
+      fixedCostDelta: Number(source.fixedCostDelta || 0),
+      imageEffect: source.imageEffect || 'neutral',
+      locationCost: Number(source.locationCost || 0)
+    };
+  }
+
+  function demandShiftFromModifiers(modifiers){
+    return (SEASON_DEMAND_DELTA[modifiers.seasonEffect] || 0) + (SHOCK_DEMAND_DELTA[modifiers.demandShock] || 0);
+  }
+
+  function imageShiftFromModifiers(modifiers){
+    return IMAGE_EFFECT_DELTA[modifiers.imageEffect] || 0;
+  }
+
+  function summarizeModifiers(modifiers){
+    const demandShift = demandShiftFromModifiers(modifiers);
+    return [
+      'Saison-Effekt: ' + modifiers.seasonEffect + ' (Nachfrage ' + ((SEASON_DEMAND_DELTA[modifiers.seasonEffect] || 0) >= 0 ? '+' : '') + (SEASON_DEMAND_DELTA[modifiers.seasonEffect] || 0) + ')',
+      'Nachfrage-Schock: ' + modifiers.demandShock + ' (Nachfrage ' + ((SHOCK_DEMAND_DELTA[modifiers.demandShock] || 0) >= 0 ? '+' : '') + (SHOCK_DEMAND_DELTA[modifiers.demandShock] || 0) + ')',
+      'Variable Kosten-Zuschlag: ' + Number(modifiers.variableCostDelta || 0).toFixed(2) + ' €',
+      'Fixkosten-Zuschlag: ' + Number(modifiers.fixedCostDelta || 0).toFixed(2) + ' €',
+      'Image-Effekt: ' + modifiers.imageEffect + ' (Kaufneigung ' + (imageShiftFromModifiers(modifiers) >= 0 ? '+' : '') + imageShiftFromModifiers(modifiers) + ')',
+      'Standortkosten-Zuschlag: ' + Number(modifiers.locationCost || 0).toFixed(2) + ' €',
+      'Gesamtnachfrage-Impuls: ' + (demandShift >= 0 ? '+' : '') + demandShift
+    ];
   }
 
   function deriveSellerValues(seller, modifiers){
     const baseCapacity = 40;
     const baseStartPrice = Number((seller.baseValues.variableCost + 1.4).toFixed(2));
-    const costShift = getCostShift(modifiers);
-    const demandDelta = modifiers.seasonEffect === 'high-demand' ? 15 : modifiers.seasonEffect === 'low-demand' ? -8 : 0;
+    const demandShift = demandShiftFromModifiers(modifiers);
+    const costShift = Number(modifiers.variableCostDelta || 0);
+    const demandDelta = demandShift * 6;
     const productionCapacity = baseCapacity + demandDelta;
-    const fixedCost = Number(modifiers.locationCost || 0);
+    const fixedCost = Number(modifiers.locationCost || 0) + Number(modifiers.fixedCostDelta || 0);
     return {
       base: { productionCapacity: baseCapacity, startPrice: baseStartPrice, fixedCost: 0 },
       current: {
@@ -495,7 +545,7 @@
         fixedCost,
         notes: [
           demandDelta !== 0 ? 'Saison verändert Kapazität' : 'Saison neutral',
-          costShift !== 0 ? 'Kostenänderung aktiv (' + modifiers.costChange + ')' : 'Keine zusätzliche Kostenänderung',
+          costShift !== 0 ? 'Variable Kosten aktiv: +' + costShift.toFixed(2) + ' €' : 'Keine variablen Kostenzuschläge',
           fixedCost ? 'Standortkosten aktiv: +' + fixedCost : 'Keine Standortkosten'
         ]
       }
@@ -507,21 +557,20 @@
     const baseBudget = Number((12 + pref.priceFocus + (pref.qualityFocus * 0.5)).toFixed(2));
     const baseWtp = Number((2.4 + (pref.qualityFocus * 0.25) + ((pref.brandFocus || 1) * 0.15)).toFixed(2));
     const baseDemand = pref.priceFocus >= 3 ? 2 : 3;
-    const isDemandBoom = modifiers.seasonEffect === 'high-demand' || modifiers.demandShock === 'event-boom';
-    const isDemandSlump = modifiers.seasonEffect === 'low-demand' || modifiers.demandShock === 'rain-slump';
-    const imageBoost = modifiers.imageEffect === 'brand-boom' ? 0.5 : modifiers.imageEffect === 'quality-focus' ? 0.35 : 0;
+    const demandShift = demandShiftFromModifiers(modifiers);
+    const imageBoost = imageShiftFromModifiers(modifiers) * 0.25;
 
     let budget = baseBudget;
     let willingnessToPay = baseWtp + imageBoost;
     let quantityDemand = baseDemand;
     let demandBehavior = 'stabil';
-    if(isDemandBoom){
+    if(demandShift > 0){
       budget += 3;
       willingnessToPay += 0.35;
       quantityDemand += 1;
       demandBehavior = 'spontan erhöht';
     }
-    if(isDemandSlump){
+    if(demandShift < 0){
       budget -= 2;
       willingnessToPay -= 0.2;
       quantityDemand = Math.max(1, quantityDemand - 1);
@@ -536,7 +585,7 @@
         quantityDemand,
         demandBehavior,
         notes: [
-          isDemandBoom ? 'Nachfrageboom erhöht Kaufbereitschaft' : isDemandSlump ? 'Nachfragerückgang senkt Kaufbereitschaft' : 'Normale Nachfragebedingungen',
+          demandShift > 0 ? 'Nachfrageboom erhöht Kaufbereitschaft' : demandShift < 0 ? 'Nachfragerückgang senkt Kaufbereitschaft' : 'Normale Nachfragebedingungen',
           imageBoost ? 'Image-/Qualitätseffekt aktiv (' + modifiers.imageEffect + ')' : 'Kein Imageeffekt aktiv'
         ]
       }
@@ -556,7 +605,7 @@
         }),
         baseRoundValues: values.base,
         dynamicModifiers: Object.assign({}, seller.dynamicModifiers || {}, {
-          energyShock: getCostShift(roundModifiers),
+          energyShock: Number(roundModifiers.variableCostDelta || 0),
           locationCost: Number(roundModifiers.locationCost || 0)
         })
       });
@@ -753,13 +802,21 @@
   }
 
   function loadRoundModifiers(){
-    const mods = game.roundModifiers;
+    const mods = normalizeRoundModifiers(game.roundModifiers);
+    game.roundModifiers = mods;
     const form = document.getElementById('round-form');
     form.seasonEffect.value = mods.seasonEffect;
     form.demandShock.value = mods.demandShock;
-    form.costChange.value = mods.costChange;
+    form.variableCostDelta.value = mods.variableCostDelta;
+    form.fixedCostDelta.value = mods.fixedCostDelta;
     form.imageEffect.value = mods.imageEffect;
     form.locationCost.value = mods.locationCost;
+    renderRoundImpactSummary(mods);
+  }
+
+  function renderRoundImpactSummary(mods){
+    const box = document.getElementById('round-impact-summary');
+    box.innerHTML = '<strong>Konkrete Rundenauswirkungen:</strong><ul class="scenario-list">' + summarizeModifiers(mods).map((line) => '<li>' + line + '</li>').join('') + '</ul>';
   }
 
   function getScenarioById(id){
@@ -791,7 +848,7 @@
     const scenario = getScenarioById(game.currentScenarioId);
     const roundData = getScenarioRoundData(scenario, game.currentRound);
     if(!roundData || !roundData.roundModifiers) return false;
-    game.roundModifiers = Object.assign({}, game.roundModifiers, roundData.roundModifiers);
+    game.roundModifiers = normalizeRoundModifiers(getRoundParameterPlan(scenario, roundData));
     game.roleRoundEffects = getRoleRoundEffects(roundData);
     applyRoundAdjustmentsToGroups(game.roundModifiers);
     loadRoundModifiers();
@@ -808,6 +865,14 @@
     return roundData.inputs.join('\n');
   }
 
+  function getRoundParameterPlan(scenario, roundData){
+    const scenarioParams = scenarioRoundParameterPlans[scenario.id] || {};
+    if(Object.prototype.hasOwnProperty.call(scenarioParams, roundData.round)){
+      return scenarioParams[roundData.round];
+    }
+    return normalizeRoundModifiers(roundData.roundModifiers || {});
+  }
+
   function updateScenarioNotes(scenario){
     if(!scenario){
       game.scenarioNotes = '';
@@ -819,7 +884,8 @@
         const text = Object.prototype.hasOwnProperty.call(scenarioPlans, round.round)
           ? scenarioPlans[round.round]
           : round.inputs.join(' · ');
-        return 'Runde ' + round.round + ': ' + round.title + ' | ' + text;
+        const paramLines = summarizeModifiers(getRoundParameterPlan(scenario, round)).join(' / ');
+        return 'Runde ' + round.round + ': ' + round.title + ' | ' + text + ' | ' + paramLines;
       })
       .join(' || ');
   }
@@ -852,7 +918,72 @@
       });
 
       card.appendChild(heading);
+      const descriptionLabel = document.createElement('label');
+      descriptionLabel.className = 'planning-label';
+      descriptionLabel.textContent = 'Beschreibung / Moderationshinweis';
+      card.appendChild(descriptionLabel);
       card.appendChild(textbox);
+
+      const impactLabel = document.createElement('div');
+      impactLabel.className = 'planning-label';
+      impactLabel.textContent = 'Auswirkungen auf Spielparameter';
+      card.appendChild(impactLabel);
+
+      const parameterPlan = getRoundParameterPlan(activeScenario, round);
+      const grid = document.createElement('div');
+      grid.className = 'parameter-grid';
+
+      const fields = [
+        { key: 'seasonEffect', label: 'Saison-Effekt', type: 'select', options: ['neutral', 'warm', 'very-warm', 'cold'] },
+        { key: 'demandShock', label: 'Nachfrage-Schock', type: 'select', options: ['none', 'city-festival', 'holiday-start', 'rain-week', 'heatwave'] },
+        { key: 'variableCostDelta', label: 'Variable Kosten-Zuschlag (€)', type: 'number' },
+        { key: 'fixedCostDelta', label: 'Fixkosten-Zuschlag (€)', type: 'number' },
+        { key: 'imageEffect', label: 'Image-Effekt', type: 'select', options: ['negative', 'neutral', 'positive'] },
+        { key: 'locationCost', label: 'Standortkosten-Zuschlag (€)', type: 'number' }
+      ];
+
+      fields.forEach((field) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'parameter-field';
+        const label = document.createElement('label');
+        label.textContent = field.label;
+        const input = field.type === 'select' ? document.createElement('select') : document.createElement('input');
+        if(field.type === 'select'){
+          field.options.forEach((optionValue) => {
+            const option = document.createElement('option');
+            option.value = optionValue;
+            option.textContent = optionValue;
+            input.appendChild(option);
+          });
+          input.value = parameterPlan[field.key];
+        } else {
+          input.type = 'number';
+          input.step = '0.1';
+          input.value = Number(parameterPlan[field.key] || 0);
+        }
+        input.addEventListener('input', () => {
+          const nextPlan = Object.assign({}, getRoundParameterPlan(activeScenario, round), {
+            [field.key]: field.type === 'select' ? input.value : Number(input.value || 0)
+          });
+          const normalizedPlan = normalizeRoundModifiers(nextPlan);
+          scenarioRoundParameterPlans[activeScenario.id] = Object.assign({}, scenarioRoundParameterPlans[activeScenario.id] || {}, {
+            [round.round]: normalizedPlan
+          });
+          if(round.round === game.currentRound){
+            game.roundModifiers = normalizedPlan;
+            loadRoundModifiers();
+            applyRoundAdjustmentsToGroups(game.roundModifiers);
+            renderSellerCards();
+            renderBuyerCards();
+          }
+          updateScenarioNotes(activeScenario);
+        });
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        grid.appendChild(wrapper);
+      });
+
+      card.appendChild(grid);
       planning.appendChild(card);
     });
   }
@@ -959,6 +1090,18 @@
 
   document.getElementById('seller-profile').addEventListener('change', applySellerProfileDefaults);
 
+  document.getElementById('round-form').addEventListener('input', (event) => {
+    const form = event.currentTarget;
+    renderRoundImpactSummary(normalizeRoundModifiers({
+      seasonEffect: form.seasonEffect.value,
+      demandShock: form.demandShock.value,
+      variableCostDelta: Number(form.variableCostDelta.value || 0),
+      fixedCostDelta: Number(form.fixedCostDelta.value || 0),
+      imageEffect: form.imageEffect.value,
+      locationCost: Number(form.locationCost.value || 0)
+    }));
+  });
+
   document.getElementById('recalculate-groups').addEventListener('click', () => {
     applyRoundAdjustmentsToGroups(game.roundModifiers);
     renderSellerCards();
@@ -1022,13 +1165,14 @@
   document.getElementById('round-form').addEventListener('submit', (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-    game.roundModifiers = {
+    game.roundModifiers = normalizeRoundModifiers({
       seasonEffect: form.seasonEffect.value,
       demandShock: form.demandShock.value,
-      costChange: form.costChange.value,
+      variableCostDelta: Number(form.variableCostDelta.value || 0),
+      fixedCostDelta: Number(form.fixedCostDelta.value || 0),
       imageEffect: form.imageEffect.value,
       locationCost: Number(form.locationCost.value || 0)
-    };
+    });
     game.roleRoundEffects = {
       sellerDescription: 'Moderation hat individuelle Rundeneffekte gesetzt.',
       buyerDescription: 'Moderation hat individuelle Rundeneffekte gesetzt.',

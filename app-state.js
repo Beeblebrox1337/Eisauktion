@@ -30,7 +30,7 @@
   function num(v, d = 0){ const n = Number(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : d; }
   function first(obj, keys, fallback){ for(const k of keys){ if(obj && obj[k] != null && obj[k] !== '') return obj[k]; } return fallback; }
 
-  function defaultRoundModifiers(){ return { seasonEffect:'neutral', demandShock:'none', costChange:'none', imageEffect:'neutral', locationCost:0 }; }
+  function defaultRoundModifiers(){ return { seasonEffect:'neutral', demandShock:'none', variableCostDelta:0, fixedCostDelta:0, imageEffect:'neutral', locationCost:0 }; }
   function defaultGameState(){ return { currentRound:1, sellers:[], buyers:[], currentScenarioId:'', scenarioNotes:'', roundModifiers:defaultRoundModifiers(), roleRoundEffects:{ sellerDescription:'', buyerDescription:'', sellerEffects:[], buyerEffects:[] } }; }
   function defaultCompanyProfile(){ return { name:'', sellerProfile:'', sellerProfileLabel:'', profileDescription:'', startCapital:0, currentCapital:0, fixedCosts:0, variableCosts:0, capacity:0, notes:'' }; }
   function defaultBuyerProfile(){ return { name:'', buyerProfile:'', currentBalance:0, savingsAmount:0, spending:0, transferHistory:[] }; }
