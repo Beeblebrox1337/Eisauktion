@@ -96,8 +96,11 @@
   </section>
 
   <section class="card" id="buyerMarketUpdate">
-    <h2>📊 Marktupdate – Runde <span id="buyerMarketRound">1</span></h2>
+    <h2>Marktupdate – Runde <span id="buyerMarketRound">1</span></h2>
+    <label>Rundeneffekt auswählen</label>
+    <select id="buyerRoundEffectSelect"></select>
     <p class="small" id="buyerMarketDescription">Keine rundenspezifischen Effekte aktiv.</p>
+    <div class="profile-box small" id="buyerEffectImpact">Auswirkungen dieser Runde: keine Änderung.</div>
     <div id="buyerEffectsList" class="market-effects-list"></div>
     <h3>Aktuelle Werte in dieser Runde</h3>
     <div class="grid three">
@@ -129,14 +132,14 @@
       </div>
       <div>
         <label id="budgetLabel">Mein Budget (€)</label>
-        <input id="budget" type="number" step="0.01" placeholder="z. B. 5"/>
+        <input id="budget" type="number" step="0.01" placeholder="z. B. 5" readonly/>
       </div>
     </div>
 
     <div class="hr"></div>
 
     <h2>Käufe dokumentieren (Anbieter, Menge, Preis)</h2>
-    <p class="small" style="margin-top:-4px;">Standard: 3 Zeilen. Du kannst weitere Käufe hinzufügen (z. B. wenn du bei mehreren Verkäufern oder zu unterschiedlichen Preisen kaufst).</p>
+    <p class="small" style="margin-top:-4px;">Standard: 1 Zeile. Du kannst weitere Käufe hinzufügen (z. B. wenn du bei mehreren Verkäufern oder zu unterschiedlichen Preisen kaufst).</p>
 
     <datalist id="sellerOptions"></datalist>
 
@@ -224,6 +227,10 @@
   </section>
 
   <section class="card" style="margin-top:14px;">
+    <button class="btn" type="button" id="updateRoundFieldsBtn">Felder für aktuelle Runde aktualisieren</button>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
     <h2>Gespeicherte Runden (Übersicht)</h2>
     <table class="table" id="savedTable">
       <thead>
@@ -260,33 +267,89 @@ function num(v){ const n=Number(String(v??'').replace(',', '.')); return Number.
 function eur(n){ return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
 let buyerActiveRun=1; const SPENDING_RATIOS={sparsam:.3,normal:.6,viel:.9};
 
+const BUYER_ROUND_EFFECTS={
+  none:{label:'keine Änderung',description:'Keine rundenspezifischen Effekte aktiv.',impact:['Budget ±0 €','normales Kaufverhalten'],budgetDelta:0,wtpDelta:0,demandDelta:0,effects:[{type:'neutral',text:'Stabile Marktbedingungen'}]},
+  demandBoom:{label:'Nachfrageboom',description:'Viele Käufer wollen mehr Eis kaufen.',impact:['Budget +1 €','höhere Kaufwahrscheinlichkeit'],budgetDelta:1,wtpDelta:0.3,demandDelta:1,effects:[{type:'positive',text:'Budget +1 €'},{type:'positive',text:'höhere Kaufwahrscheinlichkeit'}]},
+  priceWar:{label:'Preiskampf',description:'Preise sinken durch intensiven Wettbewerb.',impact:['Budget +0,50 €','mehr Menge pro Euro möglich'],budgetDelta:0.5,wtpDelta:0.2,demandDelta:1,effects:[{type:'positive',text:'günstigere Preise am Markt'},{type:'positive',text:'mehr Kaufmenge möglich'}]},
+  costIncrease:{label:'Kostensteigerung',description:'Höhere Kosten führen zu tendenziell höheren Preisen.',impact:['Budget -0,50 €','vorsichtigeres Kaufverhalten'],budgetDelta:-0.5,wtpDelta:-0.2,demandDelta:-1,effects:[{type:'negative',text:'Budget -0,50 €'},{type:'negative',text:'Preise steigen eher'}]},
+  marketEntry:{label:'Markteintritt',description:'Neue Anbieter erhöhen die Auswahl.',impact:['Budget +0,30 €','mehr Auswahl im Markt'],budgetDelta:0.3,wtpDelta:0.1,demandDelta:0,effects:[{type:'positive',text:'mehr Anbieter verfügbar'},{type:'neutral',text:'Vergleich lohnt sich stärker'}]},
+  demandDrop:{label:'Nachfrageeinbruch',description:'Geringere Nachfrage verändert Kaufdynamik.',impact:['Budget -0,30 €','geringere Kaufwahrscheinlichkeit'],budgetDelta:-0.3,wtpDelta:-0.1,demandDelta:-1,effects:[{type:'negative',text:'Nachfrage sinkt'},{type:'neutral',text:'Käufe werden zurückhaltender'}]}
+};
+
 function readRounds(){ return JSON.parse(localStorage.getItem('eisauktion_kaeufer_rounds')||'[]').sort((a,b)=>a.round-b.round); }
 function saveRoundObj(obj){ const arr=readRounds(); const i=arr.findIndex(x=>x.round===obj.round); if(i>=0)arr[i]=obj; else arr.push(obj); localStorage.setItem('eisauktion_kaeufer_rounds', JSON.stringify(arr.sort((a,b)=>a.round-b.round))); }
 function ensureBuyer(){ const st=EisauktionState.readState(); st.buyerProfile=EisauktionState.normalizeBuyerProfile(st.buyerProfile); EisauktionState.writeState(st); return st; }
+function getEffect(){ return BUYER_ROUND_EFFECTS[buyerRoundEffectSelect.value]||BUYER_ROUND_EFFECTS.none; }
+function getRound(roundNo){ return readRounds().find(r=>num(r.round)===num(roundNo)); }
+function getPreviousRound(roundNo){ return readRounds().filter(r=>num(r.round)<num(roundNo)).at(-1); }
 
-function setBuyerRun(run){ buyerActiveRun=Number(run)||1; document.querySelectorAll('#buyerTabs .run-tab').forEach(btn=>btn.classList.toggle('active', Number(btn.dataset.run)===buyerActiveRun)); buyerRun1Intro.classList.toggle('active', buyerActiveRun===1); buyerRun2Intro.classList.toggle('active', buyerActiveRun===2); buyerBudgetPlanner.classList.toggle('active', buyerActiveRun===2); const st=ensureBuyer(); st.lastUsed.buyerRoleRun=buyerActiveRun; EisauktionState.writeState(st); updatePlanner(); }
+function renderBuyerMarket(){
+  const effect=getEffect();
+  const roundNo=num(round.value)||1;
+  buyerMarketRound.textContent=String(roundNo);
+  buyerMarketDescription.textContent=effect.description;
+  buyerEffectImpact.innerHTML='Auswirkungen dieser Runde<br>'+effect.impact.map(x=>`• ${x}`).join('<br>');
+  buyerEffectsList.innerHTML=effect.effects.map(item=>`<div class="market-effect-item ${item.type}">${item.text}</div>`).join('');
+}
+
+function setBuyerRun(run){ buyerActiveRun=Number(run)||1; document.querySelectorAll('#buyerTabs .run-tab').forEach(btn=>btn.classList.toggle('active', Number(btn.dataset.run)===buyerActiveRun)); buyerRun1Intro.classList.toggle('active', buyerActiveRun===1); buyerRun2Intro.classList.toggle('active', buyerActiveRun===2); buyerBudgetPlanner.classList.toggle('active', buyerActiveRun===2); const st=ensureBuyer(); st.lastUsed.buyerRoleRun=buyerActiveRun; EisauktionState.writeState(st); updateRoundFieldsForCurrentRound(); }
 function initProfiles(){ Object.entries(EisauktionState.BUYER_PROFILES).forEach(([id,p])=>{ const o=document.createElement('option'); o.value=id; o.textContent=p.label; buyerProfileSelect.appendChild(o);}); const st=ensureBuyer(); buyerProfileSelect.value=st.buyerProfile.buyerProfile||''; buyerProfileSelect.addEventListener('change',()=>{ const st2=ensureBuyer(); st2.buyerProfile.buyerProfile=buyerProfileSelect.value; EisauktionState.writeState(st2); updateProfileHint();}); spendingDecision.addEventListener('change', updatePlanner); updateProfileHint(); }
+function initRoundEffects(){ Object.entries(BUYER_ROUND_EFFECTS).forEach(([id,e])=>{ const o=document.createElement('option'); o.value=id; o.textContent=e.label; buyerRoundEffectSelect.appendChild(o);}); buyerRoundEffectSelect.value='none'; buyerRoundEffectSelect.addEventListener('change',()=>{ updateRoundFieldsForCurrentRound(); }); }
 function updateProfileHint(){ const p=EisauktionState.BUYER_PROFILES[buyerProfileSelect.value]; buyerProfileDesc.textContent=p?p.description:'Bitte zuerst ein Profil auswählen.'; buyerProfileHints.textContent=p?p.spendingHint:'Fokus in Runde 2: Preis, Qualität, Budget, Gewohnheit und Image.'; }
-function updatePlanner(){ const st=ensureBuyer(); const rounds=readRounds(); const last=rounds.at(-1); const previousBalance=last?num(last.newBalance):num(st.buyerProfile.currentBalance||0); const savings=num(st.buyerProfile.savingsAmount||0); const budgetNow=previousBalance+savings; budget.value=budgetNow.toFixed(2); savings.value=savings.toFixed(2); current_budget_out.innerHTML=`Aktueller Kontostand: <strong>${eur(budgetNow)}</strong>`; income_out.innerHTML=`Sparbetrag pro Runde: <strong>${eur(savings)}</strong>`; const ratio=SPENDING_RATIOS[spendingDecision.value]||0.6; spending_out.innerHTML=`Empfohlenes Ausgabenlimit (${Math.round(ratio*100)} %): <strong>${eur(budgetNow*ratio)}</strong>`; }
+
+function updatePlanner(){
+  const ratio=SPENDING_RATIOS[spendingDecision.value]||0.6;
+  const budgetNow=num(budget.value);
+  current_budget_out.innerHTML=`Aktuelles Budget in Runde ${num(round.value)||1}: <strong>${eur(budgetNow)}</strong>`;
+  income_out.innerHTML=`Sparbetrag für nächste Runde: <strong>${eur(num(savings.value))}</strong>`;
+  spending_out.innerHTML=`Empfohlenes Ausgabenlimit (${Math.round(ratio*100)} %): <strong>${eur(budgetNow*ratio)}</strong>`;
+}
+
+function updateRoundFieldsForCurrentRound(){
+  const st=ensureBuyer();
+  const roundNo=Math.max(1,num(round.value)||1);
+  round.value=roundNo;
+  const existingRound=getRound(roundNo);
+  const previousRound=getPreviousRound(roundNo);
+  const baseBudget=existingRound
+    ? num(existingRound.oldBalance)
+    : previousRound
+      ? (num(previousRound.oldBalance)-num(previousRound.spent)+num(previousRound.savingsAmount))
+      : num(st.buyerProfile.currentBalance||0);
+  const baseSavings=existingRound ? num(existingRound.savingsAmount) : num(st.buyerProfile.savingsAmount||0);
+  const effect=getEffect();
+  const adjustedBudget=Math.max(0,baseBudget+num(effect.budgetDelta));
+  budget.value=adjustedBudget.toFixed(2);
+  savings.value=baseSavings.toFixed(2);
+  if(existingRound){ spent_out.innerHTML=`Ausgegebenes Geld = <strong>${eur(existingRound.spent)}</strong>`; rest_out.innerHTML=`Neuer Kontostand = <strong>${eur(existingRound.newBalance)}</strong>`; }
+  const wtpBase=2.5;
+  const demandBase=2;
+  buyerCurrentBudget.innerHTML=`Budget: <strong>${eur(adjustedBudget)}</strong>`;
+  buyerCurrentWtp.innerHTML=`Maximale Zahlungsbereitschaft: <strong>${eur(Math.max(0,wtpBase+effect.wtpDelta))}</strong>`;
+  buyerCurrentDemand.innerHTML=`Gewünschte Menge: <strong>${Math.max(0,demandBase+effect.demandDelta)}</strong>`;
+  renderBuyerMarket();
+  updatePlanner();
+}
 
 function readPurchases(){ return Array.from(document.querySelectorAll('.purchase-row')).map(row=>({seller:row.querySelector('[data-field="seller"]').value, qty:num(row.querySelector('[data-field="qty"]').value), price:num(row.querySelector('[data-field="price"]').value)})).filter(p=>p.qty>0&&p.price>=0); }
 window.addPurchaseRow=function(){ const row=document.createElement('div'); row.className='purchase-row grid three'; row.innerHTML='<input data-field="seller" list="sellerOptions" placeholder="Anbieter"/><input data-field="qty" type="number" step="1" placeholder="Menge"/><input data-field="price" type="number" step="0.01" placeholder="Preis"/>'; purchaseList.appendChild(row); };
-window.resetPurchasesToDefault=function(){ purchaseList.innerHTML=''; for(let i=0;i<3;i++) addPurchaseRow(); };
+window.resetPurchasesToDefault=function(){ purchaseList.innerHTML=''; addPurchaseRow(); };
 
 window.addSeller=function(){ const grid=document.getElementById('sellerObsGrid'); const next=String.fromCharCode(97+grid.querySelectorAll('[data-seller-key]').length); const wrap=document.createElement('div'); wrap.className='seller-item'; wrap.innerHTML=`<label>Anbieter ${next.toUpperCase()} (€)</label><input data-seller-key="${next}" type="number" step="0.01"/>`; grid.appendChild(wrap); refreshSellerOptions(); };
 function refreshSellerOptions(){ sellerOptions.innerHTML=Array.from(document.querySelectorAll('#sellerObsGrid [data-seller-key]')).map(i=>`<option value="${i.dataset.sellerKey.toUpperCase()}"></option>`).join(''); }
 
-window.calc=function(){ const oldBalance=num(budget.value); const purchases=readPurchases(); const spent=purchases.reduce((s,p)=>s+p.qty*p.price,0); const savings=num(document.getElementById('savings')?.value||0); const newBalance=oldBalance-spent+savings; spent_out.innerHTML=`Ausgegebenes Geld = <strong>${eur(spent)}</strong>`; rest_out.innerHTML=`Neuer Kontostand = <strong>${eur(newBalance)}</strong>`; badge.className=newBalance<0?'badge bad':'badge ok'; badge.textContent=newBalance<0?'Konto negativ':'Kontostand gespeichert'; const observed={}; document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp=>observed[inp.dataset.sellerKey]=num(inp.value)||null); const roundNo=num(round.value); saveRoundObj({ round:roundNo, oldBalance, spent:+spent.toFixed(2), savingsAmount:savings, newBalance:+newBalance.toFixed(2), purchases, totalQty:purchases.reduce((s,p)=>s+p.qty,0), pricesObserved:observed, trend:trend.value||'' }); const st=ensureBuyer(); st.buyerProfile.currentBalance=+newBalance.toFixed(2); st.buyerProfile.savingsAmount=savings; st.buyerProfile.spending=+spent.toFixed(2); st.buyerProfile.transferHistory=[...(st.buyerProfile.transferHistory||[]),{round:roundNo,oldBalance,spent,savingsAmount:savings,newBalance}]; st.results=st.results||{}; st.results.buyerLastRound={round:roundNo,oldBalance,spent,savingsAmount:savings,newBalance}; EisauktionState.writeState(st); loadSaved(); };
-window.nextRound=function(){ round.value=num(round.value)+1; updatePlanner(); resetPurchasesToDefault(); };
-window.loadSaved=function(){ const arr=readRounds(); savedInfo.innerHTML=`Gespeicherte Runden: <strong>${arr.length}</strong>`; const tb=document.querySelector('#savedTable tbody'); tb.innerHTML=arr.length?arr.map(r=>`<tr><td>${r.round}</td><td>${eur(r.oldBalance)}</td><td>${r.totalQty||0}</td><td>${eur(r.spent)}</td><td>${eur(r.newBalance)}</td><td>${r.trend||''}</td><td class="small">Sparbetrag: ${eur(r.savingsAmount||0)}</td></tr>`).join(''):'<tr><td colspan="7" class="small">Noch keine gespeicherten Rundendaten.</td></tr>'; };
-window.clearSaved=function(){ localStorage.removeItem('eisauktion_kaeufer_rounds'); loadSaved(); };
+window.calc=function(){ const oldBalance=num(budget.value); const purchases=readPurchases(); const spent=purchases.reduce((s,p)=>s+p.qty*p.price,0); const savingsAmount=num(document.getElementById('savings')?.value||0); const newBalance=oldBalance-spent+savingsAmount; spent_out.innerHTML=`Ausgegebenes Geld = <strong>${eur(spent)}</strong>`; rest_out.innerHTML=`Neuer Kontostand = <strong>${eur(newBalance)}</strong>`; badge.className=newBalance<0?'badge bad':'badge ok'; badge.textContent=newBalance<0?'Konto negativ':'Kontostand gespeichert'; const observed={}; document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp=>observed[inp.dataset.sellerKey]=num(inp.value)||null); const roundNo=num(round.value); const effectKey=buyerRoundEffectSelect.value||'none'; saveRoundObj({ round:roundNo, oldBalance:+oldBalance.toFixed(2), spent:+spent.toFixed(2), savingsAmount:+savingsAmount.toFixed(2), newBalance:+newBalance.toFixed(2), purchases, totalQty:purchases.reduce((s,p)=>s+p.qty,0), pricesObserved:observed, trend:trend.value||'', roundEffect:effectKey }); const st=ensureBuyer(); st.buyerProfile.currentBalance=+newBalance.toFixed(2); st.buyerProfile.savingsAmount=+savingsAmount.toFixed(2); st.buyerProfile.spending=+spent.toFixed(2); st.buyerProfile.transferHistory=[...(st.buyerProfile.transferHistory||[]),{round:roundNo,oldBalance,spent,savingsAmount,newBalance,roundEffect:effectKey}]; st.results=st.results||{}; st.results.buyerLastRound={round:roundNo,oldBalance,spent,savingsAmount,newBalance,roundEffect:effectKey}; EisauktionState.writeState(st); loadSaved(); };
+window.nextRound=function(){ round.value=num(round.value)+1; updateRoundFieldsForCurrentRound(); resetPurchasesToDefault(); };
+window.loadSaved=function(){ const arr=readRounds(); savedInfo.innerHTML=`Gespeicherte Runden: <strong>${arr.length}</strong>`; const tb=document.querySelector('#savedTable tbody'); tb.innerHTML=arr.length?arr.map(r=>`<tr><td>${r.round}</td><td>${eur(r.oldBalance)}</td><td>${r.totalQty||0}</td><td>${eur(r.spent)}</td><td>${eur(r.newBalance)}</td><td>${r.trend||''}</td><td class="small">Sparbetrag: ${eur(r.savingsAmount||0)}</td></tr>`).join(''):'<tr><td colspan="7" class="small">Noch keine gespeicherten Rundendaten.</td></tr>'; const current=getRound(num(round.value)); if(current?.roundEffect){ buyerRoundEffectSelect.value=current.roundEffect; } renderBuyerMarket(); };
+window.clearSaved=function(){ localStorage.removeItem('eisauktion_kaeufer_rounds'); loadSaved(); updateRoundFieldsForCurrentRound(); };
 
+round.addEventListener('change', updateRoundFieldsForCurrentRound);
+updateRoundFieldsBtn.addEventListener('click', updateRoundFieldsForCurrentRound);
 document.querySelectorAll('#buyerTabs .run-tab').forEach(btn=>btn.addEventListener('click',()=>setBuyerRun(btn.dataset.run)));
-initProfiles(); refreshSellerOptions(); resetPurchasesToDefault(); loadSaved(); setBuyerRun(EisauktionState.readState().lastUsed?.buyerRoleRun||1);
+initProfiles(); initRoundEffects(); refreshSellerOptions(); resetPurchasesToDefault(); loadSaved(); setBuyerRun(EisauktionState.readState().lastUsed?.buyerRoleRun||1);
 </script>
 </body>
 </html>
-
 
 
 

@@ -84,8 +84,11 @@
   </section>
 
   <section class="card" id="sellerMarketUpdate">
-    <h2>📊 Marktupdate – Runde <span id="sellerMarketRound">1</span></h2>
+    <h2>Marktupdate – Runde <span id="sellerMarketRound">1</span></h2>
+    <label>Rundeneffekt auswählen</label>
+    <select id="sellerRoundEffectSelect"></select>
     <p class="small" id="sellerMarketDescription">Keine rundenspezifischen Effekte aktiv.</p>
+    <div class="profile-box small" id="sellerEffectImpact">Auswirkungen dieser Runde: keine Änderung.</div>
     <div id="sellerEffectsList" class="market-effects-list"></div>
     <h3>Aktuelle Werte in dieser Runde</h3>
     <div class="grid three">
@@ -163,7 +166,7 @@
         </div>
       </div>
 
-      <div class="row">
+      <div class="row quick-input-actions">
         <button class="btn secondary" type="button" onclick="loadSaved()">Gespeicherte Runden anzeigen</button>
         <button class="btn secondary" type="button" onclick="clearSaved()">Gespeicherte Runden löschen</button>
       </div>
@@ -288,28 +291,58 @@
 <script src="app-state.js"></script>
 <script>
 function num(v){ const n=Number(String(v??'').replace(',', '.')); return Number.isFinite(n)?n:0; }
-function eur(n){ return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €'; }
+function eur(n){ return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
 let sellerActiveRun=1;
 
-function getCompany(){ const st=EisauktionState.readState(); return EisauktionState.normalizeCompanyProfile(st.companyProfile || st.questionnaire.run2 || st.questionnaire.run1); }
-function syncInputsFromCompany(){ const c=getCompany(); fix.value=c.fixedCosts||0; document.getElementById("var").value=c.variableCosts||0; cap.value=c.currentCapital||c.startCapital||0; }
-function saveCompanyFromInputs(){ const st=EisauktionState.readState(); st.companyProfile = EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, fixedCosts:num(fix.value), variableCosts:num(document.getElementById("var").value), currentCapital:num(cap.value) }); st.questionnaire.run2 = { ...(st.questionnaire.run2||{}), sellerProfileId: st.companyProfile.sellerProfile, u_name: st.companyProfile.name, startCapital: st.companyProfile.startCapital, currentCapital: st.companyProfile.currentCapital, fixedCosts: st.companyProfile.fixedCosts, variableCosts: st.companyProfile.variableCosts, capacity: st.companyProfile.capacity }; st.roles.seller.run2 = EisauktionState.makeSellerRun2Model(st.questionnaire.run2); EisauktionState.writeState(st); }
+const SELLER_ROUND_EFFECTS={
+  none:{label:'keine Änderung',description:'Keine rundenspezifischen Effekte aktiv.',impact:['variable Kosten ±0,00 €','Nachfrage stabil'],varCostDelta:0,capacityDelta:0,priceDelta:0,effects:[{type:'neutral',text:'Stabile Marktlage'}]},
+  demandBoom:{label:'Nachfrageboom',description:'Die Nachfrage nach Eis steigt deutlich.',impact:['Nachfrage steigt','empfohlener Preis +0,10 €'],varCostDelta:0,capacityDelta:2,priceDelta:0.1,effects:[{type:'positive',text:'mehr Absatzchancen'},{type:'positive',text:'Nachfrage steigt'}]},
+  priceWar:{label:'Preiskampf',description:'Starker Wettbewerb senkt erzielbare Preise.',impact:['Preisdruck steigt','empfohlener Preis -0,15 €'],varCostDelta:0,capacityDelta:0,priceDelta:-0.15,effects:[{type:'negative',text:'Preisdruck steigt'},{type:'neutral',text:'Mengenstrategie wichtiger'}]},
+  costIncrease:{label:'Kostensteigerung',description:'Rohstoffe und Energie werden teurer.',impact:['variable Kosten +0,20 €','Gewinnspanne sinkt'],varCostDelta:0.2,capacityDelta:0,priceDelta:0.1,effects:[{type:'negative',text:'variable Kosten +0,20 €'},{type:'negative',text:'Marge unter Druck'}]},
+  newCompetition:{label:'neue Konkurrenz',description:'Ein neuer Anbieter tritt in den Markt ein.',impact:['Nachfrage verteilt sich stärker','Preisdruck steigt'],varCostDelta:0,capacityDelta:-1,priceDelta:-0.1,effects:[{type:'negative',text:'Konkurrenz nimmt zu'},{type:'negative',text:'Nachfrage verteilt sich'}]},
+  demandDrop:{label:'Nachfrageeinbruch',description:'Weniger Käufer am Markt.',impact:['Nachfrage sinkt','empfohlener Preis -0,20 €'],varCostDelta:0,capacityDelta:-2,priceDelta:-0.2,effects:[{type:'negative',text:'Nachfrage sinkt'},{type:'neutral',text:'produzierte Menge prüfen'}]}
+};
 
-function setSellerRun(run){ sellerActiveRun=Number(run)||1; document.querySelectorAll('#sellerTabs .run-tab').forEach(btn=>btn.classList.toggle('active', Number(btn.dataset.run)===sellerActiveRun)); sellerRun1Intro.classList.toggle('active', sellerActiveRun===1); sellerRun2Intro.classList.toggle('active', sellerActiveRun===2); const st=EisauktionState.readState(); st.lastUsed.sellerRoleRun=sellerActiveRun; EisauktionState.writeState(st); }
+function getCompany(){ const st=EisauktionState.readState(); st.companyProfile=EisauktionState.normalizeCompanyProfile(st.companyProfile||st.questionnaire?.run2||st.questionnaire?.run1); EisauktionState.writeState(st); return st.companyProfile; }
+function syncInputsFromCompany(){ const c=getCompany(); fix.value=(c.fixedCosts||0).toFixed(2); document.getElementById('var').value=(c.variableCosts||0).toFixed(2); cap.value=(c.currentCapital||c.startCapital||0).toFixed(2); }
+function syncCompanyFromInputs(){ const st=EisauktionState.readState(); st.companyProfile = EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, fixedCosts:num(fix.value), variableCosts:num(document.getElementById("var").value), currentCapital:num(cap.value) }); st.questionnaire.run2 = { ...(st.questionnaire.run2||{}), sellerProfileId: st.companyProfile.sellerProfile, u_name: st.companyProfile.name, startCapital: st.companyProfile.startCapital, currentCapital: st.companyProfile.currentCapital, fixedCosts: st.companyProfile.fixedCosts, variableCosts: st.companyProfile.variableCosts, capacity: st.companyProfile.capacity }; st.roles.seller.run2 = EisauktionState.makeSellerRun2Model(st.questionnaire.run2); EisauktionState.writeState(st); }
+function getSellerEffect(){ return SELLER_ROUND_EFFECTS[sellerRoundEffectSelect.value]||SELLER_ROUND_EFFECTS.none; }
+
+function renderSellerMarket(){
+  const c=getCompany();
+  const effect=getSellerEffect();
+  const currentRound=num(round.value)||1;
+  sellerMarketRound.textContent=String(currentRound);
+  sellerMarketDescription.textContent=effect.description;
+  sellerEffectImpact.innerHTML='Auswirkungen dieser Runde<br>'+effect.impact.map(x=>`• ${x}`).join('<br>');
+  sellerEffectsList.innerHTML=effect.effects.map(item=>`<div class="market-effect-item ${item.type}">${item.text}</div>`).join('');
+  const varCostNow=Math.max(0,num(document.getElementById('var').value||c.variableCosts)+effect.varCostDelta);
+  const capacityNow=Math.max(0,num(c.capacity)+effect.capacityDelta);
+  sellerCurrentCost.innerHTML=`Produktionskosten: <strong>${eur(varCostNow)} / Einheit</strong>`;
+  sellerCurrentCapacity.innerHTML=`Kapazität: <strong>${capacityNow}</strong>`;
+  sellerCurrentPrice.innerHTML=`Empfohlener Startpreis: <strong>${eur(Math.max(0.2,varCostNow+0.4+effect.priceDelta))}</strong>`;
+}
+
+function setSellerRun(run){ sellerActiveRun=Number(run)||1; document.querySelectorAll('#sellerTabs .run-tab').forEach(btn=>btn.classList.toggle('active', Number(btn.dataset.run)===sellerActiveRun)); sellerRun1Intro.classList.toggle('active', sellerActiveRun===1); sellerRun2Intro.classList.toggle('active', sellerActiveRun===2); const st=EisauktionState.readState(); st.lastUsed.sellerRoleRun=sellerActiveRun; EisauktionState.writeState(st); renderSellerMarket(); }
 function renderSellerRun2Profile(){ const c=getCompany(); const p=EisauktionState.SELLER_PROFILES[c.sellerProfile]; sellerRun2Missing.style.display = c.sellerProfile ? 'none':'block'; sellerRun2Data.style.display = c.sellerProfile ? 'block':'none'; if(!c.sellerProfile) return; sellerProfileLabel.textContent=p?.label||c.sellerProfileLabel||'–'; sellerProfileDesc.textContent=p?.description||c.profileDescription||'–'; sellerProfileBudget.textContent=`Startbudget: ${eur(c.startCapital)}`; sellerProfileVarCost.textContent=`Variable Kosten: ${eur(c.variableCosts)} pro Einheit`; sellerProfileHints.textContent=p?.hints||''; }
 
-function loadQuestionnaire(){ syncInputsFromCompany(); renderSellerRun2Profile(); q_missing.style.display='none'; q_summary.style.display='block'; const c=getCompany(); q_left.textContent=`Unternehmen: ${c.name||'–'} | Profil: ${c.sellerProfileLabel || c.sellerProfile || '–'}`; q_right.textContent=`Kapazität: ${c.capacity||'–'} | Startkapital: ${eur(c.startCapital)}`; q_costs.textContent=`Fixkosten: ${eur(c.fixedCosts)} | Variable Kosten: ${eur(c.variableCosts)}`; q_rules.textContent=`Verbleibendes Kapital: ${eur(c.currentCapital)}`; }
+function loadQuestionnaire(){ syncInputsFromCompany(); renderSellerRun2Profile(); q_missing.style.display='none'; q_summary.style.display='block'; const c=getCompany(); q_left.textContent=`Unternehmen: ${c.name||'–'} | Profil: ${c.sellerProfileLabel || c.sellerProfile || '–'}`; q_right.textContent=`Kapazität: ${c.capacity||'–'} | Startkapital: ${eur(c.startCapital)}`; q_costs.textContent=`Fixkosten: ${eur(c.fixedCosts)} | Variable Kosten: ${eur(c.variableCosts)}`; q_rules.textContent=`Verbleibendes Kapital: ${eur(c.currentCapital)}`; renderSellerMarket(); }
 
 function saveRound(obj){ const key='eisauktion_unternehmen_rounds'; const arr=JSON.parse(localStorage.getItem(key)||'[]'); const i=arr.findIndex(x=>Number(x.round)===Number(obj.round)); if(i>=0) arr[i]=obj; else arr.push(obj); arr.sort((a,b)=>Number(a.round)-Number(b.round)); localStorage.setItem(key, JSON.stringify(arr)); }
-function calc(){ const fixedCosts=num(fix.value), variableCosts=num(document.getElementById("var").value), capital=num(cap.value); const planned=num(document.getElementById('planned').value), sold=num(document.getElementById('sold').value), price=num(document.getElementById('price').value); const cost=fixedCosts+planned*variableCosts, revenue=sold*price, profit=revenue-cost, newCap=capital+profit; cost_out.innerHTML=`Kosten = <strong>${eur(cost)}</strong>`; rev_out.innerHTML=`Umsatz = <strong>${eur(revenue)}</strong>`; profit_out.innerHTML=`Gewinn/Verlust = <strong>${eur(profit)}</strong>`; cap_out.innerHTML=`Neuer Kapitalstand = <strong>${eur(newCap)}</strong>`; cap.value=newCap.toFixed(2); liq_badge.className = cost>capital?'badge bad':'badge ok'; liq_badge.textContent = cost>capital?'Kapital reicht nicht → Menge reduzieren':'Produktion finanzierbar'; const pricesObserved={}; document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp=>{ const k=inp.dataset.sellerKey; pricesObserved[k]=num(inp.value)||null; }); saveRound({ round:num(round.value), planned,sold,price,cost:+cost.toFixed(2),revenue:+revenue.toFixed(2),profit:+profit.toFixed(2),capital:+newCap.toFixed(2),notes:notes.value||'',sellerObservation:Object.assign({note:obs_note.value||''},pricesObserved)}); const st=EisauktionState.readState(); st.companyProfile=EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, fixedCosts, variableCosts, currentCapital:newCap }); st.results = st.results || {}; st.results.companyLastRound={ round:num(round.value), planned, sold, price, cost, revenue, profit, capital:newCap }; EisauktionState.writeState(st); loadSaved(); }
+function calc(){ const effect=getSellerEffect(); const fixedCosts=num(fix.value), variableCosts=num(document.getElementById("var").value)+effect.varCostDelta, capital=num(cap.value); const planned=num(document.getElementById('planned').value), sold=num(document.getElementById('sold').value), price=num(document.getElementById('price').value); const cost=fixedCosts+planned*variableCosts, revenue=sold*price, profit=revenue-cost, newCap=capital+profit; cost_out.innerHTML=`Kosten = <strong>${eur(cost)}</strong>`; rev_out.innerHTML=`Umsatz = <strong>${eur(revenue)}</strong>`; profit_out.innerHTML=`Gewinn/Verlust = <strong>${eur(profit)}</strong>`; cap_out.innerHTML=`Neuer Kapitalstand = <strong>${eur(newCap)}</strong>`; cap.value=newCap.toFixed(2); liq_badge.className = cost>capital?'badge bad':'badge ok'; liq_badge.textContent = cost>capital?'Kapital reicht nicht → Menge reduzieren':'Produktion finanzierbar'; const pricesObserved={}; document.querySelectorAll('#sellerObsGrid [data-seller-key]').forEach(inp=>{ const k=inp.dataset.sellerKey; pricesObserved[k]=num(inp.value)||null; }); saveRound({ round:num(round.value), planned,sold,price,cost:+cost.toFixed(2),revenue:+revenue.toFixed(2),profit:+profit.toFixed(2),capital:+newCap.toFixed(2),notes:notes.value||'',roundEffect:sellerRoundEffectSelect.value||'none',sellerObservation:Object.assign({note:obs_note.value||''},pricesObserved)}); const st=EisauktionState.readState(); st.companyProfile=EisauktionState.normalizeCompanyProfile({ ...st.companyProfile, fixedCosts, variableCosts:Math.max(0,variableCosts), currentCapital:newCap }); st.results = st.results || {}; st.results.companyLastRound={ round:num(round.value), planned, sold, price, cost, revenue, profit, capital:newCap, roundEffect:sellerRoundEffectSelect.value||'none' }; EisauktionState.writeState(st); loadSaved(); renderSellerMarket(); }
 
-function nextRound(){ round.value=num(round.value)+1; ['planned','sold','price','notes','obs_note'].forEach(id=>document.getElementById(id).value=''); }
-function loadSaved(){ const arr=JSON.parse(localStorage.getItem('eisauktion_unternehmen_rounds')||'[]'); savedInfo.innerHTML=`Gespeicherte Runden: <strong>${arr.length}</strong>`; const tb=document.querySelector('#savedTable tbody'); tb.innerHTML=arr.length?arr.map(r=>`<tr><td>${r.round}</td><td>${r.planned}</td><td>${r.sold}</td><td>${eur(r.price)}</td><td>${eur(r.cost)}</td><td>${eur(r.revenue)}</td><td>${eur(r.profit)}</td><td>${eur(r.capital)}</td></tr>`).join(''):'<tr><td colspan="8" class="small">Noch keine gespeicherten Rundendaten.</td></tr>'; }
+function nextRound(){ round.value=num(round.value)+1; ['planned','sold','price','notes','obs_note'].forEach(id=>document.getElementById(id).value=''); renderSellerMarket(); }
+function loadSaved(){ const arr=JSON.parse(localStorage.getItem('eisauktion_unternehmen_rounds')||'[]'); savedInfo.innerHTML=`Gespeicherte Runden: <strong>${arr.length}</strong>`; const tb=document.querySelector('#savedTable tbody'); tb.innerHTML=arr.length?arr.map(r=>`<tr><td>${r.round}</td><td>${r.planned}</td><td>${r.sold}</td><td>${eur(r.price)}</td><td>${eur(r.cost)}</td><td>${eur(r.revenue)}</td><td>${eur(r.profit)}</td><td>${eur(r.capital)}</td></tr>`).join(''):'<tr><td colspan="8" class="small">Noch keine gespeicherten Rundendaten.</td></tr>'; const current=arr.find(r=>num(r.round)===num(round.value)); if(current?.roundEffect){ sellerRoundEffectSelect.value=current.roundEffect; } renderSellerMarket(); }
 function clearSaved(){ localStorage.removeItem('eisauktion_unternehmen_rounds'); loadSaved(); }
 
 window.addSeller=function(){ const grid=document.getElementById('sellerObsGrid'); const next=String.fromCharCode(100+grid.querySelectorAll('[data-seller-key]').length-3); const wrap=document.createElement('div'); wrap.className='seller-item'; wrap.innerHTML=`<label>Anbieter ${next.toUpperCase()} – Preis (€)</label><input data-seller-key="${next}" type="number" step="0.01"/>`; grid.appendChild(wrap); };
 window.calc=calc; window.nextRound=nextRound; window.loadSaved=loadSaved; window.clearSaved=clearSaved; window.loadQuestionnaire=loadQuestionnaire;
 
+Object.entries(SELLER_ROUND_EFFECTS).forEach(([id,e])=>{ const o=document.createElement('option'); o.value=id; o.textContent=e.label; sellerRoundEffectSelect.appendChild(o); });
+sellerRoundEffectSelect.value='none';
+sellerRoundEffectSelect.addEventListener('change',renderSellerMarket);
+round.addEventListener('change',renderSellerMarket);
+['fix','var','cap'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ syncCompanyFromInputs(); renderSellerMarket(); }));
 document.querySelectorAll('#sellerTabs .run-tab').forEach(btn=>btn.addEventListener('click',()=>setSellerRun(btn.dataset.run)));
 const st=EisauktionState.readState(); setSellerRun(st.lastUsed?.sellerRoleRun||1); loadQuestionnaire(); loadSaved();
 </script>
