@@ -1,0 +1,54 @@
+{
+  "companyRun1": {
+    "companyName": "Eisstern",
+    "members": "Anna, Ben",
+    "sellerProfile": "discounter",
+    "startCapital": 80,
+    "fixedCosts": 10,
+    "variableCosts": 1,
+    "capacity": 25,
+    "operationalPlan": "Wir starten mit 20 Portionen und testen einen Einstiegspreis von 1,50 €.",
+    "risks": "Niedrige Nachfrage am Start",
+    "strengths": "Klare Rollenaufteilung im Team",
+    "keyDecision": "Preisdisziplin beibehalten"
+  },
+  "companyRun2": {
+    "reflectionSuccess": "Wir haben in Runde 1 solide verkauft.",
+    "reflectionGoodDecisions": "Frühes Beobachten der Konkurrenzpreise.",
+    "reflectionChallenges": "Späte Preisanpassungen.",
+    "reflectionImprovements": "In Runde 2 schneller reagieren.",
+    "businessIdea": "Schnelles, günstiges Eis für viele Käufer.",
+    "marketProblem": "Preisbewusste Käufer finden oft kein stabiles Angebot.",
+    "differentiation": "Hohe Verfügbarkeit und klare Preise.",
+    "strategyPrice": "Konstant günstiger Preis mit kleinen Anpassungen.",
+    "strategyProduction": "Produktion an Nachfragewellen koppeln.",
+    "strategyMarketResponse": "Bei Preiskampf nur moderat nachziehen.",
+    "changedCurrentCapital": 74
+  },
+  "buyerFlow": {
+    "buyerProfile": "preisorientiert",
+    "round1": {
+      "savings": 3,
+      "purchases": [
+        { "seller": "Anbieter A", "qty": 2, "price": 1.5 },
+        { "seller": "Anbieter B", "qty": 1, "price": 2.0 }
+      ]
+    },
+    "round2": {
+      "savings": 1,
+      "purchases": [
+        { "seller": "Anbieter C", "qty": 1, "price": 2.5 }
+      ]
+    }
+  },
+  "moderation": {
+    "scenarioTitle": "Hitzewelle im Ferienmonat",
+    "roundFocusText": "Rundenschwerpunkt",
+    "hiddenTextInCollapsedView": "Empfohlene Startverteilung"
+  },
+  "auswertung": {
+    "who": "Gruppe E2E",
+    "role": "unternehmen",
+    "note": "Automatisierter Versandtest"
+  }
+}
