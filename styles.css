@@ -559,6 +559,15 @@ textarea{
 }
 
 
+
+.quick-input-actions{
+  margin-top:16px;
+}
+
+#buyerMarketUpdate select,
+#sellerMarketUpdate select{
+  margin-bottom:8px;
+}
 .market-effects-list{display:grid;gap:8px;margin:10px 0 12px;}
 .market-effect-item{padding:8px 10px;border-radius:10px;border:1px solid var(--border);font-size:14px;}
 .market-effect-item.positive{background:#ecfdf5;border-color:#a7f3d0;color:#065f46;}
