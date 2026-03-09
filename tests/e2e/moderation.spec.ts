@@ -16,6 +16,7 @@ test('Testfall D: Moderationsseite Szenario-Details und editierbare Rundenplanun
 
   const planning = page.locator('#scenario-planning');
   await expect(planning).toContainText('Runde 2: Hitzewelle setzt ein');
+  await expect(planning).toContainText('Auswirkungen auf Spielparameter');
 
   const roundTwoTextbox = planning.getByLabel('Rundenplanung für Runde 2');
   await expect(roundTwoTextbox).toContainText('Saison-Effekt: hohe Nachfrage');
@@ -26,8 +27,10 @@ test('Testfall D: Moderationsseite Szenario-Details und editierbare Rundenplanun
   await details.click();
   await expect(targetCard).toContainText('Empfohlene Startverteilung');
 
-  await page.selectOption('#season-effect', 'high-demand');
-  await page.selectOption('#demand-shock', 'event-boom');
+  await page.selectOption('#season-effect', 'very-warm');
+  await page.selectOption('#demand-shock', 'city-festival');
+  await page.fill('#variable-cost-delta', '0.4');
+  await page.fill('#fixed-cost-delta', '2');
   await page.getByRole('button', { name: 'Rundeneinstellungen speichern' }).click();
   await expect(page.locator('#storage-status')).toContainText('Rundeneinstellungen gespeichert');
 });
